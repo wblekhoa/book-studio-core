@@ -76,6 +76,10 @@ class DistributionContractTests(unittest.TestCase):
     def test_ci_runs_install_tests_compile_and_public_boundary_gate(self) -> None:
         workflow = (self.root / ".github/workflows/ci.yml").read_text(encoding="utf-8")
 
+        self.assertIn("uses: actions/checkout@v7", workflow)
+        self.assertIn("uses: actions/setup-python@v7", workflow)
+        self.assertNotIn("uses: actions/checkout@v4", workflow)
+        self.assertNotIn("uses: actions/setup-python@v5", workflow)
         self.assertIn("python-version: [\"3.11\", \"3.12\", \"3.13\"]", workflow)
         self.assertIn('cp -R . "$RUNNER_TEMP/bookstudio-install"', workflow)
         self.assertIn(

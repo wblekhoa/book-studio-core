@@ -1,0 +1,7 @@
+interface:
+  display_name: "Book Translation"
+  short_description: "Guided EPUB translation with a pilot gate"
+  default_prompt: "Use $book-translation to guide this EPUB from intake through a reviewed pilot and verified translated book."
+
+policy:
+  allow_implicit_invocation: true

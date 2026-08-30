@@ -1,0 +1,1 @@
+"""Book Studio Core tests."""

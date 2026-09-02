@@ -25,6 +25,7 @@ from .pilot import (
     pilot_receipt,
     require_translation_scope,
 )
+from .pdf.source import inspect_pdf, pdf_tool_status, prepare_pdf
 from .project import init_project, start_project
 from .safety.public_audit import audit_public_tree
 from .translation.coverage import coverage_receipt
@@ -94,7 +95,7 @@ def _add_json_flag(parser: argparse.ArgumentParser) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="bookstudio",
-        description="Prepare, translate, build, and verify EPUB projects.",
+        description="Prepare PDF sources, then translate, build, and verify EPUB projects.",
     )
     parser.add_argument(
         "--version",
@@ -214,6 +215,37 @@ def build_parser() -> argparse.ArgumentParser:
             )
         _add_json_flag(pilot_command)
 
+    pdf = subparsers.add_parser(
+        "pdf",
+        help="Inspect or prepare a PDF source for the EPUB workflow.",
+        description="Inspect or prepare a PDF source for the EPUB workflow.",
+    )
+    pdf_commands = pdf.add_subparsers(dest="pdf_command", required=True)
+    pdf_inspect = pdf_commands.add_parser(
+        "inspect",
+        help="Classify the PDF text layer without exposing extracted prose.",
+        description="Classify the PDF text layer without exposing extracted prose.",
+    )
+    pdf_inspect.add_argument("source", type=Path, help="Read-only PDF source.")
+    _add_json_flag(pdf_inspect)
+    pdf_prepare = pdf_commands.add_parser(
+        "prepare",
+        help="Create a semantic, review-gated EPUB from a text-layer PDF.",
+        description="Create a semantic, review-gated EPUB from a text-layer PDF.",
+    )
+    pdf_prepare.add_argument("source", type=Path, help="Read-only PDF source.")
+    pdf_prepare.add_argument(
+        "--output", required=True, type=Path, help="New prepared EPUB path."
+    )
+    pdf_prepare.add_argument(
+        "--source-language",
+        help="Optional BCP-47-like source language such as en or vi.",
+    )
+    pdf_prepare.add_argument(
+        "--title", help="Optional title override for the prepared EPUB metadata."
+    )
+    _add_json_flag(pdf_prepare)
+
     return parser
 
 
@@ -255,14 +287,33 @@ def _translation_scope(
 
 def _dispatch(args: argparse.Namespace) -> dict[str, Any]:
     if args.command == "doctor":
+        pdf_tools = pdf_tool_status()
         return {
             "status": "pass",
             "message": "Book Studio can run in this Python environment.",
             "python": platform.python_version(),
             "optional_tools": {
                 "ebook-convert": shutil.which("ebook-convert") is not None,
-                "pdftotext": shutil.which("pdftotext") is not None,
+                **pdf_tools,
             },
+        }
+    if args.command == "pdf":
+        if args.pdf_command == "inspect":
+            receipt = inspect_pdf(args.source)
+            return {
+                **receipt,
+                "message": f"PDF inspection classified the source as {receipt['text']['classification']}.",
+            }
+        receipt = prepare_pdf(
+            args.source,
+            args.output,
+            source_language=args.source_language,
+            title=args.title,
+        )
+        return {
+            **receipt,
+            "message": "Prepared EPUB requires source-fidelity review before translation.",
+            "_exit_code": 2,
         }
     if args.command == "start":
         payload = start_project(

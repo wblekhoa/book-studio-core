@@ -20,13 +20,29 @@ every eligible image. Prefer the least invasive treatment that preserves
 understanding. Do not alter an existing approved AI-generated companion unless
 the user asks for a revision.
 
+Apply the same audit to the front matter. Title pages, endorsements, prefaces,
+introductions, and opening illustrations can contain meaningful labels or full
+captions even when they were not selected for the pilot. Inspect raster text
+visually; inspect SVG `<text>` and accessible attributes as text; and record an
+explicit `original_only`, `annotation`, or `original_plus_companion` decision.
+Do not treat a decorative-looking filename, a short alt value, or placement
+before chapter one as proof that localization is unnecessary.
+
 ## Preserve provenance and canvas
 
 The source EPUB is read-only and its original image remains in the output.
-Localized artwork is an additive companion displayed after the original. Store
-it under `PROJECT/assets/localized/` as PNG or JPEG and preserve the exact
-source pixel dimensions. Do not crop, stretch, change aspect ratio, or replace
-the source asset.
+Localized artwork is additive. The Core manifest path conservatively displays
+the original first and the companion after it at the same apparent size. Store
+the companion under `PROJECT/assets/localized/` as PNG or JPEG and preserve the
+exact source pixel dimensions. Do not crop, stretch, change aspect ratio, or
+replace the source asset.
+
+Order and relative display size are book-specific visual decisions, not a
+universal translation rule. If the approved treatment makes the localized
+visual primary or keeps a smaller original in a padded block afterward, the
+manifest-only Core path is insufficient. Use a project-owned deterministic
+postprocessor and stylesheet, preserve both source and same-canvas companion,
+and approve that exact path in the rendered pilot before applying it book-wide.
 
 Use an image editing or generation capability only when it is available,
 authorized, and legally appropriate. Preserve the author's composition and
@@ -97,8 +113,9 @@ companion outside the project or replacing an original asset.
 
 For the pilot and final book, inspect at least:
 
-- original and companion remain adjacent and in the intended order;
-- companion canvas and apparent display size match the author's composition;
+- original and companion remain adjacent and in the approved order;
+- both assets preserve the source canvas, and their apparent sizes match the
+  approved hierarchy without distorting the author's composition;
 - embedded target-language text is legible and semantically accurate;
 - annotation is visibly secondary to the image and does not duplicate it;
 - page breaks do not leave an empty localization block behind;
@@ -106,5 +123,7 @@ For the pilot and final book, inspect at least:
 - added local brands or websites are accurate, necessary, and clearly
   editorial rather than attributed to the author.
 
-The core validates structure and dimensions, not aesthetics. Report visual QA
-as unverified unless it was actually rendered and inspected.
+The core packages conservative default styles that keep localized image blocks
+together and render annotations as secondary text. It still does not render or
+judge aesthetics. Report visual QA as unverified unless the actual EPUB was
+rendered and inspected.

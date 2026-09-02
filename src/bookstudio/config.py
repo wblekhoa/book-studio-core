@@ -39,6 +39,7 @@ MANAGED_PROJECT_SINGLETONS = (
     "cache/translations.json",
     "assets/image-manifest.json",
     "reference-notes.json",
+    "production-brief.md",
 )
 _LANGUAGE_PATTERN = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$")
 DEFAULT_PROFILE = {
@@ -67,6 +68,7 @@ class ProjectPaths:
     localized_assets: Path
     output: Path
     reports: Path
+    production_brief: Path
 
     @classmethod
     def from_root(cls, root: Path) -> "ProjectPaths":
@@ -85,6 +87,7 @@ class ProjectPaths:
             localized_assets=root / "assets/localized",
             output=root / "output",
             reports=root / "reports",
+            production_brief=root / "production-brief.md",
         )
 
 

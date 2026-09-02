@@ -160,8 +160,10 @@ Confirmed acceptance records a content-free `policy_identity`. It covers the
 normalized source/target languages, output mode, full sorted profile, batch
 size and scope, prompt version, and quality flags through one canonical policy
 SHA-256; the receipt never stores those open-ended values. It also stores the
-glossary-byte hash, reference-notes hash, and either the image-manifest hash or
-an explicit absent sentinel. Its canonical overall SHA-256 is validated and
+glossary-byte hash, reference-notes hash, either the image-manifest hash or an
+explicit absent sentinel, and the production-brief hash when that optional
+brief exists. Omitting the optional brief preserves the pre-brief identity
+shape. Its canonical overall SHA-256 is validated and
 all components are recomputed whenever `full_active` is loaded. Changing any
 covered input produces `PILOT_POLICY_STALE` without modifying the pilot
 receipt.
@@ -212,8 +214,9 @@ requires its exact schema and integer schema version. All present restart inputs
 pass validation before any missing artifact is written. That boundary comprises
 the exact project and guided markers, config, locked intake, inspection, full
 block map, coverage, pilot, canonical translation cache, optional image
-manifest and referenced localized companions, and valid JSON syntax for
-optional reference notes. Glossary prose remains free-form and is preserved
+manifest and referenced localized companions, the optional production-brief
+node, and valid JSON syntax for optional reference notes. Glossary prose
+remains free-form and is preserved
 rather than semantically reinterpreted by `start`; transient packets and
 downstream output/report files are outside restart preflight. A present pilot,
 cache, or image manifest whose validation depends on a missing config fails

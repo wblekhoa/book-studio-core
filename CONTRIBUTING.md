@@ -17,5 +17,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m bookstudio public-audit . --
 
 Never add source books, translated passages, covers, project caches, model
 credentials, account addresses, or personal filesystem paths. The package is
-MIT licensed; release tags, package-index publication, and hosted services
-remain separate maintainer decisions.
+source-available under the Book Studio Personal Use License 1.0. Contributions
+and forks must remain under that license; commercial licensing, release tags,
+package-index publication, and hosted services remain separate maintainer
+decisions.

@@ -122,6 +122,9 @@ _POLICY_IDENTITY_KEYS = frozenset(
         "sha256",
     }
 )
+_POLICY_IDENTITY_WITH_BRIEF_KEYS = _POLICY_IDENTITY_KEYS | {
+    "production_brief_sha256"
+}
 _ARTIFACT_NOT_SUPPLIED = object()
 
 
@@ -154,7 +157,8 @@ def current_policy_identity(config: ProjectConfig) -> dict[str, Any]:
 def _validate_policy_identity(config: ProjectConfig, value: Any) -> None:
     valid_shape = (
         type(value) is dict
-        and set(value) == _POLICY_IDENTITY_KEYS
+        and set(value)
+        in (_POLICY_IDENTITY_KEYS, _POLICY_IDENTITY_WITH_BRIEF_KEYS)
         and type(value.get("schema_version")) is int
         and value.get("schema_version") == 1
         and _sha256(value.get("policy_sha256"))
@@ -169,6 +173,10 @@ def _validate_policy_identity(config: ProjectConfig, value: Any) -> None:
         and (
             value.get("image_manifest_sha256") == "absent"
             or _sha256(value.get("image_manifest_sha256"))
+        )
+        and (
+            "production_brief_sha256" not in value
+            or _sha256(value.get("production_brief_sha256"))
         )
         and _sha256(value.get("sha256"))
     )

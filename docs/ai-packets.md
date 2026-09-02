@@ -19,14 +19,16 @@ adds a missing row and is unavailable once full scope is unlocked.
 
 Each translatable block carries `source_path`, `block_index`, role, source text,
 and `source_sha256`. Neighboring context is explicitly marked
-`translate: false`. The packet includes the book profile, only glossary terms
-matched to this batch, reference notes whose `source_path` matches the current
-document, and an exact response schema.
+`translate: false`. The packet includes the book profile, the optional bounded
+private `production_brief` when that file exists, only glossary terms matched
+to this batch, reference notes whose `source_path` matches the current document,
+and an exact response schema.
 
 The packet ID binds the source filename and whole-file SHA-256, exact target
 blocks, neighboring context block roles and hashes, and a content-free context
 fingerprint covering project policy, prompt version, glossary bytes,
-chapter-reference notes, and the optional image manifest. A response emitted
+chapter-reference notes, the optional production brief when present, and the
+optional image manifest. A response emitted
 before any of those inputs changed is stale even when its target block hash is
 unchanged. The fingerprint contains hashes only; it never stores source prose,
 reference prose, or local paths in lifecycle receipts. API callers cannot mix a

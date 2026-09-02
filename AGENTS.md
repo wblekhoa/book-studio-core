@@ -2,7 +2,8 @@
 
 ## Mission
 
-Build a safe, deterministic, provider-neutral EPUB translation engine and CLI.
+Build a safe, deterministic, provider-neutral EPUB translation engine and CLI,
+with a fail-closed PDF source gateway that prepares reviewable semantic EPUBs.
 
 ## Public Boundary
 
@@ -12,6 +13,16 @@ Build a safe, deterministic, provider-neutral EPUB translation engine and CLI.
   covers, provider responses, personal paths, account addresses, or secrets.
 - `.gitignore` is defense in depth. `bookstudio public-audit` is the publication
   gate.
+- The book-processing workflow and its generated book artifacts are for the
+  user's private, personal, non-commercial use only. Follow
+  [`personal-use-and-rights.md`](skills/book-translation/references/personal-use-and-rights.md):
+  do not sell, monetize, publish, upload, share, redistribute, or build shared
+  archives from them. Private local storage is allowed only for the user's own
+  use.
+- Stop any proposed commercial use for maintainer review. It may proceed only
+  under a separate written commercial license from the software Licensor and
+  binding written authorization from every applicable rights holder for the
+  material being processed.
 
 ## Implementation Rules
 

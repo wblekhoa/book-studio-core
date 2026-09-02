@@ -18,7 +18,10 @@ from .cache import (
     validated_cache_index,
 )
 from .coverage import target_index
-from .context import current_translation_context_sha256
+from .context import (
+    current_translation_context_sha256,
+    current_translation_context_snapshot,
+)
 
 
 OPTIONAL_RESPONSE_KEYS = (
@@ -133,7 +136,10 @@ def next_packet(
 ) -> dict[str, Any] | None:
     targets, _, block_map = target_index(config)
     source_sha256 = block_map.get("source", {}).get("sha256")
-    context_sha256 = current_translation_context_sha256(config)
+    context_identity, production_brief = current_translation_context_snapshot(
+        config
+    )
+    context_sha256 = str(context_identity["sha256"])
     cache_index = validated_cache_index(
         config,
         targets=targets,
@@ -233,6 +239,11 @@ def next_packet(
             "output_mode": config.output_mode,
         },
         "book_profile": dict(config.profile),
+        **(
+            {"production_brief": production_brief}
+            if production_brief is not None
+            else {}
+        ),
         "source_document": source_document,
         "glossary": _glossary(config, haystack),
         "reference_notes": _reference_notes(config, source_document),

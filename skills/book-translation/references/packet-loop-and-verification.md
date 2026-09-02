@@ -11,8 +11,9 @@ bookstudio next PROJECT --json
 ```
 
 The packet contains one `source_document`, at most the configured batch size,
-and an exact `response_schema`. Produce a local JSON file with exactly these
-top-level keys:
+the book profile, an optional private `production_brief`, bounded chapter
+context, and an exact `response_schema`. Read all of those inputs before
+producing a local JSON file with exactly these top-level keys:
 
 ```json
 {
@@ -35,6 +36,13 @@ may additionally contain only `translation_xhtml`, `explanation`,
 `image_annotations`, `image_companions`, and `market_contexts`, and only when
 the active policy and content justify them. Do not add prose around the JSON.
 
+Every translation must contain visible target content. Whitespace,
+non-breaking spaces, zero-width characters, or other default-ignorable Unicode
+are not valid placeholders. If OCR debris, a print index, or another block
+should not appear, resolve it through semantic source preparation or the
+supported coverage/exclusion contract; never hide it with an invisible cache
+value that can leave blank layout behind.
+
 Apply it through the sole cache mutation path:
 
 ```bash
@@ -46,8 +54,9 @@ changing approved inputs. Do not open or patch `cache/translations.json` to
 repair a response.
 
 Packet IDs bind the source identity, neighboring context, policy, prompt
-version, glossary, matching reference notes, and the optional image manifest
-through content-free hashes. If one changes during the pilot, `next` re-emits
+version, glossary, matching reference notes, the optional production brief,
+and the optional image manifest through content-free hashes. If one changes
+during the pilot, `next` re-emits
 targets whose cached context is stale. Use the fresh packet with `pilot revise`
 for rows that already exist and `apply` for targets that do not. A stale packet
 or old response must be regenerated, never edited to mimic the new ID. If an
@@ -93,6 +102,46 @@ byte-identical output, independently validates the candidate, and only then
 promotes `PROJECT/output/final.epub`. `verify` must independently pass against
 that final artifact. One aggregate success never hides a failed command.
 
+Then run the dependency-free `scripts/audit_final_epub.py` shipped with this
+skill, resolving the script relative to `SKILL.md`:
+
+```bash
+python3 AUDIT_SCRIPT --source SOURCE.epub \
+  --output PROJECT/output/final.epub --json
+```
+
+Exit code 1 means a hard final-artifact failure, including invisible
+translations or collapsed deep-navigation labels. Exit code 2 means unchanged
+captions, alt text, titles, table text, metadata, navigation labels, or
+substantive text in the bounded opening/front-matter scope needs human
+classification. Resolve or explicitly document each review finding;
+proper names and quoted product labels may be intentional, but an unreviewed
+finding is not a pass. Read [final book quality](final-book-quality.md) for the
+complete editorial, structural, image, and rendered receipt.
+
+Create the candidate-bound `reports/editorial-review.json` described in [the
+private brief and review-receipt
+contract](production-brief-and-visual-receipt.md). Its semantic and target-only
+checks are judgment evidence, not deterministic scores. A missing, stale,
+failed, or required-unknown editorial receipt blocks a claim of language
+quality even when the CLI gates pass.
+
+Validate that evidence with the dependency-free companion script, resolving it
+relative to `SKILL.md`:
+
+```bash
+python3 EDITORIAL_AUDIT_SCRIPT \
+  --candidate PROJECT/output/final.epub \
+  --production-brief PROJECT/production-brief.md \
+  --receipt PROJECT/reports/editorial-review.json --json
+```
+
+The script verifies exact schema, candidate and production-brief SHA-256,
+required review coverage, timestamp, independent criterion statuses, and
+aggregate consistency. Exit code 1 blocks completion. It cannot decide whether
+an editorial judgment is truthful, so retain the sampled notes and label the
+actual reviewer kind accurately.
+
 Where local rendering tools are available, inspect representative text-heavy,
 image-heavy, and boundary pages in the final EPUB. Keep that receipt separate:
 the core proves structural integrity and reproducibility, not typography,
@@ -104,6 +153,7 @@ Report to the user:
 - target language and output mode actually used;
 - pilot acceptance and full coverage status;
 - `finish` reproducibility and `verify` integrity evidence;
+- final-EPUB audit status and the disposition of every review finding;
 - whether visual review occurred and what was sampled;
 - any unresolved rights, terminology, image, or reader-app risks.
 

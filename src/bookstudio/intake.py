@@ -107,6 +107,8 @@ def _inferred_source_language(inspection: Mapping[str, Any]) -> str | None:
     if not isinstance(languages, list) or len(languages) != 1:
         return None
     value = languages[0]
+    if isinstance(value, str) and value.casefold() in {"und", "zxx"}:
+        return None
     try:
         return validate_language(value, field="source_language")
     except BookStudioError:

@@ -1,14 +1,24 @@
 # Book Studio Core
 
 Book Studio Core is a local, provider-neutral workflow for translating EPUB
-books with AI while keeping source text, editorial decisions, and generated
-books in a private project directory. The runtime uses only the Python standard
-library; it does not call a model or upload a book.
+books and supported PDF sources with AI while keeping source text, editorial
+decisions, and generated books in a private project directory. The Python
+runtime uses only the standard library; it does not call a model or upload a
+book. Optional local Poppler tools power the fail-closed PDF Source Gateway.
 
-The workflow is language-neutral and has been dogfooded most deeply on English
+The translation workflow is language-neutral and has been dogfooded most deeply on English
 to Vietnamese. It supports target-only and bilingual output, bounded
 chapter-level AI packets, glossary and reference context, safe inline XHTML,
 original images, image annotations, and same-canvas localized companions.
+
+> **Personal-use license:** this source-available project supports private
+> copies for the user's own reading, study, accessibility, or personal
+> research. Generated book artifacts must not be sold, monetized, published,
+> uploaded, shared, redistributed, or retained as a collection for other
+> people. Private local storage is allowed only as needed for the user's own
+> use. Read the full
+> [personal use and rights boundary](skills/book-translation/references/personal-use-and-rights.md)
+> before processing a book.
 
 ## Install
 
@@ -38,31 +48,72 @@ PYTHONPATH=src python3 -m bookstudio --help
 ## Add the AI skill
 
 The portable [`book-translation` skill](skills/book-translation/SKILL.md) adds
-the conversational layer: it discovers missing goals, explains meaningful
-choices, proposes a representative pilot, waits for explicit pilot acceptance,
-and then drives the bounded packet loop. For one setup that installs both the
-CLI and skill in Codex:
+the conversational and reader-quality layer: it discovers missing goals,
+explains meaningful choices, proposes a representative text and visual pilot,
+drives the bounded packet loop, and audits the final EPUB for editorial,
+navigation, image, and rendering gaps that structural coverage cannot prove.
+
+From inside Codex, the shortest first-time setup is to ask:
+
+```text
+Use $skill-installer to install https://github.com/wblekhoa/book-studio-core/tree/main/skills/book-translation
+```
+
+Install the CLI separately with the command above. For a cloned checkout, the
+bundled installer handles first install and safe updates atomically:
 
 ```bash
 git clone https://github.com/wblekhoa/book-studio-core.git
 cd book-studio-core
 pipx install .
-mkdir -p ~/.codex/skills
-cp -R skills/book-translation ~/.codex/skills/
+python3 skills/book-translation/scripts/install.py --dry-run --json
+python3 skills/book-translation/scripts/install.py --json
+python3 skills/book-translation/scripts/install.py --check --json
 ```
 
+An update moves the previous installed skill to a recoverable timestamped
+backup and verifies exact tree parity before reporting success. The scripts use
+only the Python standard library.
+
 Then ask naturally, for example: `Use $book-translation to help me translate
-this EPUB.` The skill does not bundle an AI provider or bypass the CLI's safety
-gates; other agents can use the same `SKILL.md` and references when they support
-directory-based skills.
+and refine this EPUB or PDF.` The skill does not bundle an AI provider, OCR
+engine, Poppler, or visual renderer and does not bypass the CLI's safety gates; other
+agents can use the same `SKILL.md` and references when they support directory-
+based skills.
 
 Root and nested `--help` output explains every advertised command and its core
 inputs. Placeholder commands that have no implementation are not exposed.
 
+## PDF Source Gateway
+
+PDFs enter through a separate preparation boundary before the guided EPUB
+workflow. `doctor` reports the required optional Poppler tools but never
+installs them:
+
+```bash
+bookstudio doctor --json
+bookstudio pdf inspect "/path/to/source.pdf" --json
+bookstudio pdf prepare "/path/to/source.pdf" \
+  --output "/path/to/prepared.epub" \
+  --source-language en \
+  --json
+```
+
+Inspection returns `text_layer_sufficient`, `mixed_or_sparse`, or `image_only`
+without returning extracted prose. Only the first class is prepared
+automatically. Successful preparation intentionally returns exit code 2 with
+`status: source_review_required`: compare the original PDF and prepared EPUB
+before translation, especially every reported complex-layout page. Scans,
+sparse extraction, encrypted sources, OCR, exact fixed-layout reproduction,
+tables, and equations remain fail-closed rather than being silently guessed.
+See [PDF source preparation](docs/pdf-source-preparation.md) for the full
+receipt, review, and recovery contract.
+
 ## Guided path
 
 Create a project outside the public source tree. The source EPUB stays in
-place and is opened read-only. Start without an answers file first:
+place and is opened read-only. For PDF input, first produce and review the
+intermediate EPUB using the gateway above. Start without an answers file first:
 
 ```bash
 PYTHONPATH=src python3 -m bookstudio start ../book-project \
@@ -126,10 +177,11 @@ Pilot commands expose one canonical `status` field: `pilot_proposed`,
 `pilot_active`, derived `pilot_review_required`, or `full_active`. Confirmed
 acceptance stores only hashes derived from normalized policy values—not the
 values themselves, source prose, or local paths—and later full-scope commands
-fail with `PILOT_POLICY_STALE` if the accepted config, prompt version, glossary,
-reference notes, or image manifest changes.
+fail with `PILOT_POLICY_STALE` if the accepted config, prompt version, private
+production brief, glossary, reference notes, or image manifest changes.
 
-Every emitted packet is also bound to a content-free fingerprint of those
+Every emitted packet carries the bounded private `production-brief.md` when it
+exists and is also bound to a content-free fingerprint of those
 response-shaping inputs, the source file identity, and the exact neighboring
 context shown to the model. Accepted cache rows retain only that fingerprint
 and their packet ID; rows missing either identity fail closed. If glossary,
@@ -161,8 +213,9 @@ interrupted, only missing artifacts are reconstructed; present artifacts are
 validated and preserved. Before reconstructing any file, `start` validates every
 present restart input. The exact boundary is: both ownership markers, config,
 locked intake, inspection, full block map, coverage, pilot, canonical cache,
-optional image manifest plus localized companions, and JSON syntax for optional
-reference notes. Type-sensitive canonical JSON comparison covers the complete
+optional image manifest plus localized companions, optional production-brief
+node, and JSON syntax for optional reference notes. Type-sensitive canonical
+JSON comparison covers the complete
 locked intake, inspection, and full block map; config, coverage, pilot, cache,
 and image state use their existing schema validators. Altered, extra, or
 Boolean-for-number fields therefore fail without creating a new pilot or
@@ -215,6 +268,21 @@ PYTHONPATH=src python3 -m bookstudio finish ../book-project --json
 the candidate independently, and only then promotes `output/final.epub`. It
 does not publish or upload anything.
 
+For target-only output, the builder preserves nested source anchors,
+pagebreak markers, and validated cross-references while replacing visible
+prose. It derives each translated XHTML document title from its leading
+translated heading or heading pair, and uses those titles for matching EPUB 3
+navigation links and EPUB 2 NCX labels. The EPUB 3 navigation document receives the configured
+`navigation_label`; Vietnamese projects default to `Mục lục`, while other
+languages retain the source navigation heading unless the profile overrides
+it. Bilingual output keeps source document and navigation titles.
+
+The build also packages a collision-safe `bookstudio.css` and links it from
+spine documents. Its conservative defaults keep image annotations visually
+secondary and keep localized image blocks together without altering source
+image bytes or companion canvas dimensions. Visual review in an EPUB reader is
+still required because the CLI does not render a pilot or judge typography.
+
 ## Verify the core
 
 ```bash
@@ -232,12 +300,24 @@ artifacts instead of silently ignoring them.
 
 Only reusable code, documentation, and synthetic fixture builders belong in
 this tree. Source books, translations, screenshots, localized artwork, caches,
-packets, and receipts stay in private project directories. Users are
-responsible for having the right to process their inputs and distribute their
-outputs.
+packets, and receipts stay in private project directories. Book Studio Core
+supports generated book artifacts only for private, personal, non-commercial
+use and does not support their publication, sharing, redistribution, shared
+archiving, or monetization. Users are responsible for having the right to
+process every input. See the
+[personal use and rights boundary](skills/book-translation/references/personal-use-and-rights.md).
 
-Book Studio Core is released under the [MIT License](LICENSE). Version 0.1.0 is
-an alpha-quality command-line foundation: keep private book data outside this
-repository and review generated translations before distribution. See
+Book Studio Core is source-available under the
+[Book Studio Personal Use License 1.0](LICENSE), not an open-source license.
+Commercial use of the software requires a separate written commercial license
+from the software Licensor and binding written authorization from every
+applicable rights holder for the material being processed. Neither permission
+substitutes for the other. Versions previously distributed under MIT retain the
+terms attached to those earlier distributions; the current license is not
+retroactive.
+
+Version 0.1.0 is an alpha-quality command-line foundation. Keep private book
+data outside this repository and review generated translations before personal
+use. See
 [architecture](docs/architecture.md), [AI packets](docs/ai-packets.md),
 [guided intake](docs/guided-intake.md), and [safety](docs/safety.md).

@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased
+
+- Added a fail-closed PDF source gateway that prepares supported text-layer
+  PDFs as review-required semantic EPUBs without adding OCR or model-provider
+  dependencies.
+- Added book-specific production briefs, contextual packet binding, front-matter
+  coverage, candidate-bound editorial receipts, and deterministic final-EPUB
+  audit scripts.
+- Preserved target-only anchors and pagebreaks, localized navigation labels,
+  and added conservative reader-compatible image annotation and companion
+  styling.
+- Added a portable skill installer with dry-run, parity-check, backup, and
+  rollback behavior.
+- Replaced the MIT license for current and future distributions with the
+  source-available Book Studio Personal Use License 1.0. Personal,
+  non-commercial use remains permitted; commercial use requires separate
+  written authorization from both the software Licensor and every applicable
+  rights holder for processed material.
+
 ## 0.1.0 - 2026-08-30
 
 - Added zero-dependency project initialization and AI-friendly CLI contracts.

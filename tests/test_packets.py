@@ -17,7 +17,10 @@ from bookstudio.epub.extract import extract_block_map
 from bookstudio.errors import BookStudioError
 from bookstudio.project import init_project
 from bookstudio.translation.cache import load_cache
-from bookstudio.translation.context import current_translation_context_sha256
+from bookstudio.translation.context import (
+    MAX_PRODUCTION_BRIEF_BYTES,
+    current_translation_context_sha256,
+)
 from bookstudio.translation.coverage import coverage_receipt
 from bookstudio.translation.packets import apply_response, next_packet
 from tests.fixtures import build_synthetic_epub
@@ -478,6 +481,7 @@ class PacketAndCacheTests(unittest.TestCase):
         assert packet is not None
 
         self.assertEqual(dict(self.config.profile), packet["book_profile"])
+        self.assertNotIn("production_brief", packet)
         self.assertIn("response_schema", packet)
         self.assertTrue(all("source_sha256" in block for block in packet["blocks"]))
         self.assertTrue(all(context["translate"] is False for context in packet["context"]))
@@ -485,6 +489,48 @@ class PacketAndCacheTests(unittest.TestCase):
         self.assertEqual(1, len(packet["reference_notes"]))
         self.assertEqual(packet["source_document"], packet["reference_notes"][0]["source_path"])
         self.assertNotIn(str(self.root), json.dumps(packet))
+
+    def test_packet_emits_and_binds_the_private_production_brief(self) -> None:
+        original = next_packet(self.config)
+        assert original is not None
+        old_response = self.write_response(
+            self.response_for(original), "pre-production-brief.json"
+        )
+        brief = """# Production brief
+
+- Voice: calm, precise, and natural for experienced practitioners
+- Target-language rhythm: prefer direct verbs and connected paragraphs
+"""
+        (self.project / "production-brief.md").write_text(brief, encoding="utf-8")
+
+        current = next_packet(self.config)
+        assert current is not None
+        self.assertEqual(brief, current["production_brief"])
+        self.assertNotEqual(original["packet_id"], current["packet_id"])
+        self.assertNotIn(str(self.root), json.dumps(current))
+
+        with self.assertRaisesRegex(BookStudioError, "RESPONSE_PACKET_STALE"):
+            apply_response(self.config, old_response)
+        self.assertFalse((self.project / "cache/translations.json").exists())
+
+    def test_production_brief_must_be_nonempty_bounded_utf8(self) -> None:
+        path = self.project / "production-brief.md"
+        cases = (
+            ("empty", b" \n", "PRODUCTION_BRIEF_INVALID"),
+            ("non-utf8", b"\xff\xfe", "PRODUCTION_BRIEF_INVALID"),
+            (
+                "oversized",
+                b"x" * (MAX_PRODUCTION_BRIEF_BYTES + 1),
+                "PRODUCTION_BRIEF_TOO_LARGE",
+            ),
+        )
+
+        for name, payload, code in cases:
+            with self.subTest(name=name):
+                path.write_bytes(payload)
+                with self.assertRaisesRegex(BookStudioError, code):
+                    next_packet(self.config)
+        self.assertFalse((self.project / "cache/translations.json").exists())
 
     def test_packet_declares_the_exact_response_and_translation_key_sets(self) -> None:
         packet = next_packet(self.config)

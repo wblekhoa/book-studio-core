@@ -12,6 +12,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote, urlsplit
 from xml.etree import ElementTree as ET
 
 from ..config import ProjectConfig, atomic_write_json
@@ -33,6 +34,30 @@ from .inspect import DC_NS, OPF_NS, clean_text, local_name, package_context
 XHTML_NS = "http://www.w3.org/1999/xhtml"
 XML_NS = "http://www.w3.org/XML/1998/namespace"
 ZIP_TIME = (1980, 1, 1, 0, 0, 0)
+BOOKSTUDIO_STYLESHEET = b"""/* Book Studio generated editorial styles */
+.bs-localized-image-block {
+  box-sizing: border-box;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin: 0.65em 0 1em;
+  padding: 0.75em 0.9em;
+  background-color: rgba(127, 127, 127, 0.08);
+  border-radius: 0.35em;
+}
+.bs-localized-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+.bs-image-annotation {
+  margin: 0;
+  font-size: 0.82em;
+  line-height: 1.45;
+  font-style: italic;
+  opacity: 0.78;
+}
+"""
 ET.register_namespace("", XHTML_NS)
 ET.register_namespace("epub", EPUB_NAMESPACE)
 
@@ -69,6 +94,88 @@ def _replace_content(element: ET.Element, entry: dict[str, Any]) -> None:
             element.append(child)
     else:
         element.text = entry["translation"]
+
+
+def _source_anchor_artifacts(
+    element: ET.Element,
+) -> list[tuple[str, ET.Element, set[str]]]:
+    artifacts: list[tuple[str, ET.Element, set[str]]] = []
+
+    def structural_copy(source: ET.Element) -> ET.Element:
+        artifact = copy.deepcopy(source)
+        for descendant in artifact.iter():
+            descendant.text = None
+            descendant.tail = None
+        return artifact
+
+    def walk(parent: ET.Element) -> None:
+        for child in list(parent):
+            if local_name(child.tag) == "a" and child.attrib.get("id"):
+                artifact = structural_copy(child)
+                artifacts.append(("prefix", artifact, {child.attrib["id"]}))
+                continue
+            if local_name(child.tag) == "sup":
+                ids = {
+                    descendant.attrib["id"]
+                    for descendant in child.iter()
+                    if local_name(descendant.tag) == "a" and descendant.attrib.get("id")
+                }
+                if ids:
+                    artifact = copy.deepcopy(child)
+                    artifact.tail = None
+                    artifacts.append(("suffix", artifact, ids))
+                    continue
+            epub_type = child.attrib.get(f"{{{EPUB_NAMESPACE}}}type", "").split()
+            if child.attrib.get("id") or "pagebreak" in epub_type:
+                artifact = structural_copy(child)
+                ids = {
+                    descendant.attrib["id"]
+                    for descendant in artifact.iter()
+                    if descendant.attrib.get("id")
+                }
+                artifacts.append(("prefix", artifact, ids))
+                continue
+            walk(child)
+
+    walk(element)
+    return artifacts
+
+
+def _restore_source_anchor_artifacts(
+    element: ET.Element,
+    artifacts: list[tuple[str, ET.Element, set[str]]],
+) -> None:
+    existing_ids = {
+        descendant.attrib["id"]
+        for descendant in element.iter()
+        if descendant.attrib.get("id")
+    }
+    prefixes: list[ET.Element] = []
+    suffixes: list[ET.Element] = []
+    for placement, artifact, ids in artifacts:
+        if ids and ids <= existing_ids:
+            continue
+        if placement == "prefix":
+            prefixes.append(copy.deepcopy(artifact))
+        else:
+            suffixes.append(copy.deepcopy(artifact))
+        existing_ids.update(ids)
+
+    if prefixes:
+        leading_text = element.text
+        element.text = None
+        prefixes[-1].tail = leading_text or ""
+        element[:] = prefixes + list(element)
+    for artifact in suffixes:
+        element.append(artifact)
+
+
+def _replace_content_preserving_anchors(
+    element: ET.Element, entry: dict[str, Any]
+) -> None:
+    artifacts = _source_anchor_artifacts(element)
+    _replace_content(element, entry)
+    _restore_source_anchor_artifacts(element, artifacts)
 
 
 def _block_nodes(root: ET.Element) -> list[tuple[ET.Element, ET.Element, int, bool]]:
@@ -157,14 +264,171 @@ def _translate_document(
             parent.insert(position + 1, translated)
             insertion_anchor = translated
         else:
-            _replace_content(element, entry)
+            _replace_content_preserving_anchors(element, entry)
             _classed(element, "bs-translation")
             insertion_anchor = element
         position = list(parent).index(insertion_anchor)
         for context_node in _market_context_nodes(entry, config):
             position += 1
             parent.insert(position, context_node)
+    if config.output_mode != "bilingual":
+        title = _document_heading_title(root)
+        if title:
+            for node in root.iter():
+                if local_name(node.tag) == "title":
+                    node.text = title
+                    node[:] = []
+                    break
     return root
+
+
+def _document_heading_title(root: ET.Element) -> str | None:
+    body = next((node for node in root.iter() if local_name(node.tag) == "body"), None)
+    if body is None:
+        return None
+    canonical_blocks = [
+        element
+        for _, element, _, canonical in _block_nodes(body)
+        if canonical
+    ]
+    if not canonical_blocks:
+        return None
+    first_tag = local_name(canonical_blocks[0].tag)
+    if first_tag not in {"h1", "h2", "h3", "h4"}:
+        return None
+    parts: list[str] = []
+    for element in canonical_blocks:
+        if local_name(element.tag) != first_tag:
+            break
+        text = clean_text("".join(element.itertext()))
+        if text:
+            parts.append(text)
+    return " ".join(parts) or None
+
+
+def _ensure_stylesheet_link(
+    root: ET.Element, *, document_path: str, stylesheet_path: str
+) -> None:
+    head = next((node for node in root.iter() if local_name(node.tag) == "head"), None)
+    if head is None:
+        return
+    href = posixpath.relpath(stylesheet_path, posixpath.dirname(document_path))
+    for node in list(head):
+        if local_name(node.tag) == "link" and node.attrib.get("href") == href:
+            return
+    ET.SubElement(
+        head,
+        f"{{{XHTML_NS}}}link",
+        {"href": href, "rel": "stylesheet", "type": "text/css"},
+    )
+
+
+def _navigation_label(config: ProjectConfig, current: str) -> str:
+    return _editorial_label(
+        config,
+        "navigation_label",
+        vietnamese="Mục lục",
+        fallback=current or "Contents",
+    )
+
+
+def _localize_navigation_document(
+    raw: bytes,
+    *,
+    config: ProjectConfig,
+    document_path: str,
+    translated_titles: dict[str, str],
+) -> bytes:
+    root = ET.fromstring(raw)
+    root.attrib["lang"] = config.target_language
+    root.attrib[f"{{{XML_NS}}}lang"] = config.target_language
+    title_node = next(
+        (node for node in root.iter() if local_name(node.tag) == "title"), None
+    )
+    current_title = clean_text("".join(title_node.itertext())) if title_node is not None else ""
+    label = _navigation_label(config, current_title)
+    if title_node is not None:
+        title_node.text = label
+        title_node[:] = []
+    for node in root.iter():
+        if local_name(node.tag) in {"h1", "h2"}:
+            node.text = label
+            node[:] = []
+            break
+    for node in root.iter():
+        if local_name(node.tag) != "a":
+            continue
+        href = node.attrib.get("href")
+        if not href:
+            continue
+        parsed = urlsplit(href)
+        if parsed.scheme or parsed.netloc:
+            continue
+        raw_path = unquote(parsed.path)
+        target = (
+            document_path
+            if not raw_path
+            else posixpath.normpath(
+                posixpath.join(posixpath.dirname(document_path), raw_path)
+            )
+        )
+        translated = translated_titles.get(target)
+        if translated:
+            node.text = translated
+            node[:] = []
+    return ET.tostring(root, encoding="utf-8", xml_declaration=True)
+
+
+def _localize_ncx_document(
+    raw: bytes,
+    *,
+    config: ProjectConfig,
+    document_path: str,
+    translated_titles: dict[str, str],
+) -> bytes:
+    root = ET.fromstring(raw)
+    root.attrib[f"{{{XML_NS}}}lang"] = config.target_language
+    for nav_point in root.iter():
+        if local_name(nav_point.tag) != "navPoint":
+            continue
+        content = next(
+            (
+                node
+                for node in nav_point.iter()
+                if local_name(node.tag) == "content" and node.attrib.get("src")
+            ),
+            None,
+        )
+        if content is None:
+            continue
+        parsed = urlsplit(content.attrib["src"])
+        if parsed.scheme or parsed.netloc:
+            continue
+        raw_path = unquote(parsed.path)
+        target = (
+            document_path
+            if not raw_path
+            else posixpath.normpath(
+                posixpath.join(posixpath.dirname(document_path), raw_path)
+            )
+        )
+        translated = translated_titles.get(target)
+        if not translated:
+            continue
+        label = next(
+            (node for node in nav_point.iter() if local_name(node.tag) == "navLabel"),
+            None,
+        )
+        if label is None:
+            continue
+        text_node = next(
+            (node for node in label.iter() if local_name(node.tag) == "text"),
+            None,
+        )
+        if text_node is not None:
+            text_node.text = translated
+            text_node[:] = []
+    return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
 
 def _insert_image_blocks(
@@ -240,7 +504,10 @@ def _media_type(path: str) -> str:
 
 
 def _modified_package(
-    context: dict[str, Any], config: ProjectConfig, image_records: list[dict[str, Any]]
+    context: dict[str, Any],
+    config: ProjectConfig,
+    image_records: list[dict[str, Any]],
+    stylesheet_path: str,
 ) -> bytes:
     package: ET.Element = context["package"]
     languages = package.findall(f".//{{{DC_NS}}}language")
@@ -262,6 +529,24 @@ def _modified_package(
     existing_ids = {item.attrib.get("id") for item in list(manifest)}
     existing_hrefs = {item.attrib.get("href") for item in list(manifest)}
     opf_dir = posixpath.dirname(context["opf_path"])
+    stylesheet_href = posixpath.relpath(stylesheet_path, opf_dir)
+    if stylesheet_href not in existing_hrefs:
+        stylesheet_id = "bookstudio-styles"
+        suffix = 1
+        while stylesheet_id in existing_ids:
+            stylesheet_id = f"bookstudio-styles-{suffix}"
+            suffix += 1
+        ET.SubElement(
+            manifest,
+            f"{{{OPF_NS}}}item",
+            {
+                "id": stylesheet_id,
+                "href": stylesheet_href,
+                "media-type": "text/css",
+            },
+        )
+        existing_ids.add(stylesheet_id)
+        existing_hrefs.add(stylesheet_href)
     companion_index = 0
     for record in image_records:
         if record.get("policy") != "original_plus_companion":
@@ -283,6 +568,16 @@ def _modified_package(
         existing_hrefs.add(href)
         companion_index += 1
     return ET.tostring(package, encoding="utf-8", xml_declaration=True)
+
+
+def _stylesheet_path(opf_path: str, source_names: set[str]) -> str:
+    directory = posixpath.join(posixpath.dirname(opf_path), "bookstudio")
+    candidate = posixpath.join(directory, "bookstudio.css")
+    suffix = 1
+    while candidate in source_names:
+        candidate = posixpath.join(directory, f"bookstudio-{suffix}.css")
+        suffix += 1
+    return candidate
 
 
 def _zip_info(name: str, *, stored: bool = False) -> zipfile.ZipInfo:
@@ -335,9 +630,17 @@ def build_epub(config: ProjectConfig, output_path: Path) -> dict[str, Any]:
     with zipfile.ZipFile(config.source, "r") as source_archive:
         context = package_context(source_archive)
         image_records = image_manifest["images"]
+        source_names = set(source_archive.namelist())
+        stylesheet_path = _stylesheet_path(context["opf_path"], source_names)
         overrides: dict[str, bytes] = {
-            context["opf_path"]: _modified_package(context, config, image_records)
+            context["opf_path"]: _modified_package(
+                context,
+                config,
+                image_records,
+                stylesheet_path,
+            )
         }
+        translated_titles: dict[str, str] = {}
         for item in context["spine"]:
             if "xhtml" not in item["media_type"] and "html" not in item["media_type"]:
                 continue
@@ -354,9 +657,36 @@ def build_epub(config: ProjectConfig, output_path: Path) -> dict[str, Any]:
                 opf_path=context["opf_path"],
                 image_records=image_records,
             )
+            _ensure_stylesheet_link(
+                root,
+                document_path=item["path"],
+                stylesheet_path=stylesheet_path,
+            )
+            if config.output_mode != "bilingual" and cache_files.get(item["path"]):
+                title = _document_heading_title(root)
+                if title:
+                    translated_titles[item["path"]] = title
             overrides[item["path"]] = ET.tostring(
                 root, encoding="utf-8", xml_declaration=True
             )
+
+        if config.output_mode != "bilingual":
+            for item in context["manifest"].values():
+                raw = overrides.get(item["path"], source_archive.read(item["path"]))
+                if "nav" in item.get("properties", "").split():
+                    overrides[item["path"]] = _localize_navigation_document(
+                        raw,
+                        config=config,
+                        document_path=item["path"],
+                        translated_titles=translated_titles,
+                    )
+                elif item.get("media_type") == "application/x-dtbncx+xml":
+                    overrides[item["path"]] = _localize_ncx_document(
+                        raw,
+                        config=config,
+                        document_path=item["path"],
+                        translated_titles=translated_titles,
+                    )
 
         companions: dict[str, Path] = {}
         for record in image_records:
@@ -373,7 +703,6 @@ def build_epub(config: ProjectConfig, output_path: Path) -> dict[str, Any]:
         os.close(descriptor)
         temporary = Path(temporary_name)
         try:
-            source_names = set(source_archive.namelist())
             collisions = source_names.intersection(companions)
             if collisions:
                 raise _fail(
@@ -404,6 +733,7 @@ def build_epub(config: ProjectConfig, output_path: Path) -> dict[str, Any]:
                     with companions[name].open("rb") as source_member:
                         with output.open(_zip_info(name), "w", force_zip64=True) as output_member:
                             shutil.copyfileobj(source_member, output_member, length=1024 * 1024)
+                output.writestr(_zip_info(stylesheet_path), BOOKSTUDIO_STYLESHEET)
             temporary.replace(destination)
         except BaseException:
             temporary.unlink(missing_ok=True)

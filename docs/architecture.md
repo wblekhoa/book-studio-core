@@ -34,14 +34,29 @@ source EPUB (read-only)
   -> private project output/final.epub
 ```
 
+During a target-only build, block replacement retains structural source
+artifacts such as nested anchor IDs, pagebreak markers, and footnote marker
+wrappers. Visible linked text still belongs in validated `translation_xhtml`;
+the builder does not reintroduce untranslated link labels. Leading translated
+headings become the XHTML document title. EPUB 3 navigation links and EPUB 2
+NCX labels that target those documents inherit the translated title. Bilingual
+builds preserve the source title and navigation contract.
+
+Generated editorial markup is paired with a deterministic, collision-safe
+stylesheet resource registered in the OPF manifest and linked from spine
+documents. The stylesheet supplies conservative secondary treatment for image
+annotations and atomic layout for localized image blocks. This is a portable
+baseline, not a visual-rendering gate; reader-specific inspection remains
+separate evidence.
+
 `bookstudio.toml` owns project policy. `state/intake.json` owns the locked
 guided answers, and `state/pilot.json` owns the exact source document, source
 hashes, target indexes, and canonical lifecycle status. A confirmed
 `full_active` receipt also owns a closed policy identity: a SHA-256 of the
 canonical normalized language, output, full sorted profile, batching, prompt,
-and quality policy plus hashes of glossary bytes and the optional image
-manifest and reference notes. The receipt stores none of those open-ended
-policy values. Loading accepted state recomputes the hashes, so later policy
+and quality policy plus hashes of glossary bytes and the optional production
+brief, image manifest, and reference notes. The receipt stores none of those
+open-ended policy values. Loading accepted state recomputes the hashes, so later policy
 drift fails closed without editing the receipt. The block map owns source
 identity and block hashes. The glossary owns stable terminology. The cache owns
 accepted translations. `assets/image-manifest.json` owns image treatment.
@@ -66,7 +81,8 @@ identity, validates exact coverage shape, and preflights every present restart
 input before reconstructing any missing artifact. The read-only preflight set is
 the exact ownership markers, config, locked intake, inspection, full block map,
 coverage, pilot state, its scoped cache, optional image manifest and localized
-companions, plus JSON syntax for optional reference notes. Glossary prose has no
+companions, the optional production-brief node, plus JSON syntax for optional
+reference notes. Glossary prose has no
 restart-time semantic validator, while packets, outputs, and reports are
 downstream products rather than restart inputs. A node-shape gate runs before
 artifact reads: every lexically present singleton is a non-symlink regular file,
@@ -88,8 +104,9 @@ global coverage target, requires one unique `(source_path, block_index)` with
 the exact source hash and accepted row schema, and rejects empty or malformed
 translations. Every nonempty row also requires its 64-hex packet ID and a
 content-free translation-context hash covering policy, prompt, glossary,
-reference notes, and image manifest; missing metadata cannot downgrade a row to
-legacy trust. Packet IDs additionally bind the source name and whole-file hash,
+the optional production brief, reference notes, and image manifest; missing
+metadata cannot downgrade a row to legacy trust. Packet IDs additionally bind
+the source name and whole-file hash,
 target hashes, and exact neighboring context hashes and roles. Packet selection
 and guided pilot completion count only rows from the current context; after
 pre-acceptance context drift, fresh packets can explicitly revise existing

@@ -17,10 +17,14 @@ class DistributionContractTests(unittest.TestCase):
         )
 
         project = pyproject["project"]
+        self.assertEqual(["setuptools>=77"], pyproject["build-system"]["requires"])
         self.assertEqual("bookstudio", project["name"])
         self.assertEqual("0.1.0", project["version"])
         self.assertEqual(">=3.11", project["requires-python"])
         self.assertEqual([], project["dependencies"])
+        self.assertIn("PDF", project["description"])
+        self.assertIn("epub", project["keywords"])
+        self.assertIn("pdf", project["keywords"])
         self.assertEqual("bookstudio.cli:main", project["scripts"]["bookstudio"])
         self.assertEqual(
             "https://github.com/wblekhoa/book-studio-core",
@@ -39,10 +43,33 @@ class DistributionContractTests(unittest.TestCase):
             encoding="utf-8"
         )
         license_text = (self.root / "LICENSE").read_text(encoding="utf-8")
+        pyproject = tomllib.loads(
+            (self.root / "pyproject.toml").read_text(encoding="utf-8")
+        )
 
         self.assertIn('__version__ = "0.1.0"', package_init)
-        self.assertIn("MIT License", license_text)
+        self.assertIn("BOOK STUDIO PERSONAL USE LICENSE", license_text)
+        self.assertIn("Version 1.0", license_text)
         self.assertIn("Copyright (c) 2026 khoa 'jak' le", license_text)
+        self.assertIn("Personal Use", license_text)
+        self.assertIn("Commercial Use", license_text)
+        self.assertIn(
+            "separate written commercial license from the Licensor", license_text
+        )
+        self.assertIn(
+            "written authorization from every applicable Third-Party Rights Holder",
+            license_text,
+        )
+        project = pyproject["project"]
+        self.assertEqual(
+            "LicenseRef-Book-Studio-Personal-Use-1.0", project["license"]
+        )
+        self.assertEqual(["LICENSE"], project["license-files"])
+        classifiers = project["classifiers"]
+        self.assertFalse(any(value.startswith("License ::") for value in classifiers))
+        readme = (self.root / "README.md").read_text(encoding="utf-8")
+        self.assertIn("source-available", readme)
+        self.assertIn("not an open-source license", readme)
 
     def test_public_defaults_and_guidance_are_target_language_neutral(self) -> None:
         glossary = (self.root / "src/bookstudio/templates/glossary.md").read_text(
@@ -67,11 +94,93 @@ class DistributionContractTests(unittest.TestCase):
         self.assertRegex(skill_text, r"\ndescription: .+\n")
         self.assertIn("$book-translation", openai_yaml)
 
+        for relative in (
+            "scripts/install.py",
+            "scripts/audit_final_epub.py",
+            "scripts/audit_editorial_receipt.py",
+        ):
+            with self.subTest(skill_script=relative):
+                self.assertTrue((skill_root / relative).is_file())
+
         references = re.findall(r"\]\((references/[^)]+)\)", skill_text)
-        self.assertGreaterEqual(len(references), 3)
+        self.assertGreaterEqual(len(references), 4)
+        self.assertIn("references/final-book-quality.md", references)
+        self.assertIn("references/pdf-source-preparation.md", references)
         for relative in references:
             with self.subTest(reference=relative):
                 self.assertTrue((skill_root / relative).is_file())
+
+    def test_public_skill_exposes_reader_quality_and_fail_closed_pdf_preparation(self) -> None:
+        skill_root = self.root / "skills/book-translation"
+        skill_text = (skill_root / "SKILL.md").read_text(encoding="utf-8")
+        openai_yaml = (skill_root / "agents/openai.yaml").read_text(encoding="utf-8")
+
+        self.assertIn("reader-compatible styling", skill_text)
+        self.assertIn("semantic EPUB", skill_text)
+        self.assertIn("bookstudio pdf inspect", skill_text)
+        self.assertIn("bookstudio pdf prepare", skill_text)
+        self.assertIn("source_review_required", skill_text)
+        self.assertIn("PDF Source Gateway", skill_text)
+        self.assertIn("Book Translation & Design", openai_yaml)
+
+    def test_public_skill_requires_book_specific_contextual_editorial_review(self) -> None:
+        skill_root = self.root / "skills/book-translation"
+        skill_text = (skill_root / "SKILL.md").read_text(encoding="utf-8")
+        editorial = (skill_root / "references/editorial-quality.md").read_text(
+            encoding="utf-8"
+        )
+        receipt = (
+            skill_root / "references/production-brief-and-visual-receipt.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("book-context pass", skill_text)
+        self.assertIn("production_brief", skill_text)
+        self.assertIn("source-derived chapter context", editorial)
+        self.assertIn("content mode", editorial)
+        self.assertIn("target-only read", editorial)
+        self.assertIn("cross-packet boundary", editorial)
+        self.assertIn("front-matter document", skill_text)
+        self.assertIn("reports/editorial-review.json", receipt)
+        self.assertIn("audit_editorial_receipt.py", skill_text)
+        self.assertIn('"meaning_fidelity": "pass | fail | unknown"', receipt)
+        self.assertIn(
+            '"target_language_naturalness": "pass | fail | unknown"', receipt
+        )
+        self.assertIn('"production_brief_sha256": "..."', receipt)
+        self.assertIn('"material_content_modes": "pass | fail | unknown"', receipt)
+        self.assertIn('"front_matter_image_text": "pass | fail | unknown"', receipt)
+        self.assertIn("--production-brief PROJECT/production-brief.md", receipt)
+
+    def test_personal_use_boundary_is_explicit_and_portable(self) -> None:
+        readme = (self.root / "README.md").read_text(encoding="utf-8")
+        agents = (self.root / "AGENTS.md").read_text(encoding="utf-8")
+        skill_root = self.root / "skills/book-translation"
+        skill_text = (skill_root / "SKILL.md").read_text(encoding="utf-8")
+        policy_path = skill_root / "references/personal-use-and-rights.md"
+
+        self.assertTrue(policy_path.is_file())
+        policy = policy_path.read_text(encoding="utf-8")
+        normalized_policy = re.sub(r"\s+", " ", policy)
+
+        for text in (readme, agents, skill_text):
+            with self.subTest(document=text[:24]):
+                self.assertIn("personal-use-and-rights.md", text)
+
+        self.assertIn("private, personal, and non-commercial", normalized_policy)
+        self.assertIn("Private local storage", normalized_policy)
+        self.assertIn("sell, license, rent, or monetize", normalized_policy)
+        self.assertIn(
+            "publish, upload, share, transfer, or redistribute", normalized_policy
+        )
+        self.assertIn(
+            "shared archive, library, corpus, dataset, or service", normalized_policy
+        )
+        self.assertIn(
+            "Book Studio Personal Use License applies to the software code",
+            normalized_policy,
+        )
+        self.assertIn("does not grant rights", normalized_policy)
+        self.assertIn("does not provide legal advice", normalized_policy)
 
     def test_ci_runs_install_tests_compile_and_public_boundary_gate(self) -> None:
         workflow = (self.root / ".github/workflows/ci.yml").read_text(encoding="utf-8")

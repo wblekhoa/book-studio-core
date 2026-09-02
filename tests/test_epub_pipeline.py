@@ -10,6 +10,7 @@ import tempfile
 import unittest
 import zipfile
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 from bookstudio.config import atomic_write_json, load_config
 from bookstudio.epub.build import build_epub, finish_project
@@ -277,6 +278,85 @@ class BuildFixture(unittest.TestCase):
 
 class DeterministicBuildTests(BuildFixture):
 
+    def test_target_only_build_preserves_nested_anchor_and_pagebreak_markers(self) -> None:
+        build_synthetic_epub(self.source, preserve_heading_markers=True)
+        _, config = self.ready_project()
+        output_path = self.root / "preserved-markers.epub"
+
+        build_epub(config, output_path)
+
+        with zipfile.ZipFile(output_path) as archive:
+            chapter = archive.read("OEBPS/text/chapter.xhtml").decode("utf-8")
+        self.assertEqual(1, chapter.count('id="chapter-title"'))
+        self.assertEqual(1, chapter.count('id="page-10"'))
+        self.assertIn('epub:type="pagebreak"', chapter)
+        self.assertIn("Bản dịch 0", chapter)
+        self.assertNotIn("Source marker text", chapter)
+
+    def test_target_only_build_localizes_document_titles_and_navigation_labels(self) -> None:
+        build_synthetic_epub(self.source, include_navigation=True)
+        _, config = self.ready_project()
+        output_path = self.root / "localized-navigation.epub"
+
+        build_epub(config, output_path)
+
+        with zipfile.ZipFile(output_path) as archive:
+            chapter = ET.fromstring(archive.read("OEBPS/text/chapter.xhtml"))
+            navigation = ET.fromstring(archive.read("OEBPS/text/nav.xhtml"))
+            ncx = ET.fromstring(archive.read("OEBPS/toc.ncx"))
+        chapter_title = next(
+            node for node in chapter.iter() if node.tag.rsplit("}", 1)[-1] == "title"
+        )
+        nav_title = next(
+            node for node in navigation.iter() if node.tag.rsplit("}", 1)[-1] == "title"
+        )
+        nav_heading = next(
+            node for node in navigation.iter() if node.tag.rsplit("}", 1)[-1] == "h1"
+        )
+        nav_links = {
+            node.attrib["href"]: "".join(node.itertext())
+            for node in navigation.iter()
+            if node.tag.rsplit("}", 1)[-1] == "a"
+        }
+        ncx_labels = {
+            next(
+                descendant.attrib["src"]
+                for descendant in node.iter()
+                if descendant.tag.rsplit("}", 1)[-1] == "content"
+            ): next(
+                "".join(descendant.itertext())
+                for descendant in node.iter()
+                if descendant.tag.rsplit("}", 1)[-1] == "text"
+            )
+            for node in ncx.iter()
+            if node.tag.rsplit("}", 1)[-1] == "navPoint"
+        }
+        self.assertEqual("Bản dịch 0", chapter_title.text)
+        self.assertEqual("Mục lục", nav_title.text)
+        self.assertEqual("Mục lục", nav_heading.text)
+        self.assertEqual("Bản dịch 0", nav_links["chapter.xhtml#chapter-one"])
+        self.assertEqual("Bản dịch 0", ncx_labels["text/chapter.xhtml#chapter-one"])
+        self.assertEqual("vi", navigation.attrib["lang"])
+
+    def test_build_packages_default_secondary_image_styles(self) -> None:
+        _, config = self.ready_project(with_companion=True)
+        output_path = self.root / "styled-images.epub"
+
+        build_epub(config, output_path)
+
+        with zipfile.ZipFile(output_path) as archive:
+            package = archive.read("OEBPS/content.opf").decode("utf-8")
+            chapter = archive.read("OEBPS/text/chapter.xhtml").decode("utf-8")
+            self.assertIn("OEBPS/bookstudio/bookstudio.css", archive.namelist())
+            stylesheet = archive.read("OEBPS/bookstudio/bookstudio.css").decode("utf-8")
+        self.assertIn('href="bookstudio/bookstudio.css"', package)
+        self.assertIn('href="../bookstudio/bookstudio.css"', chapter)
+        self.assertIn(".bs-localized-image-block", stylesheet)
+        self.assertIn("break-inside: avoid", stylesheet)
+        self.assertIn("padding: 0.75em 0.9em", stylesheet)
+        self.assertIn(".bs-image-annotation", stylesheet)
+        self.assertIn("font-size: 0.82em", stylesheet)
+
     def test_direct_build_and_finish_reject_unaccepted_guided_project(self) -> None:
         answers = {
             "target_language": "vi",
@@ -454,6 +534,46 @@ class DeterministicBuildTests(BuildFixture):
             chapter = archive.read("OEBPS/text/chapter.xhtml").decode("utf-8")
         self.assertIn("bs-source", chapter)
         self.assertIn("bs-translation", chapter)
+
+    def test_bilingual_build_preserves_source_document_and_navigation_titles(self) -> None:
+        build_synthetic_epub(self.source, include_navigation=True)
+        _, config = self.ready_project("bilingual")
+        output_path = self.root / "bilingual-navigation.epub"
+
+        build_epub(config, output_path)
+
+        with zipfile.ZipFile(output_path) as archive:
+            chapter = ET.fromstring(archive.read("OEBPS/text/chapter.xhtml"))
+            navigation = ET.fromstring(archive.read("OEBPS/text/nav.xhtml"))
+            ncx = ET.fromstring(archive.read("OEBPS/toc.ncx"))
+        chapter_title = next(
+            node for node in chapter.iter() if node.tag.rsplit("}", 1)[-1] == "title"
+        )
+        nav_title = next(
+            node for node in navigation.iter() if node.tag.rsplit("}", 1)[-1] == "title"
+        )
+        nav_links = {
+            node.attrib["href"]: "".join(node.itertext())
+            for node in navigation.iter()
+            if node.tag.rsplit("}", 1)[-1] == "a"
+        }
+        ncx_labels = {
+            next(
+                descendant.attrib["src"]
+                for descendant in node.iter()
+                if descendant.tag.rsplit("}", 1)[-1] == "content"
+            ): next(
+                "".join(descendant.itertext())
+                for descendant in node.iter()
+                if descendant.tag.rsplit("}", 1)[-1] == "text"
+            )
+            for node in ncx.iter()
+            if node.tag.rsplit("}", 1)[-1] == "navPoint"
+        }
+        self.assertEqual("Chapter One", chapter_title.text)
+        self.assertEqual("Contents", nav_title.text)
+        self.assertEqual("Chapter One", nav_links["chapter.xhtml#chapter-one"])
+        self.assertEqual("Chapter One", ncx_labels["text/chapter.xhtml#chapter-one"])
 
     def test_non_vietnamese_editorial_labels_use_fallbacks_and_profile_overrides(self) -> None:
         cases = (

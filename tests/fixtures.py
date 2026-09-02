@@ -40,6 +40,8 @@ def build_synthetic_epub(
     *,
     include_image: bool = True,
     image_markup: str | None = None,
+    include_navigation: bool = False,
+    preserve_heading_markers: bool = False,
 ) -> None:
     container = b'''<?xml version="1.0" encoding="UTF-8"?>
 <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
@@ -85,6 +87,33 @@ def build_synthetic_epub(
 <html xmlns="http://www.w3.org/1999/xhtml"><head><title>Legal</title></head>
 <body><section><h1>Legal notice</h1><p>This synthetic document is intentionally excluded.</p></section></body></html>
 '''
+    if preserve_heading_markers:
+        chapter = chapter.replace(
+            b"<h1>Make the important choice obvious</h1>",
+            b'<h1><a id="chapter-title">Source marker text</a><span xmlns:epub="http://www.idpf.org/2007/ops" '
+            b'id="page-10" epub:type="pagebreak"/>Make the important choice obvious</h1>',
+        )
+    navigation = b'''<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+<head><title>Contents</title></head><body><nav epub:type="toc"><h1>Contents</h1><ol>
+<li><a href="title.xhtml">Synthetic Book</a></li>
+<li><a href="chapter.xhtml#chapter-one">Chapter One</a></li>
+</ol></nav></body></html>
+'''
+    ncx = b'''<?xml version="1.0" encoding="UTF-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+<head/><docTitle><text>Book Studio Synthetic</text></docTitle><navMap>
+<navPoint id="title"><navLabel><text>Synthetic Book</text></navLabel><content src="text/title.xhtml"/></navPoint>
+<navPoint id="chapter"><navLabel><text>Chapter One</text></navLabel><content src="text/chapter.xhtml#chapter-one"/></navPoint>
+</navMap></ncx>
+'''
+    if include_navigation:
+        package = package.replace(
+            b'    <item id="legal" href="text/legal.xhtml" media-type="application/xhtml+xml"/>',
+            b'    <item id="nav" href="text/nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>\n'
+            b'    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>\n'
+            b'    <item id="legal" href="text/legal.xhtml" media-type="application/xhtml+xml"/>',
+        ).replace(b"  <spine>", b'  <spine toc="ncx">')
     if image_markup is None:
         image_markup = "img" if include_image else "none"
     image_block = (
@@ -121,6 +150,11 @@ def build_synthetic_epub(
         _member("OEBPS/text/chapter.xhtml", chapter),
         _member("OEBPS/text/legal.xhtml", legal),
     )
+    if include_navigation:
+        members += (
+            _member("OEBPS/text/nav.xhtml", navigation),
+            _member("OEBPS/toc.ncx", ncx),
+        )
     if include_image:
         members += (_member("OEBPS/images/pixel.png", _PNG_1X1),)
     path.parent.mkdir(parents=True, exist_ok=True)

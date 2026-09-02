@@ -221,6 +221,7 @@ class GuidedRestartOwnershipTests(unittest.TestCase):
         "cache/translations.json",
         "assets/image-manifest.json",
         "reference-notes.json",
+        "production-brief.md",
     )
     MANAGED_DIRECTORY_PATHS = (
         "state",
@@ -888,6 +889,7 @@ class GuidedRestartOwnershipTests(unittest.TestCase):
             ),
             "assets/image-manifest.json": b'{"schema_version":1,"images":[]}\n',
             "reference-notes.json": b'{"notes":[]}\n',
+            "production-brief.md": b"# Production brief\n",
         }
         for variant in ("regular", "broken"):
             for index, relative in enumerate(self.SINGLETON_PATHS):

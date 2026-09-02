@@ -54,3 +54,13 @@ copy so the audited checkout remains artifact-free.
 The tool cannot determine whether a user has legal rights to a book. Users must
 review copyright, privacy, provider, and distribution obligations for every
 input and output.
+
+The software license and supported book-processing workflow are aligned around
+private, personal, non-commercial use. Generated books and localized assets
+must not be published, uploaded, shared, redistributed, monetized, or stored as
+a collection for other people. Private local storage needed for the user's own
+reading, study, accessibility, or research remains allowed. Any commercial
+exception requires separate written permission from both the software Licensor
+and every applicable rights holder for the material being processed. The
+complete operational boundary is documented in
+[`personal-use-and-rights.md`](../skills/book-translation/references/personal-use-and-rights.md).

@@ -1,23 +1,23 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "bookstudio"
 version = "0.1.0"
-description = "A safe, deterministic, provider-neutral EPUB translation workflow for AI"
+description = "A safe PDF-to-EPUB source gateway and provider-neutral EPUB translation workflow for AI"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { file = "LICENSE" }
+license = "LicenseRef-Book-Studio-Personal-Use-1.0"
+license-files = ["LICENSE"]
 authors = [
   { name = "khoa 'jak' le" },
 ]
-keywords = ["epub", "translation", "localization", "ai", "publishing"]
+keywords = ["epub", "pdf", "translation", "localization", "ai", "publishing"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
   "Intended Audience :: End Users/Desktop",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",

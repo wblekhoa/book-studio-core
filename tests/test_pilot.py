@@ -768,6 +768,14 @@ class PilotTests(unittest.TestCase):
         )
         config_path.write_text(config_text, encoding="utf-8")
         self.config = load_config(config_path)
+        production_brief = (
+            "# Production brief\n\n"
+            f"- Private source location: {absolute_like}\n"
+            f"- Voice evidence: {recognizable_prose}\n"
+        )
+        self.config.paths.production_brief.write_text(
+            production_brief, encoding="utf-8"
+        )
         self.complete_active_pilot()
 
         accepted = accept_pilot(self.config, confirmed=True)
@@ -783,6 +791,7 @@ class PilotTests(unittest.TestCase):
                 "glossary_sha256",
                 "reference_notes_sha256",
                 "image_manifest_sha256",
+                "production_brief_sha256",
                 "sha256",
             },
             set(identity),
@@ -802,6 +811,10 @@ class PilotTests(unittest.TestCase):
         )
         self.assertEqual("absent", identity["reference_notes_sha256"])
         self.assertEqual("absent", identity["image_manifest_sha256"])
+        self.assertEqual(
+            hashlib.sha256(production_brief.encode("utf-8")).hexdigest(),
+            identity["production_brief_sha256"],
+        )
 
         pilot_before = self.config.paths.pilot.read_bytes()
         config_path.write_text(
@@ -819,6 +832,7 @@ class PilotTests(unittest.TestCase):
         glossary_path = self.config.paths.glossary
         reference_notes_path = self.config.paths.root / "reference-notes.json"
         manifest_path = self.config.paths.root / "assets/image-manifest.json"
+        production_brief_path = self.config.paths.production_brief
         original_config = config_path.read_bytes()
         original_glossary = glossary_path.read_bytes()
         original_pilot = self.config.paths.pilot.read_bytes()
@@ -848,18 +862,26 @@ class PilotTests(unittest.TestCase):
         def add_manifest() -> None:
             atomic_write_json(manifest_path, {"schema_version": 1, "images": []})
 
+        def add_production_brief() -> None:
+            production_brief_path.write_text(
+                "# Production brief\n\n- Voice: calm and direct\n",
+                encoding="utf-8",
+            )
+
         for name, mutate in (
             ("target language", change_target),
             ("prompt version", change_prompt),
             ("glossary", change_glossary),
             ("reference notes", add_reference_notes),
             ("image manifest", add_manifest),
+            ("production brief", add_production_brief),
         ):
             with self.subTest(name=name):
                 config_path.write_bytes(original_config)
                 glossary_path.write_bytes(original_glossary)
                 reference_notes_path.unlink(missing_ok=True)
                 manifest_path.unlink(missing_ok=True)
+                production_brief_path.unlink(missing_ok=True)
                 self.config.paths.pilot.write_bytes(original_pilot)
                 mutate()
                 before = self.config.paths.pilot.read_bytes()

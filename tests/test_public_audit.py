@@ -28,6 +28,19 @@ class PublicBoundaryAuditTests(unittest.TestCase):
         receipt = audit_public_tree(self.root)
         self.assertTrue(receipt["passed"], receipt["violations"])
 
+    def test_plugin_packaging_does_not_hide_private_content(self) -> None:
+        for relative, category in (
+            ('plugins/book-studio/runtime/book.epub', 'book_binary'),
+            ('.agents/private.txt', 'agent_path_not_allowlisted'),
+            ('plugins/book-studio/cache/data.json', 'private_data_directory'),
+        ):
+            with self.subTest(relative=relative):
+                path = self.root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text('synthetic')
+                self.assertIn(category, audit_public_tree(self.root)['category_counts'])
+                path.unlink()
+
     def test_forbidden_books_private_directories_and_top_level_paths_fail(self) -> None:
         cases = (
             ("src/book.epub", "book_binary"),

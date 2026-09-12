@@ -1,0 +1,129 @@
+BOOK STUDIO PERSONAL USE LICENSE
+Version 1.0, 2 September 2026
+
+Copyright (c) 2026 khoa 'jak' le
+All rights reserved except as expressly granted below.
+
+By copying, installing, running, modifying, or distributing the Software, you
+accept this License.
+
+1. Definitions
+
+"Software" means Book Studio Core and the source code, documentation, and
+other materials distributed with this License.
+
+"Licensor" means the copyright holder identified above.
+
+"Personal Use" means use by a natural person solely for that person's own
+private, non-commercial reading, study, accessibility, research, experiment,
+or hobby. Personal Use excludes use for or on behalf of an employer, client,
+business, organization, customer, class, audience, or other third party, and
+excludes any use with an anticipated commercial application.
+
+"Commercial Use" means any direct or indirect use connected with revenue,
+compensation, commercial advantage, professional services, client work,
+organizational operations, fundraising tied to access, advertising,
+sponsorship, sale, licensing, rental, subscription, or a revenue-generating
+product, platform, application, service, workflow, or output.
+
+"Processed Material" means any book, document, product, content, data, image,
+media, interface, or other material that the Software accesses, copies,
+transforms, translates, localizes, formats, analyzes, or otherwise affects.
+
+"Third-Party Rights Holder" means any person or entity that owns or controls
+copyright, trademark, contract, privacy, publicity, database, or other rights
+in Processed Material.
+
+2. Personal-use grant
+
+Subject to this License, the Licensor grants you a non-exclusive, worldwide,
+royalty-free copyright license to copy, install, run, inspect, modify, and
+create derivative works of the Software solely for Personal Use.
+
+You may make reasonable private backup copies needed for Personal Use.
+
+3. Non-commercial sharing of the Software
+
+You may share the Software itself, including your modifications, only when all
+of the following are true:
+
+- the sharing is non-commercial and is not part of a product, platform,
+  application, service, or organizational workflow;
+- every copy includes this License and all copyright and attribution notices;
+- modified copies are clearly identified as modified; and
+- recipients receive the Software only under this same License.
+
+This section permits sharing the Software source. It does not permit sharing
+Processed Material or outputs made from Processed Material.
+
+4. Prohibited uses
+
+Except under Section 5, you may not:
+
+- make any Commercial Use of the Software;
+- use the Software to build, operate, support, or improve a commercial product,
+  platform, application, service, or workflow;
+- use the Software to create, prepare, or provide any output for Commercial
+  Use;
+- provide Software-powered processing or outputs to any third party;
+- publish, upload, host, share, transfer, redistribute, sell, license, rent, or
+  monetize Processed Material or outputs made from it;
+- create or populate a shared archive, library, corpus, dataset, or service
+  from Processed Material or outputs;
+- remove or alter this License, copyright notices, or attribution notices; or
+- bypass DRM, access controls, contractual restrictions, or applicable law.
+
+5. Commercial-use exception
+
+Commercial Use is not granted by this License. It is permitted only when you
+have both:
+
+1. a separate written commercial license from the Licensor; and
+2. binding written authorization from every applicable Third-Party Rights Holder
+   for the intended use of all Processed Material and outputs.
+
+Authorization from a Third-Party Rights Holder does not grant commercial rights
+to the Software. A commercial license from the Licensor does not grant rights
+to Processed Material. Both requirements must be satisfied before Commercial
+Use begins.
+
+6. Processed Material and outputs
+
+This License grants no rights to Processed Material. It does not determine
+ownership of outputs or guarantee that an output is lawful, non-infringing, or
+fit for distribution. You are responsible for obtaining every permission and
+complying with every obligation applicable to your inputs, processing, and
+outputs.
+
+Without the authorizations required by Section 5, Processed Material,
+intermediate files, and outputs must remain private and may be stored only as
+needed for Personal Use.
+
+7. Patent and trademark rights
+
+The Licensor grants no trademark rights. To the extent the Licensor can grant
+patent rights necessary to exercise the permissions in Section 2, those rights
+are granted only for Personal Use and terminate with the copyright license.
+
+8. Termination
+
+Your rights under this License terminate automatically when you breach it. On
+termination, you must stop using and distributing the Software and delete all
+copies in your possession or control, except copies you are legally required
+to retain. Rights may be reinstated only by the Licensor in writing.
+
+9. Disclaimer and limitation of liability
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, TITLE, AND NON-INFRINGEMENT. TO THE MAXIMUM EXTENT PERMITTED BY LAW,
+THE LICENSOR WILL NOT BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY
+ARISING FROM THE SOFTWARE OR ITS USE.
+
+10. General terms
+
+If any provision of this License is unenforceable, it will be limited to the
+minimum extent necessary and the remaining provisions will continue in effect.
+A failure to enforce a provision is not a waiver. This License applies only to
+copies of the Software distributed with this License and does not alter the
+license terms attached to earlier distributions.

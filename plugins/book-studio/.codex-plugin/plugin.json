@@ -1,0 +1,19 @@
+{
+  "name": "book-studio",
+  "version": "0.1.0",
+  "description": "Guided book translation with a reviewed pilot and bundled local engine.",
+  "license": "LicenseRef-Book-Studio-Personal-Use-1.0",
+  "author": {
+    "name": "khoa 'jak' le"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Book Studio",
+    "shortDescription": "Use Book Studio in Codex.",
+    "longDescription": "Translate EPUBs and supported text-layer PDFs for private reading. Includes its engine; requires Python 3.11+. Review a sample before translating the full book.",
+    "developerName": "khoa 'jak' le",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Help me translate this book, starting with my preferences and a sample for review."
+  }
+}

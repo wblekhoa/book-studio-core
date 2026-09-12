@@ -1,0 +1,7 @@
+interface:
+  display_name: "Book Translation & Design"
+  short_description: "Translate, localize, and refine EPUB or PDF books"
+  default_prompt: "Use $book-translation to prepare this EPUB or supported PDF, then translate or improve it through guided intake, a reviewed pilot, and final reader-quality verification."
+
+policy:
+  allow_implicit_invocation: true

@@ -23,6 +23,9 @@ ALLOWED_TOP_LEVEL = frozenset(
         "tests",
         "docs",
         "skills",
+        "scripts",
+        "plugins",
+        ".agents",
     }
 )
 ALLOWED_TEXT_SUFFIXES = frozenset({".py", ".md", ".toml", ".json", ".txt", ".yml", ".yaml"})
@@ -90,6 +93,8 @@ def audit_public_tree(root: Path) -> dict[str, Any]:
         relative_path = path.relative_to(base)
         relative = relative_path.as_posix()
         top = relative_path.parts[0]
+        if top == ".agents" and relative not in {".agents", ".agents/plugins", ".agents/plugins/marketplace.json"}:
+            violations.append(_row("agent_path_not_allowlisted", relative))
         if top not in ALLOWED_TOP_LEVEL:
             violations.append(_row("top_level_not_allowlisted", relative))
         if any(part in PRIVATE_DIRECTORIES for part in relative_path.parts):

@@ -23,9 +23,12 @@ jobs:
       - name: Audit public boundary before executing project code
         run: PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python -m bookstudio public-audit . --json
       - name: Install package from clean copy
+        # The plugin must ship the same engine and skill as this checkout.
         run: |
           cp -R . "$RUNNER_TEMP/bookstudio-install"
           python -m pip install "$RUNNER_TEMP/bookstudio-install"
+      - name: Check plugin bundle freshness
+        run: PYTHONDONTWRITEBYTECODE=1 python scripts/build_plugin.py --check
       - name: CLI smoke test
         run: bookstudio doctor --json
       - name: Unit tests

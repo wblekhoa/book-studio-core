@@ -22,6 +22,28 @@ original images, image annotations, and same-canvas localized companions.
 
 ## Install
 
+### Codex plugin (bundled engine)
+
+Requires Python 3.11+ and a Codex version with `codex plugin` support.
+Clone this repository, register its marketplace, then install Book Studio:
+
+```bash
+git clone https://github.com/wblekhoa/book-studio-core.git
+cd book-studio-core
+codex plugin marketplace add .
+codex plugin add book-studio@book-studio
+```
+
+Start a new Codex thread, select Book Studio, and ask: “Help me translate this
+book. Ask about the choices I haven't specified and prepare a sample first.”
+The plugin bundles its matching engine, so no pip, pipx, API key, or separate
+`bookstudio` install is needed. Python is still required. Optional Poppler
+tools are needed only for PDF preparation. Rendering and image generation use
+the tools available in your AI environment; neither is bundled here.
+
+See [plugin installation and maintenance](docs/codex-plugin.md) for updates,
+verification, and troubleshooting. The standalone CLI below remains supported.
+
 Python 3.11 or newer is required. Install the CLI directly from GitHub:
 
 ```bash

@@ -52,6 +52,7 @@ class EpubInspectExtractTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
 
+    # BSC-PIPE-003
     def test_inspect_measures_structure_without_absolute_source_path(self) -> None:
         receipt = inspect_epub(self.source)
 
@@ -60,6 +61,7 @@ class EpubInspectExtractTests(unittest.TestCase):
         self.assertEqual("Book Studio Synthetic", receipt["metadata"]["title"][0])
         self.assertNotIn(str(self.root), json.dumps(receipt))
 
+    # BSC-PIPE-003
     def test_extract_uses_stable_source_hashes_and_canonical_nesting(self) -> None:
         first = extract_block_map(self.source)
         second = extract_block_map(self.source)
@@ -74,6 +76,7 @@ class EpubInspectExtractTests(unittest.TestCase):
         self.assertEqual(hashlib.sha256(self.source.read_bytes()).hexdigest(), first["source"]["sha256"])
         self.assertNotIn(str(self.root), json.dumps(first))
 
+    # BSC-PIPE-004
     def test_inspect_rejects_missing_container_without_mutating_source(self) -> None:
         make_zip(self.source, {"mimetype": b"application/epub+zip"})
         before = hashlib.sha256(self.source.read_bytes()).hexdigest()
@@ -151,6 +154,7 @@ class ImageManifestTests(unittest.TestCase):
                 receipt = load_image_manifest(self.config)
                 self.assertTrue(receipt["passed"])
 
+    # BSC-PIPE-016
     def test_companion_must_be_project_owned_and_match_source_canvas(self) -> None:
         localized = self.project / "assets/localized/pixel-vi.png"
         localized.write_bytes(self.original_png)
@@ -278,6 +282,7 @@ class BuildFixture(unittest.TestCase):
 
 class DeterministicBuildTests(BuildFixture):
 
+    # BSC-PIPE-014
     def test_target_only_build_preserves_nested_anchor_and_pagebreak_markers(self) -> None:
         build_synthetic_epub(self.source, preserve_heading_markers=True)
         _, config = self.ready_project()
@@ -293,6 +298,7 @@ class DeterministicBuildTests(BuildFixture):
         self.assertIn("Bản dịch 0", chapter)
         self.assertNotIn("Source marker text", chapter)
 
+    # BSC-PIPE-014
     def test_target_only_build_localizes_document_titles_and_navigation_labels(self) -> None:
         build_synthetic_epub(self.source, include_navigation=True)
         _, config = self.ready_project()
@@ -357,6 +363,7 @@ class DeterministicBuildTests(BuildFixture):
         self.assertIn(".bs-image-annotation", stylesheet)
         self.assertIn("font-size: 0.82em", stylesheet)
 
+    # BSC-PILOT-013
     def test_direct_build_and_finish_reject_unaccepted_guided_project(self) -> None:
         answers = {
             "target_language": "vi",
@@ -496,6 +503,7 @@ class DeterministicBuildTests(BuildFixture):
                     },
                 )
 
+    # BSC-PIPE-013
     def test_two_builds_are_byte_identical_and_self_identified(self) -> None:
         project, config = self.ready_project(with_companion=True)
         localized_path = "OEBPS/bookstudio-localized/pixel-vi.png"
@@ -524,6 +532,7 @@ class DeterministicBuildTests(BuildFixture):
             self.assertNotIn("bs-source", chapter)
             self.assertNotIn("Bản Việt hóa", chapter)
 
+    # BSC-PIPE-014
     def test_bilingual_build_marks_source_and_translation_blocks(self) -> None:
         _, config = self.ready_project("bilingual")
         output_path = self.root / "bilingual.epub"
@@ -630,6 +639,7 @@ class IntegrityTests(BuildFixture):
         self.assertTrue(receipt["passed"], receipt["violations"])
         self.assertEqual(0, len(receipt["violations"]))
 
+    # BSC-PIPE-015
     def test_broken_fragment_fails_and_finish_preserves_previous_final(self) -> None:
         project = self.root / "broken"
         init_project(

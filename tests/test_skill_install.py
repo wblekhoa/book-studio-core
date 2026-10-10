@@ -56,6 +56,7 @@ class SkillInstallTests(unittest.TestCase):
                 relative,
             )
 
+    # BSC-SKILL-004
     def test_default_codex_home_install_and_current_check(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -84,6 +85,7 @@ class SkillInstallTests(unittest.TestCase):
             self.assertFalse(check_receipt["changed"])
             self.assertEqual(receipt["source_sha256"], check_receipt["destination_sha256"])
 
+    # BSC-SKILL-005
     def test_check_reports_missing_without_creating_destination(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -103,6 +105,7 @@ class SkillInstallTests(unittest.TestCase):
             self.assertFalse(receipt["changed"])
             self.assertFalse(destination_root.exists())
 
+    # BSC-SKILL-006
     def test_dry_run_reports_stale_without_mutating_or_backing_up(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -134,6 +137,7 @@ class SkillInstallTests(unittest.TestCase):
             self.assertEqual(stale_bytes, skill_file.read_bytes())
             self.assertEqual([], list(destination_root.glob(".book-translation.backup-*")))
 
+    # BSC-SKILL-007
     def test_update_keeps_backup_and_replaces_destination_exactly(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -165,6 +169,7 @@ class SkillInstallTests(unittest.TestCase):
             self.assertFalse((destination / "stale.txt").exists())
             self.assert_exact_tree(source, destination)
 
+    # BSC-SKILL-008
     def test_failed_post_install_verification_restores_previous_install(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -204,6 +209,7 @@ class SkillInstallTests(unittest.TestCase):
             self.assertEqual([], list(destination_root.glob(".book-translation.backup-*")))
             self.assertEqual([], list(destination_root.glob(".book-translation.install-*")))
 
+    # BSC-SKILL-009
     def test_invalid_source_never_creates_destination(self) -> None:
         def missing_required(source: Path) -> None:
             (source / "agents/openai.yaml").unlink()

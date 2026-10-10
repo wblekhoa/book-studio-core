@@ -141,6 +141,7 @@ class StartCliTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
 
+    # BSC-PILOT-001
     def test_start_missing_answers_returns_questions_without_creating_project(self) -> None:
         result = run_cli("start", str(self.project), "--source", str(self.source), "--json")
 
@@ -198,6 +199,7 @@ class StartCliTests(unittest.TestCase):
         self.assertEqual("INTAKE_ANSWERS_INVALID", json.loads(result.stdout)["code"])
         self.assertFalse(self.project.exists())
 
+    # BSC-PILOT-005
     def test_start_refuses_nonempty_unowned_target_without_mutation(self) -> None:
         self.project.mkdir()
         sentinel = self.project / "user-file.txt"
@@ -298,6 +300,7 @@ class PilotCliTests(unittest.TestCase):
             if path.is_file()
         }
 
+    # BSC-PILOT-007
     def test_pilot_status_and_approve_report_canonical_status_and_next_action(self) -> None:
         proposed = run_cli("pilot", "status", str(self.project), "--json")
 
@@ -367,6 +370,7 @@ class PilotCliTests(unittest.TestCase):
                 self.assertIn("state/pilot.json", payload["next_action"])
                 self.assertEqual(before, self._project_snapshot())
 
+    # BSC-PILOT-008
     def test_cli_requires_review_after_last_pilot_packet(self) -> None:
         approved = run_cli("pilot", "approve", str(self.project), "--json")
         self.assertEqual(0, approved.returncode, approved.stderr)
@@ -385,6 +389,7 @@ class PilotCliTests(unittest.TestCase):
         self.assertNotIn("workflow_phase", status)
         self.assertTrue(status["next_action"])
 
+    # BSC-PILOT-009
     def test_accept_requires_confirm_then_unlocks_full_scope(self) -> None:
         run_cli("pilot", "approve", str(self.project), "--json")
         pilot_response = self._complete_pilot()
@@ -421,6 +426,7 @@ class PilotCliTests(unittest.TestCase):
             json.loads(next_result.stdout)["source_document"],
         )
 
+    # BSC-PILOT-010
     def test_completed_pilot_can_be_revised_before_acceptance_but_not_after(self) -> None:
         run_cli("pilot", "approve", str(self.project), "--json")
         response_path = self._complete_pilot()

@@ -20,6 +20,7 @@ class InlineXhtmlSafetyTests(unittest.TestCase):
         )
         self.assertTrue(receipt["passed"])
 
+    # BSC-PIPE-009
     def test_script_event_style_and_unsafe_url_fail_closed(self) -> None:
         values = (
             "<script>alert(1)</script>",
@@ -34,10 +35,12 @@ class InlineXhtmlSafetyTests(unittest.TestCase):
                 with self.assertRaisesRegex(BookStudioError, "XHTML_UNSAFE"):
                     validate_inline_xhtml(value)
 
+    # BSC-PIPE-009
     def test_malformed_markup_fails_closed(self) -> None:
         with self.assertRaisesRegex(BookStudioError, "XHTML_INVALID"):
             validate_inline_xhtml("<em>unclosed")
 
+    # BSC-PIPE-009
     def test_apply_validates_xhtml_before_cache_mutation(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

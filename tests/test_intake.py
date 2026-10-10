@@ -26,6 +26,7 @@ class IntakeTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
 
+    # BSC-PILOT-002
     def test_assessment_omits_known_answers_and_image_questions_without_images(self) -> None:
         source = self.workspace / "no-images.epub"
         build_synthetic_epub(source, include_image=False)
@@ -44,6 +45,7 @@ class IntakeTests(unittest.TestCase):
         self.assertNotIn("image_text_policy", ids)
         self.assertNotIn("image_annotation_policy", ids)
 
+    # BSC-PILOT-002
     def test_assessment_infers_single_metadata_language_and_orders_missing_questions(self) -> None:
         source = self.workspace / "with-image.epub"
         build_synthetic_epub(source)
@@ -66,6 +68,7 @@ class IntakeTests(unittest.TestCase):
         )
         self.assertEqual(1, receipt["book_facts"]["images"])
 
+    # BSC-PILOT-003
     def test_missing_questions_expose_stable_accepted_values_and_recommendations(self) -> None:
         source = self.workspace / "with-image.epub"
         build_synthetic_epub(source)
@@ -106,6 +109,7 @@ class IntakeTests(unittest.TestCase):
                 self.assertEqual(accepted_values, questions[question_id]["accepted_values"])
                 self.assertEqual(recommendation, questions[question_id]["recommendation"])
 
+    # BSC-PILOT-004
     def test_assessment_rejects_unknown_non_string_and_invalid_language_answers(self) -> None:
         source = self.workspace / "with-image.epub"
         build_synthetic_epub(source)
@@ -271,6 +275,7 @@ class IntakeTests(unittest.TestCase):
             profile_from_answers(answers),
         )
 
+    # BSC-PILOT-006
     def test_start_project_writes_deterministic_pilot_after_prepared_artifacts(self) -> None:
         source = self.workspace / "guided.epub"
         target = self.workspace / "guided-project"

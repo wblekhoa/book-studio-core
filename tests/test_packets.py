@@ -151,6 +151,7 @@ class PacketAndCacheTests(unittest.TestCase):
             "files": {source_path: rows},
         }
 
+    # BSC-PIPE-005
     def test_next_packet_never_crosses_source_document_or_max_blocks(self) -> None:
         packet = next_packet(self.config)
 
@@ -324,6 +325,7 @@ class PacketAndCacheTests(unittest.TestCase):
 
         self.assertEqual(before, (self.project / "cache/translations.json").read_bytes())
 
+    # BSC-PIPE-007
     def test_packet_id_is_stable_and_guided_packet_id_binds_scope(self) -> None:
         legacy = next_packet(self.config)
         assert legacy is not None
@@ -430,6 +432,7 @@ class PacketAndCacheTests(unittest.TestCase):
             apply_response(fresh_config, response_path)
         self.assertFalse((self.project / "cache/translations.json").exists())
 
+    # BSC-PIPE-008
     def test_stale_loaded_config_cannot_emit_or_apply_a_mixed_snapshot(self) -> None:
         packet = next_packet(self.config)
         assert packet is not None
@@ -456,6 +459,7 @@ class PacketAndCacheTests(unittest.TestCase):
         self.assertEqual("fr", current["project"]["target_language"])
         self.assertNotEqual(packet["packet_id"], current["packet_id"])
 
+    # BSC-PIPE-011
     def test_cache_rows_cannot_downgrade_by_removing_context_identity(self) -> None:
         packet = next_packet(self.config)
         assert packet is not None
@@ -476,6 +480,7 @@ class PacketAndCacheTests(unittest.TestCase):
 
         self.assertEqual(before, cache_path.read_bytes())
 
+    # BSC-PIPE-006
     def test_packet_contains_bounded_context_glossary_reference_and_schema(self) -> None:
         packet = next_packet(self.config)
         assert packet is not None
@@ -744,6 +749,7 @@ class PacketAndCacheTests(unittest.TestCase):
                 self.assertEqual(code, caught.exception.code)
                 self.assertFalse(cache_path.exists())
 
+    # BSC-PIPE-010
     def test_valid_apply_merges_and_collision_fails_closed(self) -> None:
         first_packet = next_packet(self.config)
         assert first_packet is not None
@@ -765,6 +771,7 @@ class PacketAndCacheTests(unittest.TestCase):
             apply_response(self.config, self.write_response(collision, "collision.json"))
         self.assertEqual(before, hashlib.sha256(cache_path.read_bytes()).hexdigest())
 
+    # BSC-PIPE-010
     def test_legacy_unscoped_response_replay_remains_idempotent(self) -> None:
         packet = next_packet(self.config)
         assert packet is not None
@@ -778,6 +785,7 @@ class PacketAndCacheTests(unittest.TestCase):
         self.assertEqual(0, replay["applied"])
         self.assertEqual(before, cache_path.read_bytes())
 
+    # BSC-PIPE-007
     def test_apply_rechecks_the_identical_target_scope_and_identity(self) -> None:
         allowed = frozenset({("OEBPS/text/chapter.xhtml", 1)})
         packet = next_packet(
@@ -820,6 +828,7 @@ class PacketAndCacheTests(unittest.TestCase):
                 scope_identity="pilot_active:scope-a",
             )
 
+    # BSC-PIPE-012
     def test_coverage_and_no_work_exit_contract(self) -> None:
         incomplete = run_cli("status", str(self.project), "--json")
         self.assertEqual(2, incomplete.returncode)

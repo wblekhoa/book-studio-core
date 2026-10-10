@@ -112,6 +112,7 @@ class PilotTests(unittest.TestCase):
         )
         return proposal
 
+    # BSC-PILOT-006
     def test_selector_chooses_chapter_not_title_or_legal(self) -> None:
         proposal = select_pilot(self.inspection, self.block_map, self.answers)
 
@@ -605,6 +606,7 @@ class PilotTests(unittest.TestCase):
 
         self.assertEqual(before, self.config.paths.pilot.read_bytes())
 
+    # BSC-PILOT-007
     def test_approve_creates_translation_scope_and_derived_review_requirement(self) -> None:
         proposal = self.write_proposal()
 
@@ -639,6 +641,7 @@ class PilotTests(unittest.TestCase):
         self.assertEqual(len(proposal["targets"]), receipt["translated_blocks"])
         self.assertEqual(before, self.config.paths.pilot.read_bytes())
 
+    # BSC-PILOT-011
     def test_pre_acceptance_pilot_rejects_config_drift_from_locked_intake(self) -> None:
         self.write_proposal()
         approve_pilot(self.config)
@@ -668,6 +671,7 @@ class PilotTests(unittest.TestCase):
                 self.assertEqual(pilot_before, self.config.paths.pilot.read_bytes())
         config_path.write_text(original_config, encoding="utf-8")
 
+    # BSC-PILOT-009
     def test_accept_fails_without_complete_pilot_and_preserves_state(self) -> None:
         self.write_proposal()
         approve_pilot(self.config)
@@ -825,6 +829,7 @@ class PilotTests(unittest.TestCase):
             pilot_receipt(load_config(config_path))
         self.assertEqual(pilot_before, self.config.paths.pilot.read_bytes())
 
+    # BSC-PILOT-011
     def test_full_active_load_rejects_each_policy_component_drift_without_mutation(self) -> None:
         self.complete_active_pilot()
         accept_pilot(self.config, confirmed=True)
@@ -1014,6 +1019,7 @@ class PilotTests(unittest.TestCase):
                     self.assertEqual(cache_before, cache_path.read_bytes())
                     self.assertEqual(pilot_before, self.config.paths.pilot.read_bytes())
 
+    # BSC-PILOT-012
     def test_pilot_cache_scope_is_strict_until_acceptance_then_allows_global_rows(self) -> None:
         proposal = self.complete_active_pilot()
         outside_file = next(

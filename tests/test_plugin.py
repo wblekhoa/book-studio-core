@@ -15,10 +15,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class PluginTests(unittest.TestCase):
+    # BSC-SKILL-001
     def test_generated_bundle_matches_canonical_sources(self):
         result = subprocess.run([sys.executable, str(ROOT / 'scripts/build_plugin.py'), '--check'], capture_output=True, text=True)
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
 
+    # BSC-SKILL-003
     def test_standalone_bundle_runs_complete_guided_flow(self):
         with tempfile.TemporaryDirectory(prefix='bookstudio plugin ') as directory:
             bundle = Path(directory) / 'book-studio'
@@ -31,6 +33,7 @@ class PluginTests(unittest.TestCase):
             with patch('tests.test_e2e.run_cli', run_cli):
                 test_e2e.SyntheticCliEndToEndTests('test_complete_guided_pilot_gated_cli_flow').test_complete_guided_pilot_gated_cli_flow()
 
+    # BSC-SKILL-002
     def test_check_rejects_modified_bundle_without_repairing_it(self):
         with tempfile.TemporaryDirectory() as directory:
             copy = Path(directory) / 'checkout'

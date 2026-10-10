@@ -32,21 +32,25 @@ class ArchiveSafetyTests(unittest.TestCase):
             preflight_archive(self.archive, limits=limits or ArchiveLimits())
         self.assertEqual(before, file_hash(self.archive))
 
+    # BSC-PIPE-001
     def test_preflight_rejects_parent_traversal(self) -> None:
         make_zip(self.archive, {"../escape.xhtml": b"bad"})
         self.assert_rejected_unchanged("ARCHIVE_UNSAFE_PATH")
         self.assertFalse((self.root.parent / "escape.xhtml").exists())
 
+    # BSC-PIPE-001
     def test_preflight_rejects_absolute_and_backslash_paths(self) -> None:
         for name in ("/absolute.xhtml", "text\\chapter.xhtml"):
             with self.subTest(name=name):
                 make_zip(self.archive, {name: b"bad"})
                 self.assert_rejected_unchanged("ARCHIVE_UNSAFE_PATH")
 
+    # BSC-PIPE-002
     def test_preflight_rejects_duplicate_names(self) -> None:
         make_duplicate_name_zip(self.archive, "text/chapter.xhtml")
         self.assert_rejected_unchanged("ARCHIVE_DUPLICATE_ENTRY")
 
+    # BSC-PIPE-002
     def test_preflight_enforces_entry_count(self) -> None:
         make_zip(self.archive, {"one": b"1", "two": b"2"})
         self.assert_rejected_unchanged(
@@ -54,6 +58,7 @@ class ArchiveSafetyTests(unittest.TestCase):
             ArchiveLimits(max_entries=1),
         )
 
+    # BSC-PIPE-002
     def test_preflight_enforces_single_and_total_expanded_bytes(self) -> None:
         make_zip(self.archive, {"one": b"123", "two": b"456"})
         self.assert_rejected_unchanged(
@@ -65,6 +70,7 @@ class ArchiveSafetyTests(unittest.TestCase):
             ArchiveLimits(max_single_uncompressed=3, max_total_uncompressed=5),
         )
 
+    # BSC-PIPE-002
     def test_preflight_enforces_compression_ratio(self) -> None:
         with zipfile.ZipFile(self.archive, "w", compression=zipfile.ZIP_DEFLATED) as archive:
             archive.writestr("large.txt", b"0" * 4096)

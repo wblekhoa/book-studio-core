@@ -40,9 +40,10 @@ replace the source asset.
 Order and relative display size are book-specific visual decisions, not a
 universal translation rule. If the approved treatment makes the localized
 visual primary or keeps a smaller original in a padded block afterward, the
-manifest-only Core path is insufficient. Use a project-owned deterministic
-postprocessor and stylesheet, preserve both source and same-canvas companion,
-and approve that exact path in the rendered pilot before applying it book-wide.
+manifest-only Core path is insufficient. Declare the stylesheet and document
+changes in `PROJECT/edits.json` (see final book quality), preserve both source
+and same-canvas companion, and approve that exact path in the rendered pilot
+before applying it book-wide.
 
 Use an image editing or generation capability only when it is available,
 authorized, and legally appropriate. Preserve the author's composition and

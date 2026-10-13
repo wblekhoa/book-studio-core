@@ -107,16 +107,17 @@ review representative documents manually.
 - For the conservative Core layout, keep the byte-identical original first,
   preserve the source canvas and apparent display size, place the companion in
   one padded block below it, and keep the annotation inside that block. If the
-  pilot approved another order or relative display size, reproduce it through
-  a project-owned deterministic transform while retaining both source and
-  same-canvas companion.
+  pilot approved another order or relative display size, declare it in
+  `PROJECT/edits.json` while retaining both source and same-canvas companion.
 - Do not recreate logos or simple text without benefit. Treat a market-specific
   visual as labeled editorial context, not as a translation of the author.
 - Preserve approved AI-generated companions byte-for-byte unless revision was
   requested.
 - Verify the cover image, OPF cover metadata, first-spine presentation, aspect
   ratio, and readable safe area. If an approved badge or private-reading note
-  was added, prove that edits are confined to the approved region.
+  was added, prove that edits are confined to the approved region. The marked
+  image enters the book as a new `add_member` in `edits.json`; the original
+  cover image stays byte-identical.
 
 ## Render and exercise representative flows
 
@@ -140,8 +141,31 @@ self-review; do not call it independent review.
 
 ## Rebuild after every correction
 
-Change project-owned source, cache, glossary, manifest, stylesheet, asset, or a
-deterministic finalizer, then rebuild. Never patch only the deliverable.
+Change project-owned source, cache, glossary, manifest, asset, or
+`PROJECT/edits.json`, then rebuild. Never patch only the deliverable, and never
+write a per-book finalizer that edits the EPUB after `finish`.
+
+Declare every post-build correction in `PROJECT/edits.json` so the gate
+certifies the delivered book:
+
+```json
+{
+  "schema_version": 1,
+  "operations": [
+    {"op": "replace_text", "member": "OEBPS/bookstudio/bookstudio.css", "find": "…", "replace": "…", "count": 1, "note": "why"},
+    {"op": "replace_member", "member": "OEBPS/xhtml/contents.xhtml", "base_sha256": "<built member hash>", "from": "assets/edits/contents.xhtml", "sha256": "<file hash>"},
+    {"op": "add_member", "member": "OEBPS/images/cover-marked.png", "from": "assets/cover/cover-marked.png", "sha256": "<file hash>"}
+  ]
+}
+```
+
+Prefer `replace_text` with an exact `count` for small fixes; use
+`replace_member` only when a document needs restructuring, and pin
+`base_sha256` to the member as built without edits so a later translation
+change fails loudly (`EDITS_BASE_STALE`) instead of being overwritten. Replacement
+files live inside the project and are pinned by `sha256`. Members cannot be
+deleted, and edited markup may not contain scripts, `on*` handlers, or
+`javascript:` links. Fix every `EDITS_*` error at its source; never weaken it.
 
 For a normal Core artifact, run independently:
 
@@ -151,11 +175,12 @@ bookstudio finish PROJECT --json
 bookstudio verify PROJECT --json
 ```
 
-If a deterministic postprocessor creates the delivered EPUB after `finish`,
-the Core receipt applies only to its input. The delivered artifact needs its
-own byte-identical rebuild, ZIP/mimetype, XML, reference, navigation, asset,
-language, and rendered receipts. Compare it with the Core artifact and explain
-every changed package entry.
+`finish` records the number of applied edits and the `edits.json` SHA-256 in
+`reports/release.json`. The delivered EPUB is `PROJECT/output/final.epub`
+itself: copy it unchanged, and confirm its SHA-256 equals the receipt (the
+review page shows "Matches the gate receipt"). A legacy project whose delivered
+file was produced by a postprocessor after `finish` is not certified until its
+changes are moved into `edits.json`.
 
 Do not declare DONE while a required rendered state is uninspected, a critical
 string or link class is unknown, or the final artifact differs from the one

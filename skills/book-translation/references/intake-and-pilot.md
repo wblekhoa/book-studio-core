@@ -15,6 +15,10 @@ the project directory is not created. The response supplies privacy-safe
 `book_facts`, normalized existing `answers`, and only the remaining
 `questions`.
 
+Always start guided work with `start`. `bookstudio init` creates an expert
+full-scope project with no intake and no sample gate; use it only when the user
+explicitly asks for that expert path.
+
 Build one answers JSON object from facts already established in conversation
 and the user's new answers. Do not ask a question already answered explicitly.
 Do not silently infer a choice when reasonable alternatives would produce a
@@ -174,7 +178,7 @@ bookstudio pilot revise PROJECT CORRECTED_RESPONSE.json --json
 ```
 
 When layout, cover treatment, localized images, or source cleanup are part of
-the outcome, render the pilot from the same deterministic transform intended
+the outcome, render the pilot from the same build and `edits.json` path intended
 for the final EPUB. Show the actual candidate at representative phone and
 tablet widths when tools permit. A custom mockup can illustrate an idea but
 cannot approve the production path; unavailable rendering remains explicit

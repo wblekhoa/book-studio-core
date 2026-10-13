@@ -12,6 +12,20 @@ updated: 2026-10-13
 Entries before 2026-10-11 are reconstructed from commits, `CHANGELOG.md`, `AGENTS.md` and `docs/` in this repo; each
 cites its source.
 
+## 2026-10-13 · Skill references follow the gated finishing path; plugin versioned on its own
+
+- **Context**: an audit of the skill found that `final-book-quality.md` and the production-brief contract still told
+  the AI to write a deterministic finalizer or postprocessor after `finish`. That is the pattern behind the four
+  uncertified deliveries. The new commands were mentioned once each, `init` was never explained, and the plugin stayed
+  at `0.1.0` across three behaviour changes, so Codex kept a stale cached copy.
+- **Decision**: references now route every post-build correction through `edits.json`, document the drafts format
+  for `apply-drafts`, tell the agent to point the user to `review`, and keep guided work on `start` (not `init`).
+  Contract tests guard all of this (BSC-SKILL-011…013). The plugin carries its own version (`0.2.0`) and bumps it on
+  every plugin change. The engine stays at `0.1.0`, because its version is a public release contract that only moves
+  with a published release.
+- **Evidence**: `tests/test_skill_contract.py`; the references diff in this commit.
+- **Reversal**: revert the references and the version; a new entry here.
+
 ## 2026-10-13 · Post-build corrections move inside the gate; drafts get a core command
 
 - **Context**: in the private workspace, all four delivered Vietnamese editions differed from the EPUB that `finish`

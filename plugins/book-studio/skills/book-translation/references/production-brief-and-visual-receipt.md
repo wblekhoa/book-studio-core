@@ -30,7 +30,7 @@ update it when an accepted decision changes:
 - Review targets: reader apps and phone/tablet classes
 - Front matter inventory: source path, role, prose decision, image-text
   decision, and reason for every preserved or excluded item
-- Deterministic transform: command or project-owned script
+- Post-build edits: `edits.json` operations planned (none, or a short list)
 - Pilot acceptance: date, scope, and user-visible evidence
 - Voice anchor: optional short target-language excerpt approved in the pilot
 ```

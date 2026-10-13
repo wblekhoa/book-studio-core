@@ -86,10 +86,41 @@ request a fresh packet when instructed, and regenerate only the rejected local
 response. After the same failure twice, reassess rather than patching around the
 validator.
 
+## Apply prepared drafts
+
+When chapters were drafted ahead, do not hand-loop `next`/`apply`. Write one
+private drafts file and run:
+
+```bash
+bookstudio apply-drafts PROJECT DRAFTS.json --json
+```
+
+```json
+{
+  "schema_version": 1,
+  "source_sha256": "<source.sha256 from source-blocks/full-block-map.json>",
+  "drafts": [
+    {"source_document": "OEBPS/text/chapter.xhtml", "block_index": 4,
+     "source_sha256": "<that block's text_sha256>", "translation": "…",
+     "translation_xhtml": "optional safe inline markup"}
+  ]
+}
+```
+
+Every row is checked before anything is written (`DRAFTS_SOURCE_MISMATCH`,
+`DRAFT_TARGET_UNKNOWN`, `DRAFT_SOURCE_STALE`, `DRAFTS_SCHEMA_INVALID`). The
+command then applies packet by packet with the same context binding and safety
+gates. It returns `pilot_review_required` when the sample is complete, `complete`
+when the full scope is done, or `draft_missing` (exit 2) with the missing blocks.
+Drafting ahead never replaces the sample review: draft and review the pilot
+first, and apply the rest only after explicit acceptance. Context-only rows are
+never drafted.
+
 ## Complete the whole book
 
-After the pilot is explicitly accepted, repeat `next` and `apply` until full
-scope returns `NO_WORK_REMAINS`. Then run each gate separately:
+After the pilot is explicitly accepted, repeat `next` and `apply` (or run
+`apply-drafts`) until full scope returns `NO_WORK_REMAINS`. Then run each gate
+separately:
 
 ```bash
 bookstudio status PROJECT --json
@@ -97,9 +128,9 @@ bookstudio finish PROJECT --json
 bookstudio verify PROJECT --json
 ```
 
-`status` must report complete, valid coverage. `finish` builds twice, requires
-byte-identical output, independently validates the candidate, and only then
-promotes `PROJECT/output/final.epub`. `verify` must independently pass against
+`status` must report complete, valid coverage. `finish` builds twice with any
+declared `edits.json` operations, requires byte-identical output, independently
+validates the candidate, and only then promotes `PROJECT/output/final.epub`. `verify` must independently pass against
 that final artifact. One aggregate success never hides a failed command.
 
 Then run the dependency-free `scripts/audit_final_epub.py` shipped with this
@@ -147,9 +178,14 @@ image-heavy, and boundary pages in the final EPUB. Keep that receipt separate:
 the core proves structural integrity and reproducibility, not typography,
 translation quality, accessibility, or legal permission.
 
+Run `bookstudio review PROJECT --json` and point the user to the private
+`PROJECT/reports/review.html`. Do not share that page, because it contains book
+text.
+
 Report to the user:
 
-- the final local EPUB path;
+- the final local EPUB path and whether its SHA-256 matches `reports/release.json`;
+- the number of declared edits;
 - target language and output mode actually used;
 - pilot acceptance and full coverage status;
 - `finish` reproducibility and `verify` integrity evidence;

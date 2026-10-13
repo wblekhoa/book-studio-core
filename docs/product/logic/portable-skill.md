@@ -42,6 +42,9 @@ the test named in Evidence.
 | BSC-SKILL-008 | If verification after an update fails, the previous install is restored and no backup or staging folder is left behind.                                                          | live   | `tests/test_skill_install.py` (`test_failed_post_install_verification_restores_previous_install`)  |
 | BSC-SKILL-009 | An invalid skill source (a required file missing, a broken reference link) never creates the destination.                                                                         | live   | `tests/test_skill_install.py` (`test_invalid_source_never_creates_destination`)                    |
 | BSC-SKILL-010 | The plugin manifest follows the Codex `plugin.json` spec: `skills` is a `./` path, `interface.defaultPrompt` is a list of 1-3 prompts of at most 128 characters, and `keywords` is set. | live   | `tests/test_plugin.py` (`test_manifest_follows_codex_plugin_spec`)                                 |
+| BSC-SKILL-011 | `SKILL.md` and its references name every beginner CLI command (including `apply-drafts` and `review`) and the `edits.json` contract.                              | live   | `tests/test_skill_contract.py` (`test_skill_documents_every_beginner_command`)                     |
+| BSC-SKILL-012 | The skill never recommends a per-book finalizer, a postprocessor or a project-owned script that edits the EPUB after `finish`; post-build corrections go through `edits.json`. | live   | `tests/test_skill_contract.py` (`test_skill_never_recommends_editing_after_the_gate`)              |
+| BSC-SKILL-013 | The plugin manifest carries its own semantic version, which moves on every plugin change so Codex refreshes its cached copy (0.2.0 bundles engine 0.1.0 plus unreleased changes). | live   | `tests/test_skill_contract.py` (`test_plugin_version_moves_past_the_engine_baseline`)              |
 
 ## States and transitions
 

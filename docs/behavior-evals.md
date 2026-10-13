@@ -15,6 +15,6 @@ temporary folder, and runs as
 
 | Date | Plugin | Codex CLI | 1 | 2 | 3 |
 | ---- | ------ | --------- | - | - | - |
-| 2026-10-13 | 0.3.1 (skill text identical to 0.2.0) | 0.154.0 | pass | pass | pass |
+| 2026-10-13 | 0.3.1: skill text identical to 0.2.0; engine predates the 2026-10-13 hardening, whose scenario-3 path is covered by `tests/test_edits.py` | 0.154.0 | pass | pass | pass |
 
 The prompts were written in Vietnamese, to test a non-English conversation.

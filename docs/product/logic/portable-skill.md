@@ -4,7 +4,7 @@ type: logic
 product: book-studio-core
 title: "Book Studio Core — Portable skill and Codex plugin (logic)"
 status: active
-updated: 2026-10-11
+updated: 2026-10-13
 reqPrefix: BSC-SKILL
 relations:
   specifiedBy: [book-studio-core-ux-portable-skill]
@@ -41,6 +41,7 @@ the test named in Evidence.
 | BSC-SKILL-007 | An update moves the previous install to a timestamped backup and replaces the destination with an exact copy of the source.                                                       | live   | `tests/test_skill_install.py` (`test_update_keeps_backup_and_replaces_destination_exactly`)        |
 | BSC-SKILL-008 | If verification after an update fails, the previous install is restored and no backup or staging folder is left behind.                                                          | live   | `tests/test_skill_install.py` (`test_failed_post_install_verification_restores_previous_install`)  |
 | BSC-SKILL-009 | An invalid skill source (a required file missing, a broken reference link) never creates the destination.                                                                         | live   | `tests/test_skill_install.py` (`test_invalid_source_never_creates_destination`)                    |
+| BSC-SKILL-010 | The plugin manifest follows the Codex `plugin.json` spec: `skills` is a `./` path, `interface.defaultPrompt` is a list of 1-3 prompts of at most 128 characters, and `keywords` is set. | live   | `tests/test_plugin.py` (`test_manifest_follows_codex_plugin_spec`)                                 |
 
 ## States and transitions
 

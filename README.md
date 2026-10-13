@@ -253,6 +253,22 @@ output/report files are not restart inputs.
 
 See [guided intake](docs/guided-intake.md) for the question and state contracts.
 
+### Review page
+
+At any stage, write a private review page and open it in a browser:
+
+```bash
+PYTHONPATH=src python3 -m bookstudio review ../book-project --json
+```
+
+The page at `reports/review.html` shows where the project is, translation
+progress per document, the sample chapter beside its source, the recorded
+choices, and whether the final EPUB still matches its gate receipt. It ends
+with the exact next command. The page is a read-only snapshot: rerun the
+command to refresh it. It has no script, loads nothing from the network, and
+stays inside the private project. Do not share it, because it contains book
+text.
+
 ## Expert compatibility path
 
 `init` remains available for callers that already own every project decision

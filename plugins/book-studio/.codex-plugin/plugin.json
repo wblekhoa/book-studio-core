@@ -6,6 +6,9 @@
   "author": {
     "name": "khoa 'jak' le"
   },
+  "homepage": "https://github.com/wblekhoa/book-studio-core#readme",
+  "repository": "https://github.com/wblekhoa/book-studio-core",
+  "keywords": ["epub", "pdf", "translation", "localization", "ebook", "bilingual"],
   "skills": "./skills/",
   "interface": {
     "displayName": "Book Studio",
@@ -14,6 +17,10 @@
     "developerName": "khoa 'jak' le",
     "category": "Productivity",
     "capabilities": [],
-    "defaultPrompt": "Help me translate this book, starting with my preferences and a sample for review."
+    "defaultPrompt": [
+      "Help me translate this book, sample first",
+      "Show my translation progress page",
+      "Prepare this PDF for translation"
+    ]
   }
 }

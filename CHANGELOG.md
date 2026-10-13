@@ -13,6 +13,11 @@
   styling.
 - Added a portable skill installer with dry-run, parity-check, backup, and
   rollback behavior.
+- Added an installable Codex plugin that bundles its matching engine, with a
+  manifest that follows the Codex plugin spec (starter prompts as a list).
+- Added `bookstudio review`, which writes a read-only, self-contained HTML page
+  with the project stage, progress, the sample beside its source, the recorded
+  choices, the final-gate status, and the exact next command.
 - Replaced the MIT license for current and future distributions with the
   source-available Book Studio Personal Use License 1.0. Personal,
   non-commercial use remains permitted; commercial use requires separate

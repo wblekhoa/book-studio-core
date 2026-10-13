@@ -4,13 +4,27 @@ type: decision
 product: book-studio-core
 title: "Book Studio Core — Decisions"
 status: active
-updated: 2026-10-11
+updated: 2026-10-13
 ---
 
 # Book Studio Core — Decisions (append-only, newest first)
 
 Entries before 2026-10-11 are reconstructed from commits, `CHANGELOG.md`, `AGENTS.md` and `docs/` in this repo; each
 cites its source.
+
+## 2026-10-13 · Add a read-only local review page before any in-chat widget
+
+- **Context**: people judge the sample and follow progress through JSON and terminal text. Agent hosts can render
+  MCP Apps (`ui://`) widgets, but Codex Desktop support was unconfirmed when this was decided: it sat behind a
+  feature flag, and nested calls did not render. A widget would also need an MCP server and a JS bridge dependency.
+  Book text must never leave the machine.
+- **Decision**: add `bookstudio review PROJECT`. It writes one self-contained, script-free HTML page to
+  `reports/review.html` using only the standard library, and it works the same in Codex, Claude Code, or a plain
+  terminal. Approving and revising stay CLI commands; the page prints the exact next command. Interface text is
+  English, matching the CLI. A later in-chat widget can reuse this page.
+- **Evidence**: `src/bookstudio/review.py`; `tests/test_review.py` (BSC-REVIEW-001…007); `logic/review-page.md`.
+- **Reversal**: remove the `review` command, `review.py`, and its tests, then regenerate the plugin bundle; a new entry
+  here.
 
 ## 2026-10-11 · Product docs live in `docs/product/` with REQ-IDs next to the tests
 

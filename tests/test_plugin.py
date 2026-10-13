@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 import shutil
@@ -19,6 +20,17 @@ class PluginTests(unittest.TestCase):
     def test_generated_bundle_matches_canonical_sources(self):
         result = subprocess.run([sys.executable, str(ROOT / 'scripts/build_plugin.py'), '--check'], capture_output=True, text=True)
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    # BSC-SKILL-010
+    def test_manifest_follows_codex_plugin_spec(self):
+        manifest = json.loads((ROOT / 'plugins/book-studio/.codex-plugin/plugin.json').read_text(encoding='utf-8'))
+        self.assertEqual('book-studio', manifest['name'])
+        self.assertTrue(manifest['skills'].startswith('./'))
+        prompts = manifest['interface']['defaultPrompt']
+        self.assertIsInstance(prompts, list)
+        self.assertTrue(1 <= len(prompts) <= 3)
+        self.assertTrue(all(isinstance(prompt, str) and 0 < len(prompt) <= 128 for prompt in prompts))
+        self.assertTrue(manifest['keywords'])
 
     # BSC-SKILL-003
     def test_standalone_bundle_runs_complete_guided_flow(self):

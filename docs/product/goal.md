@@ -4,7 +4,7 @@ type: goal
 product: book-studio-core
 title: "Book Studio Core — Product goal"
 status: active
-updated: 2026-10-11
+updated: 2026-10-13
 ---
 
 # Book Studio Core — Product goal
@@ -36,7 +36,7 @@ updated: 2026-10-11
 
 | Measure                         | Today (observed 2026-10-11)                                                                                       | Target   | How it is measured (command, dashboard, store data)                                          |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------- |
-| Unit test suite                 | 225 of 225 pass in a clean checkout and in CI                                                                     | all pass | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m unittest discover -s tests -v`          |
+| Unit test suite                 | 233 of 233 pass locally (2026-10-13)                                                                              | all pass | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m unittest discover -s tests -v`          |
 | CI on `main` (Python 3.11-3.13) | last 3 runs green (latest on commit `e027d96`)                                                                    | green    | `gh run list -R wblekhoa/book-studio-core`                                                   |
 | Public-boundary audit           | passes in a clean checkout and in CI (before install and after tests)                                             | passes   | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m bookstudio public-audit . --json`       |
 | Public releases                 | 0 (no GitHub release, no git tag)                                                                                 | not set  | `gh release list -R wblekhoa/book-studio-core`                                               |

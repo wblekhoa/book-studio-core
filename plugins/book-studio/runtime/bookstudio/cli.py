@@ -27,12 +27,13 @@ from .pilot import (
 )
 from .pdf.source import inspect_pdf, pdf_tool_status, prepare_pdf
 from .project import init_project, start_project
+from .review import write_review
 from .safety.public_audit import audit_public_tree
 from .translation.coverage import coverage_receipt
 from .translation.packets import apply_response, next_packet, revise_pilot_response
 
 
-BEGINNER_COMMANDS = ("doctor", "start", "init", "next", "apply", "finish")
+BEGINNER_COMMANDS = ("doctor", "start", "init", "next", "apply", "finish", "review")
 EXPERT_COMMANDS = (
     "inspect",
     "prepare",
@@ -50,6 +51,7 @@ COMMAND_HELP = {
     "next": "Emit the next bounded translation packet.",
     "apply": "Validate and apply one AI translation response.",
     "finish": "Run the strict reproducible final-book gate.",
+    "review": "Write a read-only HTML review page for the project.",
     "inspect": "Inspect a source EPUB and record safe structural facts.",
     "prepare": "Extract the stable source block map and coverage scope.",
     "status": "Check strict translation coverage.",
@@ -122,6 +124,7 @@ def build_parser() -> argparse.ArgumentParser:
             "build",
             "verify",
             "release",
+            "review",
         }:
             project_help = (
                 "Private project directory to create or resume."
@@ -462,6 +465,8 @@ def _dispatch(args: argparse.Namespace) -> dict[str, Any]:
                 evidence=(json.dumps(receipt["violations"], sort_keys=True),),
             )
         return {**receipt, "message": "EPUB integrity validation passed."}
+    if args.command == "review":
+        return write_review(load_config(args.project / "bookstudio.toml"))
     if args.command in {"finish", "release"}:
         config = load_config(args.project / "bookstudio.toml")
         return finish_project(config)

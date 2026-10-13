@@ -24,7 +24,7 @@
     "runtime/bookstudio/pdf/source.py": "7a0a3de018a90445524142b1ca9c16781811bb55b484ea1c2a9a7ae591771611",
     "runtime/bookstudio/pilot.py": "33ab579f5247621ee02effd4de4461bca3d4bd8d57f93a9edfc8a4a10e87b0b4",
     "runtime/bookstudio/project.py": "0cd08e4b239f4420361b094b69b816c68fd526c6c07a7a9f29c6ed33c1b30028",
-    "runtime/bookstudio/review.py": "82b95ff19b49372cd8ac2f5fd2a5e83f11f6ee9971d6034d0bd2b43d9d0ee23f",
+    "runtime/bookstudio/review.py": "3ce2aeaab375febcfdfabcc85011b2fbd79f1ed081fe79b7f5733c3611459fc1",
     "runtime/bookstudio/safety/__init__.py": "380a5534fb60cc423d6c6181348db227dc7dcf1643f972bdc73c2bd8f8173c5f",
     "runtime/bookstudio/safety/public_audit.py": "64251289a9dc5b9518c1d08359353029b22bebd51edddd6b3133f8e7ed3c2b81",
     "runtime/bookstudio/safety/xhtml.py": "664f3e91edd9b00a4fa8ac0a633afc4dec756357951ec8bac28569027d550def",

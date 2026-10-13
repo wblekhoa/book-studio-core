@@ -215,8 +215,8 @@ def _render(context: Mapping[str, Any]) -> str:
 
     rows = "".join(
         f"<tr><td>{e(doc['title'] or doc['path'])}<div class=\"tag\">{e(doc['path'])}</div></td>"
-        f"<td class=\"num\">{'excluded' if doc['excluded'] else str(doc['translated']) + ' / ' + str(doc['blocks'])}</td>"
-        f"<td class=\"num\">{'' if doc['excluded'] else str(_percent(doc['translated'], doc['blocks'])) + '%'}</td></tr>"
+        f"<td class=\"num\">{'excluded' if doc['excluded'] else 'no text' if not doc['blocks'] else str(doc['translated']) + ' / ' + str(doc['blocks'])}</td>"
+        f"<td class=\"num\">{'' if doc['excluded'] else '—' if not doc['blocks'] else str(_percent(doc['translated'], doc['blocks'])) + '%'}</td></tr>"
         for doc in context["documents"]
     )
     documents = (

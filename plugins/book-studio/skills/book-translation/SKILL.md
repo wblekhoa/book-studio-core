@@ -14,6 +14,10 @@ CLI or pip-install another engine. Run the bundled `doctor --json` first.
 If Python is missing, explain the requirement and help the user install it.
 Optional PDF tools are reported by doctor and are needed only for PDF input.
 Keep all private project files outside the plugin installation directory.
+In Claude Code the plugin root is `${CLAUDE_PLUGIN_ROOT}`. When the `book-studio`
+MCP tools are available, you may call them instead of shell commands; they run
+the same engine and gates (accept a pilot only with `user_confirmed: true` after
+the user explicitly approved the reviewed sample).
 
 
 

@@ -27,6 +27,7 @@ ALLOWED_TOP_LEVEL = frozenset(
         "scripts",
         "plugins",
         ".agents",
+        ".claude-plugin",
     }
 )
 ALLOWED_TEXT_SUFFIXES = frozenset({".py", ".md", ".toml", ".json", ".txt", ".yml", ".yaml"})
@@ -109,6 +110,8 @@ def audit_public_tree(root: Path) -> dict[str, Any]:
         top = relative_path.parts[0]
         if top == ".agents" and relative not in {".agents", ".agents/plugins", ".agents/plugins/marketplace.json"}:
             violations.append(_row("agent_path_not_allowlisted", relative))
+        if top == ".claude-plugin" and relative not in {".claude-plugin", ".claude-plugin/marketplace.json"}:
+            violations.append(_row("agent_path_not_allowlisted", relative))
         if top not in ALLOWED_TOP_LEVEL:
             violations.append(_row("top_level_not_allowlisted", relative))
         if any(part in PRIVATE_DIRECTORIES for part in relative_path.parts):
@@ -131,10 +134,12 @@ def audit_public_tree(root: Path) -> dict[str, Any]:
             if not _is_plugin_artwork(path, relative_path):
                 violations.append(_row("binary_asset", relative))
             continue
+        eval_script = suffix == ".sh" and relative_path.parts[:3] == ("plugins", "book-studio", "evals")
         if (
             path.name not in {".gitignore", ".gitattributes"}
             and path.name not in ALLOWED_EXTENSIONLESS_FILES
             and suffix not in ALLOWED_TEXT_SUFFIXES
+            and not eval_script
         ):
             violations.append(_row("file_type_not_allowlisted", relative))
             continue

@@ -224,6 +224,18 @@ def build_parser() -> argparse.ArgumentParser:
             )
         _add_json_flag(pilot_command)
 
+    hook = subparsers.add_parser(
+        "hook",
+        help="Agent-host hook: read one JSON event on stdin.",
+        description="Agent-host hook: read one JSON event on stdin.",
+    )
+    hook.add_argument("event", choices=("guard", "session-start"))
+    subparsers.add_parser(
+        "mcp",
+        help="Serve the Book Studio tools over MCP (stdio).",
+        description="Serve the Book Studio tools over MCP (stdio).",
+    )
+
     edits = subparsers.add_parser(
         "edits",
         help="Capture post-build edits into edits.json.",
@@ -518,6 +530,14 @@ def _dispatch(args: argparse.Namespace) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.command == "hook":
+        from .hooks import run_hook
+
+        return run_hook(args.event)
+    if args.command == "mcp":
+        from .mcp_server import serve
+
+        return serve()
     try:
         payload = _dispatch(args)
         exit_code = int(payload.pop("_exit_code", 0))

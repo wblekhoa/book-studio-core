@@ -1,0 +1,22 @@
+{
+  "name": "book-studio",
+  "displayName": "Book Studio",
+  "version": "0.3.0",
+  "description": "Translate whole EPUB books and text-layer PDFs for private reading: guided choices, a reviewed sample first, and a verified, reproducible EPUB. Bundles its own local engine.",
+  "author": {
+    "name": "khoa 'jak' le",
+    "url": "https://github.com/wblekhoa"
+  },
+  "homepage": "https://github.com/wblekhoa/book-studio-core#readme",
+  "repository": "https://github.com/wblekhoa/book-studio-core",
+  "license": "LicenseRef-Book-Studio-Personal-Use-1.0",
+  "keywords": ["epub", "pdf", "translation", "localization", "ebook", "bilingual"],
+  "userConfig": {
+    "projects_dir": {
+      "type": "directory",
+      "title": "Book projects folder",
+      "description": "Optional private folder that holds your Book Studio projects. Used to show project status at session start and to resolve relative project paths in the MCP tools. Never inside a shared or synced folder.",
+      "required": false
+    }
+  }
+}

@@ -287,6 +287,50 @@ def _render(context: Mapping[str, Any]) -> str:
 """
 
 
+def _release_state(config: ProjectConfig) -> tuple[Any, dict[str, Any] | None]:
+    release_receipt = _read_optional_json(config.paths.reports / "release.json")
+    if not (isinstance(release_receipt, dict) and release_receipt.get("status") == "pass"):
+        return release_receipt, None
+    final = (config.project_root / str(release_receipt.get("output", ""))).resolve()
+    inside = config.paths.output.resolve() in final.parents
+    current = inside and final.is_file() and hashlib.sha256(final.read_bytes()).hexdigest() == release_receipt.get("output_sha256")
+    integrity = release_receipt.get("integrity", {})
+    edits = release_receipt.get("edits")
+    return release_receipt, {
+        "output": release_receipt.get("output"),
+        "sha256": release_receipt.get("output_sha256"),
+        "reproducible": release_receipt.get("reproducible"),
+        "integrity": "pass" if isinstance(integrity, dict) and integrity.get("passed") else "not recorded",
+        "current": current,
+        "edits": edits.get("applied", 0) if isinstance(edits, dict) else 0,
+    }
+
+
+def project_status(config: ProjectConfig) -> dict[str, Any]:
+    """Read-only summary of stage, progress and next command; writes nothing."""
+    pilot = pilot_receipt(config)
+    has_map = (config.paths.source_blocks / "full-block-map.json").is_file()
+    try:
+        coverage = coverage_receipt(config, require_complete=False) if has_map else None
+    except BookStudioError:
+        coverage = None
+    release_receipt, release = _release_state(config)
+    stage = _stage(pilot["status"], coverage, release_receipt if release and release["current"] else None)
+    return {
+        "status": "pass",
+        "schema_version": 1,
+        "project": config.project_root.name,
+        "workflow_status": stage,
+        "translated": coverage.get("translated", 0) if coverage else 0,
+        "eligible": coverage.get("eligible", 0) if coverage else 0,
+        "remaining": coverage.get("remaining") if coverage else None,
+        "final_matches_gate": bool(release and release["current"]),
+        "next_command": _next_command(stage, shlex.quote(config.project_root.name), coverage),
+        "hint": STAGE_HINTS.get(stage, ""),
+        "message": f"{config.project_root.name}: {stage}.",
+    }
+
+
 def write_review(config: ProjectConfig) -> dict[str, Any]:
     """Render the review page from current state; only reports/review.html is written."""
     pilot = pilot_receipt(config)
@@ -306,22 +350,7 @@ def write_review(config: ProjectConfig) -> dict[str, Any]:
         if isinstance(doc, dict)
     }
     title_values = facts.get("title") or []
-    release_receipt = _read_optional_json(config.paths.reports / "release.json")
-    release = None
-    if isinstance(release_receipt, dict) and release_receipt.get("status") == "pass":
-        final = (config.project_root / str(release_receipt.get("output", ""))).resolve()
-        inside = config.paths.output.resolve() in final.parents
-        current = inside and final.is_file() and hashlib.sha256(final.read_bytes()).hexdigest() == release_receipt.get("output_sha256")
-        integrity = release_receipt.get("integrity", {})
-        release = {
-            "output": release_receipt.get("output"),
-            "sha256": release_receipt.get("output_sha256"),
-            "reproducible": release_receipt.get("reproducible"),
-            "integrity": "pass" if isinstance(integrity, dict) and integrity.get("passed") else "not recorded",
-            "current": current,
-            "edits": (release_receipt.get("edits") or {}).get("applied", 0),
-        }
-
+    release_receipt, release = _release_state(config)
     stage = _stage(pilot["status"], coverage, release_receipt if release and release["current"] else None)
     project_arg = shlex.quote(config.project_root.name)
     document, pairs = _sample(pilot, block_map, rows)

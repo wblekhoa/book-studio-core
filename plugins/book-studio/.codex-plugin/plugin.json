@@ -1,6 +1,6 @@
 {
   "name": "book-studio",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Guided book translation with a reviewed pilot and bundled local engine.",
   "license": "LicenseRef-Book-Studio-Personal-Use-1.0",
   "author": {

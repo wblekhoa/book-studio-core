@@ -42,6 +42,8 @@ class SkillContractTests(unittest.TestCase):
         manifest = json.loads((ROOT / "plugins/book-studio/.codex-plugin/plugin.json").read_text(encoding="utf-8"))
         self.assertRegex(manifest["version"], r"^\d+\.\d+\.\d+$")
         self.assertEqual(__version__, manifest["version"])
+        claude = json.loads((ROOT / "plugins/book-studio/.claude-plugin/plugin.json").read_text(encoding="utf-8"))
+        self.assertEqual(__version__, claude["version"])
 
 
 if __name__ == "__main__":

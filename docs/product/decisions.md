@@ -12,6 +12,29 @@ updated: 2026-10-13
 Entries before 2026-10-11 are reconstructed from commits, `CHANGELOG.md`, `AGENTS.md` and `docs/` in this repo; each
 cites its source.
 
+## 2026-10-13 · One plugin for Claude Code and Codex, with hooks, MCP tools, agents and evals
+
+- **Context**: the owner asked for a professional Claude plugin that uses the full plugin feature set. The official
+  docs (fetched 2026-10-13) list skills, commands, agents, hooks, MCP and LSP servers, output styles, monitors,
+  `userConfig` and evals.
+- **Decision**:
+  - Ship one `plugins/book-studio` folder with both manifests.
+  - Add a PreToolUse guard and a SessionStart status hook, a stdlib MCP server that reuses the CLI dispatch with an
+    experimental MCP Apps review view, two agents, four commands, an optional `projects_dir` setting, and an official
+    eval suite. The hook and MCP logic live in `src/bookstudio`, so they are unit-tested and bundled like the rest of
+    the engine.
+  - Skip LSP servers, output styles and monitors, which add nothing to book translation.
+  - Exclude claude.ai web chat, because it would upload the book.
+- **Evidence**:
+  - 262 tests;
+  - `claude plugin validate --strict` passes for both the plugin and the marketplace;
+  - a clean-room `CLAUDE_CONFIG_DIR` install reports 5 skills/commands, 2 agents, 2 hooks, 1 MCP server and about
+    294 always-on tokens;
+  - a Codex run with the plugin installed shows no errors.
+- **Not yet evidenced**: the live Claude eval run, which is blocked because the local `claude` CLI is logged out. A
+  Bash-granting eval also cannot run on this machine while `~/.docker` holds a symlink.
+- **Reversal**: remove the Claude-only files and the marketplace; Codex is unaffected.
+
 ## 2026-10-13 · Release 0.2.0 to the community: macOS and Linux, one version, artwork, hardened edits
 
 - **Context**: before sharing the plugin, the following ran:

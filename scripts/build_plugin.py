@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import re
 import json
 from pathlib import Path
 import sys
@@ -32,8 +33,23 @@ CLI or pip-install another engine. Run the bundled `doctor --json` first.
 If Python is missing, explain the requirement and help the user install it.
 Optional PDF tools are reported by doctor and are needed only for PDF input.
 Keep all private project files outside the plugin installation directory.
+In Claude Code the plugin root is `${CLAUDE_PLUGIN_ROOT}`. When the `book-studio`
+MCP tools are available, you may call them instead of shell commands; they run
+the same engine and gates (accept a pilot only with `user_confirmed: true` after
+the user explicitly approved the reviewed sample).
 
 '''
+
+
+# Plugin-only files maintained by hand (manifests, artwork, agent-host wiring, evals).
+HAND_MAINTAINED = (
+    r'\.codex-plugin/plugin\.json', r'\.claude-plugin/plugin\.json', r'\.mcp\.json', r'hooks/hooks\.json',
+    r'assets/[^/]+\.png', r'agents/[^/]+\.md', r'commands/[^/]+\.md', r'evals/.+\.(md|yaml|sh|py)',
+)
+
+
+def _hand_maintained(name):
+    return any(re.fullmatch(pattern, name) for pattern in HAND_MAINTAINED)
 
 
 def expected_files():
@@ -61,9 +77,7 @@ def main():
     args = parser.parse_args()
     files = expected_files()
     existing = {p.relative_to(DEST).as_posix() for p in DEST.rglob('*') if p.is_file()}
-    # Hand-maintained plugin files: the manifest and its PNG artwork.
-    extras = {name for name in existing - files.keys() - {'.codex-plugin/plugin.json'}
-              if not (name.startswith('assets/') and name.count('/') == 1 and name.endswith('.png'))}
+    extras = {name for name in existing - files.keys() if not _hand_maintained(name)}
     if extras:
         print('Unexpected bundle files; inspect manually: ' + ', '.join(sorted(extras)))
         return 1

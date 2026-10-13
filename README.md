@@ -69,6 +69,20 @@ PYTHONPATH=src python3 -m bookstudio doctor --json
 PYTHONPATH=src python3 -m bookstudio --help
 ```
 
+### Claude Code plugin
+
+The same plugin works in Claude Code: the CLI, the desktop app's Code tab, and VS Code.
+
+```bash
+claude plugin marketplace add wblekhoa/book-studio-core
+claude plugin install book-studio@book-studio
+```
+
+It adds the commands `/book-studio:translate`, `:review`, `:finish` and `:capture`, a packet translator and an
+editorial reviewer agent, hooks that refuse direct edits to the certified EPUB, and an MCP server with the same tools
+as the CLI. See [Book Studio in Claude Code](docs/claude-plugin.md). Do not use claude.ai web chat, which would
+require uploading your book.
+
 ## Add the AI skill
 
 The portable [`book-translation` skill](skills/book-translation/SKILL.md) adds

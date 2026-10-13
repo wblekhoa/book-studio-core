@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "book-studio": {
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/bookstudio.py", "mcp"],
+      "env": {
+        "BOOKSTUDIO_PROJECTS_DIR": "${user_config.projects_dir}"
+      }
+    }
+  }
+}

@@ -4,7 +4,7 @@ type: logic
 product: book-studio-core
 title: "Book Studio Core — Guided intake and pilot (logic)"
 status: active
-updated: 2026-10-11
+updated: 2026-10-13
 reqPrefix: BSC-PILOT
 relations:
   specifiedBy: [book-studio-core-ux-guided-pilot]

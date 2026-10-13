@@ -47,6 +47,8 @@ the test named in Evidence.
 | BSC-SKILL-013 | The plugin manifest and the engine share one release version (`plugin.json` `version` equals `bookstudio.__version__`), and every release raises it so Codex fetches a fresh cached copy. | live   | `tests/test_skill_contract.py` (`test_plugin_and_engine_share_one_release_version`)              |
 | BSC-SKILL-014 | `public-audit` allows binary files only as small (at most 1 MB) real PNGs directly inside `plugins/book-studio/assets/`. Any other image, path, size or file signature is still `binary_asset`. | live   | `tests/test_public_audit.py` (`test_only_small_real_pngs_in_plugin_artwork_folder_are_allowed`)   |
 | BSC-SKILL-015 | The manifest declares a brand colour, a logo, a composer icon and screenshots, and every artwork path is an existing PNG under `./assets/`. | live   | `tests/test_plugin.py` (`test_manifest_artwork_exists_as_png_under_assets`)                        |
+| BSC-SKILL-016 | The same plugin folder carries a Claude Code manifest, a repository marketplace, hooks, `.mcp.json`, agents and commands. All of them call the bundled runner through `${CLAUDE_PLUGIN_ROOT}`, and the read-only reviewer has no shell access. | live   | `tests/test_plugin.py` (`test_claude_plugin_wiring_targets_the_bundled_runner`)                   |
+| BSC-SKILL-017 | `public-audit` allows `.claude-plugin/marketplace.json` as the only file under that top-level folder, and allows `.sh` only under `plugins/book-studio/evals/`. | live   | `tests/test_public_audit.py` (`test_claude_marketplace_and_eval_scripts_have_narrow_exceptions`)   |
 
 ## States and transitions
 

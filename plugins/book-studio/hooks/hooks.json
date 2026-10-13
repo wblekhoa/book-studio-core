@@ -1,0 +1,20 @@
+{
+  "description": "Book Studio: block direct writes to gate-owned files (final EPUB, release receipt, translation cache) and show nearby project status at session start.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {"type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/bookstudio.py\" hook guard", "timeout": 10}
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {"type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/bookstudio.py\" hook session-start", "timeout": 15}
+        ]
+      }
+    ]
+  }
+}

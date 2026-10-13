@@ -1,8 +1,14 @@
 # Changelog
 
-## Unreleased
+## Unreleased (0.3.0)
 
-- Nothing yet.
+- Claude Code plugin from the same folder as the Codex plugin: repository marketplace, commands
+  (`/book-studio:translate`, `:review`, `:finish`, `:capture`), `book-translator` and `editorial-reviewer` agents,
+  an optional `projects_dir` setting, and an official eval suite.
+- `bookstudio hook guard|session-start`: refuse direct writes to the certified EPUB, its receipt and the cache
+  inside projects, and list nearby projects with their next command.
+- `bookstudio mcp`: a stdlib MCP server with 11 tools that reuse the CLI gates, plus an experimental MCP Apps
+  review view.
 
 ## 0.2.0 - 2026-10-13
 

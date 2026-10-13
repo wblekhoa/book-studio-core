@@ -28,6 +28,25 @@ class PublicBoundaryAuditTests(unittest.TestCase):
         receipt = audit_public_tree(self.root)
         self.assertTrue(receipt["passed"], receipt["violations"])
 
+    # BSC-SKILL-017
+    def test_claude_marketplace_and_eval_scripts_have_narrow_exceptions(self) -> None:
+        self.minimal_tree()
+        cases = {
+            ".claude-plugin/marketplace.json": None,
+            ".claude-plugin/settings.json": "agent_path_not_allowlisted",
+            "plugins/book-studio/evals/case/fixture.sh": None,
+            "plugins/book-studio/hooks/run.sh": "file_type_not_allowlisted",
+            "scripts/deploy.sh": "file_type_not_allowlisted",
+        }
+        for relative, expected in cases.items():
+            with self.subTest(relative=relative):
+                path = self.root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("{}\n", encoding="utf-8")
+                rows = [row["category"] for row in audit_public_tree(self.root)["violations"] if row["path"] == relative]
+                self.assertEqual([] if expected is None else [expected], rows)
+                path.unlink()
+
     # BSC-SKILL-014
     def test_only_small_real_pngs_in_plugin_artwork_folder_are_allowed(self) -> None:
         self.minimal_tree()

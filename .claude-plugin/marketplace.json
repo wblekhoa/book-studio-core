@@ -1,0 +1,14 @@
+{
+  "name": "book-studio",
+  "owner": {"name": "khoa 'jak' le", "url": "https://github.com/wblekhoa"},
+  "metadata": {"description": "Book Studio: private, sample-first book translation with a bundled local engine."},
+  "plugins": [
+    {
+      "name": "book-studio",
+      "source": "./plugins/book-studio",
+      "description": "Translate whole EPUB books and text-layer PDFs for private reading, sample first.",
+      "category": "productivity",
+      "keywords": ["epub", "translation", "ebook"]
+    }
+  ]
+}

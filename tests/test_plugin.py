@@ -45,6 +45,30 @@ class PluginTests(unittest.TestCase):
                 data = (ROOT / 'plugins/book-studio' / path[2:]).read_bytes()
                 self.assertEqual(b'\x89PNG\r\n\x1a\n', data[:8])
 
+    # BSC-SKILL-016
+    def test_claude_plugin_wiring_targets_the_bundled_runner(self):
+        plugin = ROOT / 'plugins/book-studio'
+        manifest = json.loads((plugin / '.claude-plugin/plugin.json').read_text(encoding='utf-8'))
+        self.assertEqual('book-studio', manifest['name'])
+        self.assertEqual('directory', manifest['userConfig']['projects_dir']['type'])
+        market = json.loads((ROOT / '.claude-plugin/marketplace.json').read_text(encoding='utf-8'))
+        self.assertEqual([('book-studio', './plugins/book-studio')], [(p['name'], p['source']) for p in market['plugins']])
+        runner = '"${CLAUDE_PLUGIN_ROOT}/scripts/bookstudio.py"'
+        hooks = json.loads((plugin / 'hooks/hooks.json').read_text(encoding='utf-8'))['hooks']
+        commands = [h['command'] for groups in hooks.values() for group in groups for h in group['hooks']]
+        self.assertEqual({f'python3 {runner} hook guard', f'python3 {runner} hook session-start'}, set(commands))
+        self.assertIn('Bash', hooks['PreToolUse'][0]['matcher'].split('|'))
+        server = json.loads((plugin / '.mcp.json').read_text(encoding='utf-8'))['mcpServers']['book-studio']
+        self.assertEqual(['${CLAUDE_PLUGIN_ROOT}/scripts/bookstudio.py', 'mcp'], server['args'])
+        for folder, keys in (('agents', ('name:', 'description:', 'tools:')), ('commands', ('description:',))):
+            files = sorted((plugin / folder).glob('*.md'))
+            self.assertTrue(files)
+            for path in files:
+                with self.subTest(path=path.name):
+                    head = path.read_text(encoding='utf-8').split('---')[1]
+                    self.assertTrue(all(key in head for key in keys))
+        self.assertNotIn('Bash', (plugin / 'agents/editorial-reviewer.md').read_text(encoding='utf-8').split('---')[1])
+
     # BSC-SKILL-003
     def test_standalone_bundle_runs_complete_guided_flow(self):
         with tempfile.TemporaryDirectory(prefix='bookstudio plugin ') as directory:

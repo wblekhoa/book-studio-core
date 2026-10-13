@@ -615,7 +615,9 @@ def _rewrite_with_edits(
         raise
 
 
-def build_epub(config: ProjectConfig, output_path: Path) -> dict[str, Any]:
+def build_epub(
+    config: ProjectConfig, output_path: Path, *, apply_declared_edits: bool = True
+) -> dict[str, Any]:
     require_full_scope(config)
     coverage = coverage_receipt(config, require_complete=True)
     if not coverage["passed"]:
@@ -637,7 +639,7 @@ def build_epub(config: ProjectConfig, output_path: Path) -> dict[str, Any]:
         rows.sort(key=lambda row: row["block_index"])
     preflight_archive(config.source)
     image_manifest = load_image_manifest(config)
-    edit_operations, edits_sha256 = load_edits(config)
+    edit_operations, edits_sha256 = load_edits(config) if apply_declared_edits else ([], None)
     destination = output_path.expanduser().resolve()
     if destination == config.source.resolve():
         raise _fail(

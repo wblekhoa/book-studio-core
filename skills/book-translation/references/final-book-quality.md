@@ -167,6 +167,18 @@ files live inside the project and are pinned by `sha256`. Members cannot be
 deleted, and edited markup may not contain scripts, `on*` handlers, or
 `javascript:` links. Fix every `EDITS_*` error at its source; never weaken it.
 
+When corrections were made in an EPUB editor instead, capture them from a
+private copy of the edited book, review the result, then finish:
+
+```bash
+bookstudio edits capture PROJECT --from EDITED.epub --json
+bookstudio finish PROJECT --json
+```
+
+Capture writes `edits.json` and the changed members under `assets/edits/`. It
+never overwrites an existing `edits.json`, and it refuses an edited book that
+removes members.
+
 For a normal Core artifact, run independently:
 
 ```bash

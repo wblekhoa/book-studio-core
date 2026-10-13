@@ -14,6 +14,7 @@ from . import __version__
 from .config import ProjectConfig, atomic_write_json, load_config
 from .epub.extract import extract_block_map
 from .epub.build import build_epub, finish_project
+from .epub.edits import capture_edits
 from .epub.inspect import inspect_epub
 from .epub.validate import validate_epub
 from .errors import BookStudioError, error_payload
@@ -222,6 +223,21 @@ def build_parser() -> argparse.ArgumentParser:
                 "response", type=Path, help="Corrected AI response JSON file."
             )
         _add_json_flag(pilot_command)
+
+    edits = subparsers.add_parser(
+        "edits",
+        help="Capture post-build edits into edits.json.",
+        description="Capture post-build edits into edits.json.",
+    )
+    edits_commands = edits.add_subparsers(dest="edits_command", required=True)
+    edits_capture = edits_commands.add_parser(
+        "capture",
+        help="Write edits.json from an EPUB edited outside Book Studio.",
+        description="Write edits.json from an EPUB edited outside Book Studio.",
+    )
+    edits_capture.add_argument("project", type=Path, help="Private Book Studio project directory.")
+    edits_capture.add_argument("--from", dest="edited", required=True, type=Path, help="Edited EPUB; opened read-only.")
+    _add_json_flag(edits_capture)
 
     pdf = subparsers.add_parser(
         "pdf",
@@ -470,6 +486,8 @@ def _dispatch(args: argparse.Namespace) -> dict[str, Any]:
                 evidence=(json.dumps(receipt["violations"], sort_keys=True),),
             )
         return {**receipt, "message": "EPUB integrity validation passed."}
+    if args.command == "edits":
+        return capture_edits(load_config(args.project / "bookstudio.toml"), args.edited)
     if args.command == "apply-drafts":
         config = load_config(args.project / "bookstudio.toml")
         return apply_drafts(config, args.drafts, scope=lambda: _translation_scope(config))

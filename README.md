@@ -286,7 +286,9 @@ are allowed to add), declare the change in `../book-project/edits.json`. Use
 member's `base_sha256`, or `add_member`. Each replacement file lives inside the
 project and is pinned by `sha256`. `build` and `finish` apply these operations,
 so the gate certifies the edited book. Never change `output/final.epub` after
-`finish`.
+`finish`. If you corrected the book in an EPUB editor, run
+`bookstudio edits capture ../book-project --from edited.epub --json` to write
+`edits.json` from it, review it, then run `finish`.
 
 ## Expert compatibility path
 

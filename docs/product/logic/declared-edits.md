@@ -37,6 +37,8 @@ the test named in Evidence.
 | BSC-EDIT-005 | `replace_member` and `add_member` read only regular, non-symlink files inside the project whose SHA-256 matches the declared `sha256`.                                                                                  | live   | `tests/test_edits.py` (`test_asset_hash_and_location_are_pinned`)               |
 | BSC-EDIT-006 | An edited or added markup member must be well-formed and contain no `script`, no `on*` attribute and no `javascript:` link.                                                                                              | live   | `tests/test_edits.py` (`test_unsafe_markup_is_rejected`)                        |
 | BSC-EDIT-007 | Only `replace_text`, `replace_member` and `add_member` exist, plus an optional `note`. Unsafe member paths, adding an existing member, and editing a missing member each fail with a stable code.                     | live   | `tests/test_edits.py` (`test_schema_and_member_rules`)                          |
+| BSC-EDIT-008 | `bookstudio edits capture PROJECT --from EDITED.epub` expresses an edited EPUB as `edits.json` plus `assets/edits/` against the plain core build; the next `finish` reproduces the edited book member for member. | live   | `tests/test_edits.py` (`test_capture_turns_an_edited_epub_into_certified_edits`) |
+| BSC-EDIT-009 | Capture writes nothing for an unchanged book (`no_changes`), refuses deletions (`EDITS_CAPTURE_DELETION`), and never overwrites an existing `edits.json` (`EDITS_ALREADY_DECLARED`). | live   | `tests/test_edits.py` (`test_capture_refuses_deletions_existing_edits_and_no_change`) |
 
 ## States and transitions
 
@@ -54,11 +56,11 @@ the test named in Evidence.
 
 ## Open questions
 
-- Should the core offer a `capture` helper that writes `edits.json` from an EPUB edited elsewhere? The Zero to One
-  migration used a scratch script for this.
+- None.
 
 ## Change log
 
+- 2026-10-13: added `edits capture` (BSC-EDIT-008…009), replacing the scratch migration script.
 - 2026-10-13: created with BSC-EDIT-001…007. Proven on a private copy of a real book: 14 operations, the gate hash
   equals `final.epub`, every member is byte-identical to the previously delivered edition, and a second `finish`
   produces the same hash.

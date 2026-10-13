@@ -25,6 +25,8 @@
 - Updated the skill references so post-build corrections go through
   `edits.json`, with drafts and review guidance and contract tests; the plugin
   is now versioned `0.2.0`.
+- Added `bookstudio edits capture`, which writes `edits.json` from an EPUB
+  edited elsewhere; plugin `0.3.0`.
 - Replaced the MIT license for current and future distributions with the
   source-available Book Studio Personal Use License 1.0. Personal,
   non-commercial use remains permitted; commercial use requires separate

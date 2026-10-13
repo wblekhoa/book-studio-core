@@ -25,7 +25,7 @@ actually published - never ahead of it.
   Unreleased; commit `1671d21`), the installable Codex plugin with a bundled engine (commit `e027d96`), the
   read-only `bookstudio review` page plus a spec-conformant plugin manifest, declared post-build edits certified by
   `finish` (`edits.json`), and `apply-drafts` (2026-10-13).
-- **REQ-IDs it will ship**: BSC-PIPE-014, BSC-SKILL-001…013, BSC-REVIEW-001…007, BSC-EDIT-001…007, BSC-DRAFT-001…004 and the PDF gateway (no REQ-IDs yet), plus everything
+- **REQ-IDs it will ship**: BSC-PIPE-014, BSC-SKILL-001…013, BSC-REVIEW-001…007, BSC-EDIT-001…009, BSC-DRAFT-001…004 and the PDF gateway (no REQ-IDs yet), plus everything
   below; all `live` on `main` as of 2026-10-11.
 - **Channel**: none yet.
 - **Shown in**: none yet.

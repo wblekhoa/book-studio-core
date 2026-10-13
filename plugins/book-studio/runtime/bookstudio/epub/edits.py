@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import tempfile
 import zipfile
 from pathlib import Path, PurePosixPath
 from typing import Any
 from xml.etree import ElementTree as ET
 
-from ..config import ProjectConfig
+from ..config import ProjectConfig, atomic_write_json
 from ..errors import BookStudioError
 
 
@@ -209,3 +211,82 @@ def apply_edits(
     for member in sorted(touched):
         _check_markup(member, result[index[member]][1])
     return result
+
+
+def _write_asset(path: Path, data: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
+            handle.write(data)
+        Path(temporary).replace(path)
+    except BaseException:
+        Path(temporary).unlink(missing_ok=True)
+        raise
+
+
+def capture_edits(config: ProjectConfig, edited: Path) -> dict[str, Any]:
+    """Express an EPUB edited elsewhere as edits.json against the plain core build."""
+    from .archive import preflight_archive
+    from .build import build_epub
+
+    if (config.project_root / EDITS_FILENAME).exists():
+        raise _fail(
+            "EDITS_ALREADY_DECLARED",
+            "This project already declares edits.json; capture never overwrites it.",
+            "Move the existing edits.json aside after review, then capture again.",
+        )
+    preflight_archive(edited)
+    with tempfile.TemporaryDirectory(dir=config.project_root, prefix=".capture-") as directory:
+        base_path = Path(directory) / "base.epub"
+        build_epub(config, base_path, apply_declared_edits=False)
+        with zipfile.ZipFile(base_path) as archive:
+            base = {name: archive.read(name) for name in archive.namelist()}
+    with zipfile.ZipFile(edited) as archive:
+        target = {name: archive.read(name) for name in archive.namelist() if not name.endswith("/")}
+    removed = sorted(name for name in base if name not in target and not name.endswith("/"))
+    if removed:
+        raise _fail(
+            "EDITS_CAPTURE_DELETION",
+            f"The edited EPUB removes {len(removed)} member(s), which edits.json cannot express: {removed[0]}",
+            "Keep every built member in the edited EPUB, then capture again.",
+        )
+    operations = []
+    pending: list[tuple[Path, bytes]] = []
+    for name in sorted(target):
+        data = target[name]
+        if base.get(name) == data:
+            continue
+        _safe_member(name)
+        relative = PurePosixPath("assets/edits") / name
+        destination = config.project_root / relative
+        if destination.is_symlink() or (destination.exists() and destination.read_bytes() != data):
+            raise _fail(
+                "EDITS_ASSET_CONFLICT",
+                f"A different file already exists at {relative.as_posix()}.",
+                "Move the existing assets/edits folder aside after review, then capture again.",
+            )
+        pending.append((destination, data))
+        operation: dict[str, Any] = {"op": "replace_member", "member": name, "base_sha256": hashlib.sha256(base[name]).hexdigest()} if name in base else {"op": "add_member", "member": name}
+        operation.update({"from": relative.as_posix(), "sha256": hashlib.sha256(data).hexdigest(), "note": "captured from an edited EPUB"})
+        operations.append(operation)
+    if not operations:
+        return {
+            "status": "no_changes",
+            "schema_version": 1,
+            "operations": 0,
+            "message": "The edited EPUB matches the plain core build; nothing to declare.",
+        }
+    for destination, data in pending:
+        _write_asset(destination, data)
+    atomic_write_json(config.project_root / EDITS_FILENAME, {"schema_version": 1, "operations": operations})
+    load_edits(config)
+    return {
+        "status": "pass",
+        "schema_version": 1,
+        "operations": len(operations),
+        "written": EDITS_FILENAME,
+        "assets": "assets/edits/",
+        "next_action": "Review edits.json, then run 'bookstudio finish PROJECT'.",
+        "message": f"Captured {len(operations)} edit operation(s) into edits.json.",
+    }

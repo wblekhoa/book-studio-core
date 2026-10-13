@@ -182,6 +182,50 @@ class DeclaredEditsTests(unittest.TestCase):
         self._edits([{"op": "add_member", "member": "../escape.png", "from": "assets/x.png", "sha256": _sha(PNG)}])
         self._assert_build_fails("EDITS_SCHEMA_INVALID")
 
+    def _edited_copy(self, mutate) -> Path:
+        members = dict(self.base)
+        mutate(members)
+        path = self.root / "edited.epub"
+        with zipfile.ZipFile(path, "w") as archive:
+            info = zipfile.ZipInfo("mimetype", date_time=(1980, 1, 1, 0, 0, 0))
+            archive.writestr(info, members.pop("mimetype"), compress_type=zipfile.ZIP_STORED)
+            for name in sorted(members, reverse=True):
+                archive.writestr(name, members[name], compress_type=zipfile.ZIP_DEFLATED)
+        return path
+
+    # BSC-EDIT-008
+    def test_capture_turns_an_edited_epub_into_certified_edits(self) -> None:
+        changed = self.base[CHAPTER].replace("Bản dịch 1".encode(), "Đã biên tập".encode())
+
+        def mutate(members: dict[str, bytes]) -> None:
+            members[CHAPTER] = changed
+            members["OEBPS/images/marked.png"] = PNG
+
+        edited = self._edited_copy(mutate)
+        code, payload = self._cli("edits", "capture", str(self.project), "--from", str(edited))
+        self.assertEqual(0, code, payload)
+        self.assertEqual(2, payload["operations"])
+        self.assertEqual("edits.json", payload["written"])
+        self.assertNotIn(str(self.root), json.dumps(payload))
+        code, finished = self._cli("finish", str(self.project))
+        self.assertEqual(0, code, finished)
+        final = self._final()
+        with zipfile.ZipFile(edited) as archive:
+            self.assertEqual({n: archive.read(n) for n in archive.namelist()}, final)
+
+    # BSC-EDIT-009
+    def test_capture_refuses_deletions_existing_edits_and_no_change(self) -> None:
+        code, payload = self._cli("edits", "capture", str(self.project), "--from", str(self._edited_copy(lambda m: None)))
+        self.assertEqual(0, code, payload)
+        self.assertEqual("no_changes", payload["status"])
+        self.assertFalse((self.project / "edits.json").exists())
+        code, payload = self._cli("edits", "capture", str(self.project), "--from", str(self._edited_copy(lambda m: m.pop(CSS))))
+        self.assertEqual("EDITS_CAPTURE_DELETION", payload["code"])
+        self.assertFalse((self.project / "edits.json").exists())
+        self._edits([])
+        code, payload = self._cli("edits", "capture", str(self.project), "--from", str(self._edited_copy(lambda m: m.update({CSS: b"x"}))))
+        self.assertEqual("EDITS_ALREADY_DECLARED", payload["code"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -26,7 +26,8 @@ figma: []
 
 ## Scope
 
-- Included: a project file `edits.json` with three operations, applied by `build`, `finish` and `release`.
+- Included: a project file `edits.json` with three operations, applied by `build`, `finish` and `release`;
+  `bookstudio edits capture PROJECT --from EDITED.epub` writes it from an EPUB edited elsewhere.
 - Excluded: deleting members, changing the source EPUB, and editing `output/final.epub` after `finish`.
 
 ## Current truth

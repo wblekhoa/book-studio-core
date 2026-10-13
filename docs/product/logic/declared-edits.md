@@ -39,6 +39,8 @@ the test named in Evidence.
 | BSC-EDIT-007 | Only `replace_text`, `replace_member` and `add_member` exist, plus an optional `note`. Unsafe member paths, adding an existing member, and editing a missing member each fail with a stable code.                     | live   | `tests/test_edits.py` (`test_schema_and_member_rules`)                          |
 | BSC-EDIT-008 | `bookstudio edits capture PROJECT --from EDITED.epub` expresses an edited EPUB as `edits.json` plus `assets/edits/` against the plain core build; the next `finish` reproduces the edited book member for member. | live   | `tests/test_edits.py` (`test_capture_turns_an_edited_epub_into_certified_edits`) |
 | BSC-EDIT-009 | Capture writes nothing for an unchanged book (`no_changes`), refuses deletions (`EDITS_CAPTURE_DELETION`), and never overwrites an existing `edits.json` (`EDITS_ALREADY_DECLARED`). | live   | `tests/test_edits.py` (`test_capture_refuses_deletions_existing_edits_and_no_change`) |
+| BSC-EDIT-010 | A member is checked as markup when its name has a markup suffix or when the edited OPF gives it a markup media-type, so renaming cannot skip the check. Active elements (script, iframe, object, embed, form, `meta http-equiv`, SVG animation, foreignObject) are rejected, as are `on*` and `srcdoc` attributes and active styles. Links allow only relative, http(s) and mailto targets; resources must be files inside the book. | live   | `tests/test_edits.py` (`test_markup_check_follows_manifest_media_type_and_blocks_active_content`) |
+| BSC-EDIT-011 | Before writing anything, capture refuses destinations under a symlinked folder, names that collide after case folding or Unicode normalisation, file-versus-folder clashes, and names with `:`, Windows reserved names or a trailing dot or space. On refusal nothing is written. | live   | `tests/test_edits.py` (`test_capture_never_writes_through_symlinks_or_colliding_names`) |
 
 ## States and transitions
 
@@ -60,6 +62,7 @@ the test named in Evidence.
 
 ## Change log
 
+- 2026-10-13: hardened after a security review (BSC-EDIT-010…011). All four real migrated books still rebuild to their certified hashes.
 - 2026-10-13: added `edits capture` (BSC-EDIT-008…009), replacing the scratch migration script.
 - 2026-10-13: created with BSC-EDIT-001…007. Proven on a private copy of a real book: 14 operations, the gate hash
   equals `final.epub`, every member is byte-identical to the previously delivered edition, and a second `finish`

@@ -24,15 +24,17 @@ original images, image annotations, and same-canvas localized companions.
 
 ### Codex plugin (bundled engine)
 
-Requires Python 3.11+ and a Codex version with `codex plugin` support.
-Clone this repository, register its marketplace, then install Book Studio:
+Requires Python 3.11+ on macOS or Linux and a Codex version with `codex plugin`
+support. Windows is not supported yet. Register this repository as a
+marketplace, then install Book Studio:
 
 ```bash
-git clone https://github.com/wblekhoa/book-studio-core.git
-cd book-studio-core
-codex plugin marketplace add .
+codex plugin marketplace add wblekhoa/book-studio-core@v0.2.0
 codex plugin add book-studio@book-studio
 ```
+
+To work from a checkout instead, run `codex plugin marketplace add .` inside
+it.
 
 Start a new Codex thread, select Book Studio, and ask: “Help me translate this
 book. Ask about the choices I haven't specified and prepare a sample first.”
@@ -47,7 +49,7 @@ verification, and troubleshooting. The standalone CLI below remains supported.
 Python 3.11 or newer is required. Install the CLI directly from GitHub:
 
 ```bash
-pipx install git+https://github.com/wblekhoa/book-studio-core.git
+pipx install git+https://github.com/wblekhoa/book-studio-core.git@v0.2.0
 bookstudio doctor --json
 ```
 
@@ -56,7 +58,7 @@ If `pipx` is unavailable, use an isolated virtual environment:
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install git+https://github.com/wblekhoa/book-studio-core.git
+python -m pip install git+https://github.com/wblekhoa/book-studio-core.git@v0.2.0
 bookstudio doctor --json
 ```
 

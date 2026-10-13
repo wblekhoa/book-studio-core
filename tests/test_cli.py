@@ -34,7 +34,7 @@ class CliContractTests(unittest.TestCase):
         result = run_cli("--version")
 
         self.assertEqual(0, result.returncode, result.stderr)
-        self.assertEqual("bookstudio 0.1.0", result.stdout.strip())
+        self.assertEqual("bookstudio 0.2.0", result.stdout.strip())
 
     def test_help_lists_beginner_commands(self) -> None:
         result = run_cli("--help")

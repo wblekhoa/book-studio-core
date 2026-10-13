@@ -603,7 +603,9 @@ def _rewrite_with_edits(
     with zipfile.ZipFile(path, "r") as built:
         members = [(info, built.read(info.filename)) for info in built.infolist()]
     edited = apply_edits(config, members, operations)
-    rewritten = path.with_name(path.name + ".edits")
+    descriptor, rewritten_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".edits")
+    os.close(descriptor)
+    rewritten = Path(rewritten_name)
     try:
         with zipfile.ZipFile(rewritten, "w") as output:
             for info, data in edited:

@@ -226,6 +226,56 @@ class DeclaredEditsTests(unittest.TestCase):
         code, payload = self._cli("edits", "capture", str(self.project), "--from", str(self._edited_copy(lambda m: m.update({CSS: b"x"}))))
         self.assertEqual("EDITS_ALREADY_DECLARED", payload["code"])
 
+    # BSC-EDIT-010
+    def test_markup_check_follows_manifest_media_type_and_blocks_active_content(self) -> None:
+        chapter = self.base[CHAPTER].decode("utf-8")
+        renamed = chapter.replace("</body>", "<script>alert(1)</script></body>").encode("utf-8")
+        self._asset("assets/edits/chapter.txt", renamed)
+        self._edits(
+            [
+                {"op": "add_member", "member": "OEBPS/text/chapter.txt", "from": "assets/edits/chapter.txt", "sha256": _sha(renamed)},
+                {"op": "replace_text", "member": "OEBPS/content.opf", "find": 'href="text/chapter.xhtml"', "replace": 'href="text/chapter.txt"', "count": 1},
+            ]
+        )
+        self._assert_build_fails("EDITS_UNSAFE_MARKUP")
+        unsafe = [
+            '<a href="java&#9;script:alert(1)">x</a>',
+            '<a href="data:text/html,x">x</a>',
+            '<iframe srcdoc="x"></iframe>',
+            '<form action="javascript:x"></form>',
+            '<object data="x.svg"></object>',
+            '<embed src="x.svg"/>',
+            '<meta http-equiv="refresh" content="0;url=javascript:x"/>',
+            '<img src="https://tracker.example/p.png"/>',
+            '<svg xmlns="http://www.w3.org/2000/svg"><animate attributeName="href" values="javascript:x"/></svg>',
+        ]
+        for snippet in unsafe:
+            with self.subTest(snippet=snippet):
+                self._edits([{"op": "replace_text", "member": CHAPTER, "find": "</body>", "replace": snippet + "</body>", "count": 1}])
+                self._assert_build_fails("EDITS_UNSAFE_MARKUP")
+        self._edits([{"op": "replace_text", "member": CHAPTER, "find": "</body>", "replace": '<p><a href="https://example.org/">ok</a> <a href="#note-1">n</a></p></body>', "count": 1}])
+        code, built = self._cli("build", str(self.project))
+        self.assertEqual(0, code, built)
+
+    # BSC-EDIT-011
+    def test_capture_never_writes_through_symlinks_or_colliding_names(self) -> None:
+        outside = self.root / "outside"
+        outside.mkdir()
+        (self.project / "assets").mkdir(exist_ok=True)
+        (self.project / "assets/edits").symlink_to(outside, target_is_directory=True)
+        edited = self._edited_copy(lambda m: m.update({"OEBPS/pwn.txt": b"x"}))
+        code, payload = self._cli("edits", "capture", str(self.project), "--from", str(edited))
+        self.assertEqual("EDITS_ASSET_INVALID", payload["code"])
+        self.assertEqual([], list(outside.iterdir()))
+        (self.project / "assets/edits").unlink()
+        for extra in ({"OEBPS/Extra.txt": b"a", "OEBPS/extra.txt": b"b"}, {"OEBPS/aa": b"a", "OEBPS/aa/b.txt": b"b"}, {"OEBPS/a:b.txt": b"a"}):
+            with self.subTest(extra=sorted(extra)):
+                edited = self._edited_copy(lambda m: m.update(extra))
+                code, payload = self._cli("edits", "capture", str(self.project), "--from", str(edited))
+                self.assertIn(payload.get("code"), {"EDITS_ASSET_INVALID", "EDITS_SCHEMA_INVALID", "ARCHIVE_UNSAFE_PATH"}, payload)
+                self.assertFalse((self.project / "edits.json").exists())
+                self.assertFalse((self.project / "assets/edits").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

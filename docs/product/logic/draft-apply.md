@@ -32,7 +32,7 @@ the test named in Evidence.
 | BSC-DRAFT-001 | `apply-drafts` applies drafts packet by packet with `next`/`apply` semantics. It stops at `pilot_review_required` (the sample gate is never skipped), and after acceptance it continues to `complete`. | live   | `tests/test_drafts.py` (`test_drafts_stop_at_pilot_review_then_finish_full_book`)       |
 | BSC-DRAFT-002 | When the next packet needs a block with no draft, the command stops before that packet, exits 2 with `draft_missing`, and lists the missing blocks.                              | live   | `tests/test_drafts.py` (`test_missing_draft_stops_before_that_packet`)                  |
 | BSC-DRAFT-003 | The whole file is preflighted before any write. A stale source hash, an unknown or ineligible block, another source EPUB, or a duplicate row each fail with a stable code and an empty cache. | live   | `tests/test_drafts.py` (`test_stale_or_unknown_drafts_fail_before_any_write`)           |
-| BSC-DRAFT-004 | Draft inline markup goes through the normal `apply` safety gate; an unsafe link is rejected and nothing is cached.                                                               | live   | `tests/test_drafts.py` (`test_unsafe_inline_markup_is_rejected_by_the_packet_gate`)     |
+| BSC-DRAFT-004 | Every row's `translation_xhtml` passes the inline XHTML allowlist during preflight, so one unsafe row fails the whole file before any packet is applied (the cache stays empty).                       | live   | `tests/test_drafts.py` (`test_unsafe_inline_markup_is_rejected_by_the_packet_gate`)     |
 
 ## States and transitions
 

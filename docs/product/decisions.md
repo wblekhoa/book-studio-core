@@ -12,6 +12,36 @@ updated: 2026-10-13
 Entries before 2026-10-11 are reconstructed from commits, `CHANGELOG.md`, `AGENTS.md` and `docs/` in this repo; each
 cites its source.
 
+## 2026-10-13 · Release 0.2.0 to the community: macOS and Linux, one version, artwork, hardened edits
+
+- **Context**: before sharing the plugin, the following ran:
+  - a clean-room install from GitHub with an isolated `CODEX_HOME`, then the e2e/review/edits/drafts suites through the
+    installed runner;
+  - three live Codex behaviour scenarios;
+  - a security review of the new code;
+  - a CI matrix across Linux, macOS and Windows.
+- **Findings**:
+  - The review found two high-severity holes in declared edits: renaming a scripted document to `.txt` skipped the
+    markup check, and capture wrote through a symlinked `assets/edits` folder. It also found denylist bypasses and a
+    drafts preflight gap.
+  - Windows CI exposed five existing engine portability failures: a cp1252 console, CRLF in identity hashes,
+    backslash member names, and block-map identity.
+- **Decision**:
+  - Fix every high and medium finding with tests (BSC-EDIT-010…011, BSC-DRAFT-004), along with the low ones on
+    permissions and review path containment.
+  - Ship 0.2.0 for macOS and Linux only. Windows is documented as not yet supported and is left out of CI until those
+    failures are fixed.
+  - The plugin and engine share one version (BSC-SKILL-013), replacing the separate plugin numbering used earlier the
+    same day.
+  - Plugin artwork is allowed only as small PNGs in `plugins/book-studio/assets/` (BSC-SKILL-014/015).
+- **Evidence**:
+  - The clean-room run passed 22 tests through the installed runner.
+  - All three behaviour scenarios passed (`docs/behavior-evals.md`).
+  - The four real migrated books rebuild to their certified hashes under the hardened checks.
+  - CI on macOS and Linux with Python 3.11-3.14.
+- **Reversal**: add Windows back to the CI matrix after the portability fixes. Remove the artwork and its audit
+  exception.
+
 ## 2026-10-13 · Skill references follow the gated finishing path; plugin versioned on its own
 
 - **Context**: an audit of the skill found that `final-book-quality.md` and the production-brief contract still told

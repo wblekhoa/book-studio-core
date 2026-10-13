@@ -7,9 +7,11 @@ import json
 import os
 import re
 import tempfile
+import unicodedata
 import zipfile
 from pathlib import Path, PurePosixPath
 from typing import Any
+from urllib.parse import unquote, urlsplit
 from xml.etree import ElementTree as ET
 
 from ..config import ProjectConfig, atomic_write_json
@@ -24,6 +26,7 @@ _OPERATION_KEYS = {
 }
 _MARKUP_SUFFIXES = (".xhtml", ".html", ".htm", ".xml", ".opf", ".ncx", ".svg")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
+_WINDOWS_RESERVED = frozenset({"CON", "PRN", "AUX", "NUL", *(f"COM{n}" for n in range(1, 10)), *(f"LPT{n}" for n in range(1, 10))})
 
 
 def _fail(code: str, message: str, next_action: str) -> BookStudioError:
@@ -48,6 +51,8 @@ def _safe_member(name: Any) -> str:
         or ".." in posix.parts
         or name == "mimetype"
         or name.endswith("/")
+        or ":" in name
+        or any(part != part.rstrip(". ") or part.split(".")[0].upper() in _WINDOWS_RESERVED for part in posix.parts)
     ):
         raise _schema(f"Unsafe or invalid EPUB member name in edits.json: {name!r}")
     return name
@@ -110,7 +115,7 @@ def _asset_bytes(config: ProjectConfig, operation: dict[str, Any]) -> bytes:
         "Keep edit assets as regular files inside the project and pin their current SHA-256 in edits.json.",
     )
     relative = PurePosixPath(operation["from"])
-    if relative.is_absolute() or ".." in relative.parts or "\\" in operation["from"]:
+    if relative.is_absolute() or ".." in relative.parts or "\\" in operation["from"] or ":" in operation["from"]:
         raise invalid
     path = config.project_root
     for part in relative.parts:
@@ -125,29 +130,85 @@ def _asset_bytes(config: ProjectConfig, operation: dict[str, Any]) -> bytes:
     return data
 
 
-def _check_markup(member: str, data: bytes) -> None:
-    if not member.lower().endswith(_MARKUP_SUFFIXES):
-        return
-    unsafe = _fail(
+_ACTIVE_ELEMENTS = frozenset(
+    {
+        "script", "iframe", "frame", "frameset", "object", "embed", "applet", "form", "base",
+        "animate", "set", "animatemotion", "animatetransform", "foreignobject",
+        "button", "input", "textarea", "select", "portal",
+    }
+)
+_LINK_ATTRIBUTES = frozenset({"href"})
+_RESOURCE_ATTRIBUTES = frozenset(
+    {"src", "data", "action", "formaction", "poster", "background", "srcset", "codebase", "usemap", "longdesc", "cite"}
+)
+_MARKUP_MEDIA_TYPES = ("application/xhtml+xml", "text/html", "image/svg+xml", "application/xml", "text/xml")
+
+
+def _unsafe(member: str, reason: str) -> BookStudioError:
+    return _fail(
         "EDITS_UNSAFE_MARKUP",
-        f"Edited markup is not well-formed or contains script, event handlers or javascript: links: {member}",
-        "Remove scripts, on* attributes and javascript: URLs from the edit.",
+        f"Edited markup in {member} is unsafe: {reason}",
+        "Use plain XHTML: relative links, http(s)/mailto anchors, and local images only.",
     )
+
+
+def _scheme(value: str) -> str:
+    # urlsplit drops tab/newline; also drop other control characters a reader would ignore.
+    cleaned = "".join(char for char in value if ord(char) > 0x20 or char == " ").strip()
+    return urlsplit(cleaned).scheme.lower()
+
+
+def _check_markup(member: str, data: bytes) -> None:
     try:
         root = ET.fromstring(data)
     except ET.ParseError as error:
-        raise unsafe from error
+        raise _unsafe(member, "not well-formed XML") from error
     for node in root.iter():
         if not isinstance(node.tag, str):
             continue
-        if node.tag.rsplit("}", 1)[-1].lower() == "script":
-            raise unsafe
+        tag = node.tag.rsplit("}", 1)[-1].lower()
+        if tag in _ACTIVE_ELEMENTS:
+            raise _unsafe(member, f"<{tag}> is not allowed")
+        if tag == "meta" and any(key.rsplit("}", 1)[-1].lower() == "http-equiv" for key in node.attrib):
+            raise _unsafe(member, "<meta http-equiv> is not allowed")
+        if tag == "style" and re.search(r"@import|url\s*\(\s*['\"]?\s*[a-z][a-z0-9+.-]*:", node.text or "", re.I):
+            raise _unsafe(member, "external resources in <style>")
         for name, value in node.attrib.items():
             local = name.rsplit("}", 1)[-1].lower()
-            if local.startswith("on") or (
-                local in {"href", "src"} and value.strip().lower().startswith("javascript:")
-            ):
-                raise unsafe
+            if local.startswith("on") or local == "srcdoc":
+                raise _unsafe(member, f"attribute {local}")
+            if local == "style" and re.search(r"url\s*\(|expression\s*\(|javascript:", value, re.I):
+                raise _unsafe(member, "active style attribute")
+            if local in _LINK_ATTRIBUTES and _scheme(value) not in {"", "http", "https", "mailto"}:
+                raise _unsafe(member, f"{local} scheme {_scheme(value)!r}")
+            if local in _RESOURCE_ATTRIBUTES and _scheme(value):
+                raise _unsafe(member, f"{local} must reference a file inside the book")
+
+
+def _markup_members(members: list[tuple[zipfile.ZipInfo, bytes]]) -> set[str]:
+    """Members a reader would parse as markup, by suffix or by manifest media-type."""
+    data = {info.filename: content for info, content in members}
+    names = {name for name in data if name.lower().endswith(_MARKUP_SUFFIXES)}
+    try:
+        container = ET.fromstring(data.get("META-INF/container.xml", b""))
+        rootfile = next(node for node in container.iter() if str(node.tag).endswith("rootfile"))
+        opf_path = rootfile.attrib["full-path"]
+        package = ET.fromstring(data[opf_path])
+    except (ET.ParseError, StopIteration, KeyError):
+        return names
+    base = PurePosixPath(opf_path).parent
+    for node in package.iter():
+        if str(node.tag).endswith("item") and node.attrib.get("media-type", "").startswith(_MARKUP_MEDIA_TYPES):
+            href = unquote(node.attrib.get("href", "").split("#", 1)[0])
+            parts: list[str] = []
+            for part in (base / href).parts:
+                if part == "..":
+                    if parts:
+                        parts.pop()
+                elif part not in {"", "."}:
+                    parts.append(part)
+            names.add("/".join(parts))
+    return names
 
 
 def apply_edits(
@@ -208,7 +269,8 @@ def apply_edits(
             data = text.replace(operation["find"], operation["replace"]).encode("utf-8")
         result[index[member]] = (info, data)
         touched.add(member)
-    for member in sorted(touched):
+    markup = _markup_members(result)
+    for member in sorted(touched & markup):
         _check_markup(member, result[index[member]][1])
     return result
 
@@ -223,6 +285,37 @@ def _write_asset(path: Path, data: bytes) -> None:
     except BaseException:
         Path(temporary).unlink(missing_ok=True)
         raise
+
+
+def _capture_invalid(reason: str) -> BookStudioError:
+    return _fail(
+        "EDITS_ASSET_INVALID",
+        f"Cannot capture edits safely: {reason}.",
+        "Remove symlinks under assets/, and make member names unique, case-insensitively and without file/folder clashes.",
+    )
+
+
+def _check_capture_destinations(config: ProjectConfig, destinations: list[Path]) -> None:
+    root = config.project_root
+    seen: dict[str, Path] = {}
+    files = {destination.relative_to(root).as_posix().casefold() for destination in destinations}
+    for destination in destinations:
+        relative = destination.relative_to(root)
+        key = unicodedata.normalize("NFC", relative.as_posix()).casefold()
+        if key in seen:
+            raise _capture_invalid(f"{relative.as_posix()} collides with {seen[key].relative_to(root).as_posix()}")
+        seen[key] = destination
+        parents = [parent.casefold() for parent in relative.as_posix().split("/")[:-1]]
+        for depth in range(1, len(parents) + 1):
+            if "/".join(parents[:depth]) in files:
+                raise _capture_invalid(f"{relative.as_posix()} needs a folder where another captured file goes")
+        current = root
+        for part in relative.parts:
+            current = current / part
+            if current.is_symlink():
+                raise _capture_invalid(f"{current.relative_to(root).as_posix()} is a symlink")
+        if destination.exists() and not destination.is_file():
+            raise _capture_invalid(f"{relative.as_posix()} exists and is not a file")
 
 
 def capture_edits(config: ProjectConfig, edited: Path) -> dict[str, Any]:
@@ -260,7 +353,7 @@ def capture_edits(config: ProjectConfig, edited: Path) -> dict[str, Any]:
         _safe_member(name)
         relative = PurePosixPath("assets/edits") / name
         destination = config.project_root / relative
-        if destination.is_symlink() or (destination.exists() and destination.read_bytes() != data):
+        if destination.is_file() and not destination.is_symlink() and destination.read_bytes() != data:
             raise _fail(
                 "EDITS_ASSET_CONFLICT",
                 f"A different file already exists at {relative.as_posix()}.",
@@ -277,8 +370,12 @@ def capture_edits(config: ProjectConfig, edited: Path) -> dict[str, Any]:
             "operations": 0,
             "message": "The edited EPUB matches the plain core build; nothing to declare.",
         }
-    for destination, data in pending:
-        _write_asset(destination, data)
+    _check_capture_destinations(config, [destination for destination, _ in pending])
+    try:
+        for destination, data in pending:
+            _write_asset(destination, data)
+    except OSError as error:
+        raise _capture_invalid(f"could not write {destination.name}: {type(error).__name__}") from error
     atomic_write_json(config.project_root / EDITS_FILENAME, {"schema_version": 1, "operations": operations})
     load_edits(config)
     return {

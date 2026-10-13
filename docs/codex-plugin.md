@@ -4,6 +4,17 @@ The plugin contains the canonical translation skill and its matching Python
 engine. Only Python 3.11+ and Codex plugin support are required for EPUB work.
 Run commands from Terminal, not from a Python prompt.
 
+## Install from GitHub
+
+```bash
+codex plugin marketplace add wblekhoa/book-studio-core@v0.2.0
+codex plugin add book-studio@book-studio
+codex plugin list
+```
+
+Supported on macOS and Linux with Python 3.11-3.14. Windows is not supported
+yet.
+
 ## Install from a checkout
 
 ```bash
@@ -28,6 +39,16 @@ explicitly to avoid ambiguity. Installing this plugin does not remove it.
 
 Pull updates into a clean checkout, rerun doctor, and rerun the marketplace-add
 and plugin-add commands above to refresh the local snapshot. Start a new thread.
+For a GitHub install, run `codex plugin marketplace upgrade`, then
+`codex plugin add book-studio@book-studio`. Each release raises the plugin
+version, so Codex fetches a fresh copy.
+
+## Artwork
+
+`assets/logo.png` is drawn as vector shapes. The two screenshots show the
+read-only review page of the synthetic test book from `tests/fixtures.py`.
+They contain no third-party book content. `public-audit` allows small PNG files
+only directly inside `plugins/book-studio/assets/`.
 Preserve private book projects separately. Remove only the installed plugin with:
 
 ```bash

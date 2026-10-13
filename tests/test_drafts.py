@@ -116,7 +116,12 @@ class DraftApplyTests(unittest.TestCase):
         rows = [{**row, "translation_xhtml": '<a href="javascript:alert(1)">x</a>'} for row in rows]
         code, payload = self._cli("apply-drafts", str(self.project), str(self._drafts(rows)))
         self.assertEqual(1, code)
-        self.assertTrue(payload["code"])
+        self.assertEqual("XHTML_UNSAFE", payload["code"])
+        self.assertEqual(0, self._cache_count())
+        rows = self._rows()
+        rows[-1] = {**rows[-1], "translation_xhtml": "<script>x</script>"}
+        code, payload = self._cli("apply-drafts", str(self.project), str(self._drafts(rows)))
+        self.assertEqual(1, code)
         self.assertEqual(0, self._cache_count())
 
 

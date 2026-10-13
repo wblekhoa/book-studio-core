@@ -8,6 +8,7 @@ from typing import Any, Callable, Collection
 
 from ..config import ProjectConfig, atomic_write_json
 from ..errors import BookStudioError
+from ..safety.xhtml import validate_inline_xhtml
 from .cache import read_json
 from .coverage import target_index
 from .packets import apply_response, next_packet
@@ -82,6 +83,8 @@ def load_drafts(config: ProjectConfig, path: Path) -> dict[tuple[str, int], dict
                 f"Draft row {number} was written for different source text: {key[0]} block {key[1]}.",
                 "Re-draft the block from the current source block map.",
             )
+        if "translation_xhtml" in row:
+            validate_inline_xhtml(row["translation_xhtml"])
         drafts[key] = row
     return drafts
 

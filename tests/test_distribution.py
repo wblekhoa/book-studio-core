@@ -19,7 +19,7 @@ class DistributionContractTests(unittest.TestCase):
         project = pyproject["project"]
         self.assertEqual(["setuptools>=77"], pyproject["build-system"]["requires"])
         self.assertEqual("bookstudio", project["name"])
-        self.assertEqual("0.1.0", project["version"])
+        self.assertEqual("0.2.0", project["version"])
         self.assertEqual(">=3.11", project["requires-python"])
         self.assertEqual([], project["dependencies"])
         self.assertIn("PDF", project["description"])
@@ -47,7 +47,7 @@ class DistributionContractTests(unittest.TestCase):
             (self.root / "pyproject.toml").read_text(encoding="utf-8")
         )
 
-        self.assertIn('__version__ = "0.1.0"', package_init)
+        self.assertIn('__version__ = "0.2.0"', package_init)
         self.assertIn("BOOK STUDIO PERSONAL USE LICENSE", license_text)
         self.assertIn("Version 1.0", license_text)
         self.assertIn("Copyright (c) 2026 khoa 'jak' le", license_text)
@@ -190,7 +190,7 @@ class DistributionContractTests(unittest.TestCase):
         self.assertNotIn("uses: actions/checkout@v4", workflow)
         self.assertNotIn("uses: actions/setup-python@v5", workflow)
         self.assertIn("python-version: [\"3.11\", \"3.12\", \"3.13\", \"3.14\"]", workflow)
-        self.assertIn("os: [ubuntu-latest, macos-latest, windows-latest]", workflow)
+        self.assertIn("os: [ubuntu-latest, macos-latest]", workflow)
         self.assertIn('cp -R . "$RUNNER_TEMP/bookstudio-install"', workflow)
         self.assertIn(
             'python -m pip install "$RUNNER_TEMP/bookstudio-install"', workflow

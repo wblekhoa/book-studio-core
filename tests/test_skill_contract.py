@@ -36,10 +36,12 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("never\nwrite a per-book finalizer", text)
 
     # BSC-SKILL-013
-    def test_plugin_version_moves_past_the_engine_baseline(self) -> None:
+    def test_plugin_and_engine_share_one_release_version(self) -> None:
+        from bookstudio import __version__
+
         manifest = json.loads((ROOT / "plugins/book-studio/.codex-plugin/plugin.json").read_text(encoding="utf-8"))
         self.assertRegex(manifest["version"], r"^\d+\.\d+\.\d+$")
-        self.assertNotEqual("0.1.0", manifest["version"])
+        self.assertEqual(__version__, manifest["version"])
 
 
 if __name__ == "__main__":

@@ -298,7 +298,8 @@ def write_review(config: ProjectConfig) -> dict[str, Any]:
     except BookStudioError:
         coverage = None
     intake = _read_optional_json(config.paths.intake)
-    facts = intake.get("book_facts", {}) if isinstance(intake, dict) else {}
+    facts = intake.get("book_facts") if isinstance(intake, dict) else None
+    facts = facts if isinstance(facts, dict) else {}
     titles = {
         doc.get("logical_path"): doc.get("title") or ""
         for doc in facts.get("documents", [])
@@ -308,8 +309,9 @@ def write_review(config: ProjectConfig) -> dict[str, Any]:
     release_receipt = _read_optional_json(config.paths.reports / "release.json")
     release = None
     if isinstance(release_receipt, dict) and release_receipt.get("status") == "pass":
-        final = config.project_root / str(release_receipt.get("output", ""))
-        current = final.is_file() and hashlib.sha256(final.read_bytes()).hexdigest() == release_receipt.get("output_sha256")
+        final = (config.project_root / str(release_receipt.get("output", ""))).resolve()
+        inside = config.paths.output.resolve() in final.parents
+        current = inside and final.is_file() and hashlib.sha256(final.read_bytes()).hexdigest() == release_receipt.get("output_sha256")
         integrity = release_receipt.get("integrity", {})
         release = {
             "output": release_receipt.get("output"),
@@ -323,7 +325,8 @@ def write_review(config: ProjectConfig) -> dict[str, Any]:
     stage = _stage(pilot["status"], coverage, release_receipt if release and release["current"] else None)
     project_arg = shlex.quote(config.project_root.name)
     document, pairs = _sample(pilot, block_map, rows)
-    answers = intake.get("answers", {}) if isinstance(intake, dict) else {}
+    answers = intake.get("answers") if isinstance(intake, dict) else None
+    answers = answers if isinstance(answers, dict) else {}
     choices = sorted(answers.items()) if answers else sorted(
         {"source_language": config.source_language, "target_language": config.target_language,
          "output_mode": config.output_mode, **dict(config.profile)}.items()

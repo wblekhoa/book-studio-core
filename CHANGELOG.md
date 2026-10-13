@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Nothing yet.
+
+## 0.2.0 - 2026-10-13
+
 - Added a fail-closed PDF source gateway that prepares supported text-layer
   PDFs as review-required semantic EPUBs without adding OCR or model-provider
   dependencies.
@@ -23,10 +27,15 @@
 - Added `bookstudio apply-drafts`, which preflights a whole drafts file and
   applies it packet by packet, stopping at the sample review.
 - Updated the skill references so post-build corrections go through
-  `edits.json`, with drafts and review guidance and contract tests; the plugin
-  is now versioned `0.2.0`.
+  `edits.json`, with drafts and review guidance and contract tests.
 - Added `bookstudio edits capture`, which writes `edits.json` from an EPUB
-  edited elsewhere; plugin `0.3.0`.
+  edited elsewhere.
+- Hardened declared edits: markup is checked by manifest media-type with an
+  allowlist for links and resources; capture refuses symlinked, colliding,
+  or reserved destinations; `apply-drafts` checks inline markup before any
+  write.
+- Plugin artwork (logo, two synthetic screenshots); the plugin and engine now
+  share one release version. CI covers macOS and Linux with Python 3.11-3.14.
 - Replaced the MIT license for current and future distributions with the
   source-available Book Studio Personal Use License 1.0. Personal,
   non-commercial use remains permitted; commercial use requires separate

@@ -44,7 +44,7 @@ figma: []
 | Progress            | coverage bar, translated / eligible / remaining, per-document table, source-hash mismatch warning | "Coverage is not available yet"            |
 | Sample chapter      | source and translation pairs with a block number, role, and state badge (Translated / Not translated yet / Source changed) | "No sample blocks to show yet" |
 | Choices             | the locked intake answers, or the `bookstudio.toml` profile for expert projects | "No recorded choices"                      |
-| Final book          | output path, reproducible, integrity, SHA-256, and whether the file still matches the gate | "The final gate has not run yet"          |
+| Final book          | output path, reproducible, integrity, number of declared edits, SHA-256, and whether the file still matches the gate | "The final gate has not run yet"          |
 
 ## Flow
 

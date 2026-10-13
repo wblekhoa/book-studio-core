@@ -12,6 +12,23 @@ updated: 2026-10-13
 Entries before 2026-10-11 are reconstructed from commits, `CHANGELOG.md`, `AGENTS.md` and `docs/` in this repo; each
 cites its source.
 
+## 2026-10-13 · Post-build corrections move inside the gate; drafts get a core command
+
+- **Context**: in the private workspace, all four delivered Vietnamese editions differed from the EPUB that `finish`
+  had certified. Per-book scripts had changed them afterwards: wording, contents pages, CSS, a cover mark. Roughly 35
+  per-book scripts repeated four needs. Book work happens in Codex (299 sessions, against 5 in Claude Code), and there
+  is no external audience yet.
+- **Decision**: add `PROJECT/edits.json`, which declares hash-pinned `replace_text`, `replace_member` and `add_member`
+  operations that `build` applies, so `finish` certifies the delivered book. Add `apply-drafts` for whole-chapter
+  drafts through the unchanged packet contract. A cover mark is drawn outside the core (it needs an imaging library)
+  and enters the book as a declared `add_member`, so the core stays standard-library only. The workspace scripts are
+  frozen; no new features go there. A Claude Code port, an MCP Apps widget and plugin artwork are deferred.
+- **Evidence**: `tests/test_edits.py` (BSC-EDIT-001…007), `tests/test_drafts.py` (BSC-DRAFT-001…004). On a private
+  copy of a real book, 14 captured operations reproduced the delivered edition member for member, and the gate hash
+  equalled `final.epub`.
+- **Reversal**: delete `edits.json` from a project (its build returns to the plain core output). Removing the feature
+  means reverting `epub/edits.py`, `translation/drafts.py` and their CLI wiring, then regenerating the plugin bundle.
+
 ## 2026-10-13 · Add a read-only local review page before any in-chat widget
 
 - **Context**: people judge the sample and follow progress through JSON and terminal text. Agent hosts can render

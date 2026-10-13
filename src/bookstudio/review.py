@@ -257,7 +257,7 @@ def _render(context: Mapping[str, Any]) -> str:
         text = "Matches the gate receipt" if release["current"] else "Changed since the gate ran: run finish again"
         final = (
             f"<dl><dt>Output</dt><dd>{e(release['output'])}</dd><dt>Reproducible</dt><dd>{'yes' if release['reproducible'] is True else 'no'}</dd>"
-            f"<dt>Integrity</dt><dd>{e(release['integrity'])}</dd><dt>SHA-256</dt><dd><code>{e(release['sha256'])}</code>"
+            f"<dt>Integrity</dt><dd>{e(release['integrity'])}</dd><dt>Declared edits</dt><dd>{e(release['edits'])}</dd><dt>SHA-256</dt><dd><code>{e(release['sha256'])}</code>"
             f'<span class="badge {state}">{e(text)}</span></dd></dl>'
         )
     else:
@@ -317,6 +317,7 @@ def write_review(config: ProjectConfig) -> dict[str, Any]:
             "reproducible": release_receipt.get("reproducible"),
             "integrity": "pass" if isinstance(integrity, dict) and integrity.get("passed") else "not recorded",
             "current": current,
+            "edits": (release_receipt.get("edits") or {}).get("applied", 0),
         }
 
     stage = _stage(pilot["status"], coverage, release_receipt if release and release["current"] else None)

@@ -111,7 +111,9 @@ pages, or publish books.
    passages, image decisions, added context, and any actual rendered evidence.
    The core has no visual renderer, so never imply one ran. Do not accept on the
    user's behalf. Apply requested corrections through `bookstudio pilot revise`
-   and review again. After explicit acceptance, run:
+   and review again. Run `bookstudio review PROJECT --json` and point the user
+   to the private `reports/review.html` (sample beside its source, progress,
+   next command); never share that page. After explicit acceptance, run:
 
    ```bash
    bookstudio pilot accept PROJECT --confirm --json
@@ -119,7 +121,12 @@ pages, or publish books.
 
 7. Continue the remaining scope with the accepted decisions. Read [packet loop
    and verification](references/packet-loop-and-verification.md) for the exact
-   response contract and recovery behavior. Before declaring completion, run
+   response contract and recovery behavior. When whole chapters are drafted
+   ahead, use `bookstudio apply-drafts PROJECT DRAFTS.json --json`; it
+   preflights every row and applies them packet by packet through the same
+   gates. Declare every post-build correction (wording, contents page, CSS,
+   an approved cover mark) in `PROJECT/edits.json` so `finish` certifies the
+   edited book. Before declaring completion, run
    the candidate-bound editorial-evidence gate plus independent structural,
    navigation, image, and rendered gates in [final book
    quality](references/final-book-quality.md). Create
@@ -152,8 +159,9 @@ pages, or publish books.
   context-only row or patch the canonical cache to bypass a gate.
 - After a prompt, policy, glossary, reference, or image-manifest change, request
   fresh packets and revise stale pilot rows through the documented path.
-- Make every post-build correction reproducible from project-owned inputs. A
-  manually edited final EPUB is not a finished artifact.
+- Make every post-build correction reproducible from project-owned inputs
+  through `edits.json`. Never change `output/final.epub` after `finish`; an
+  EPUB edited outside the gate is not a finished artifact.
 - Stop for an unsupported source, substantive editorial or visual fork, rights
   ambiguity, stale or conflicting state, new dependency, destructive rewrite,
   or any commercial, monetized, shared-storage, upload, publish, release, or

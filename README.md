@@ -269,6 +269,25 @@ command to refresh it. It has no script, loads nothing from the network, and
 stays inside the private project. Do not share it, because it contains book
 text.
 
+### Drafts and post-build edits
+
+When whole chapters are drafted ahead, apply them through the same packet gates:
+
+```bash
+PYTHONPATH=src python3 -m bookstudio apply-drafts ../book-project drafts.json --json
+```
+
+The command checks every row first. It then stops at the sample review, at the
+first block without a draft, or when the scope is complete.
+
+To correct the built book (wording, a contents page, CSS, or a cover mark you
+are allowed to add), declare the change in `../book-project/edits.json`. Use
+`replace_text` with an exact `count`, `replace_member` pinned to the built
+member's `base_sha256`, or `add_member`. Each replacement file lives inside the
+project and is pinned by `sha256`. `build` and `finish` apply these operations,
+so the gate certifies the edited book. Never change `output/final.epub` after
+`finish`.
+
 ## Expert compatibility path
 
 `init` remains available for callers that already own every project decision

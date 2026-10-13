@@ -22,9 +22,10 @@ actually published - never ahead of it.
 
 - **What changed for users**: the fail-closed PDF Source Gateway, book-specific production briefs and final-EPUB
   audits, localized navigation labels, the portable skill installer, the personal-use licence (`CHANGELOG.md`,
-  Unreleased; commit `1671d21`), the installable Codex plugin with a bundled engine (commit `e027d96`), and the
-  read-only `bookstudio review` page plus a spec-conformant plugin manifest (2026-10-13).
-- **REQ-IDs it will ship**: BSC-PIPE-014, BSC-SKILL-001…010, BSC-REVIEW-001…007 and the PDF gateway (no REQ-IDs yet), plus everything
+  Unreleased; commit `1671d21`), the installable Codex plugin with a bundled engine (commit `e027d96`), the
+  read-only `bookstudio review` page plus a spec-conformant plugin manifest, declared post-build edits certified by
+  `finish` (`edits.json`), and `apply-drafts` (2026-10-13).
+- **REQ-IDs it will ship**: BSC-PIPE-014, BSC-SKILL-001…010, BSC-REVIEW-001…007, BSC-EDIT-001…007, BSC-DRAFT-001…004 and the PDF gateway (no REQ-IDs yet), plus everything
   below; all `live` on `main` as of 2026-10-11.
 - **Channel**: none yet.
 - **Shown in**: none yet.

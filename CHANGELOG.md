@@ -18,6 +18,10 @@
 - Added `bookstudio review`, which writes a read-only, self-contained HTML page
   with the project stage, progress, the sample beside its source, the recorded
   choices, the final-gate status, and the exact next command.
+- Added declared post-build edits: hash-pinned operations in `edits.json` are
+  applied inside `build`, so `finish` certifies the delivered book.
+- Added `bookstudio apply-drafts`, which preflights a whole drafts file and
+  applies it packet by packet, stopping at the sample review.
 - Replaced the MIT license for current and future distributions with the
   source-available Book Studio Personal Use License 1.0. Personal,
   non-commercial use remains permitted; commercial use requires separate

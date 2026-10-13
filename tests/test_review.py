@@ -178,6 +178,7 @@ class ReviewPageTests(unittest.TestCase):
         self.assertEqual(0, payload["remaining"])
         self.assertIn("bookstudio verify", payload["next_command"])
         self.assertIn("Matches the gate receipt", page)
+        self.assertIn("Declared edits</dt><dd>0</dd>", page)
 
         with (self.project / "output/final.epub").open("ab") as handle:
             handle.write(b"tampered")

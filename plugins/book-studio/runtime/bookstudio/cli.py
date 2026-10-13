@@ -30,10 +30,11 @@ from .project import init_project, start_project
 from .review import write_review
 from .safety.public_audit import audit_public_tree
 from .translation.coverage import coverage_receipt
+from .translation.drafts import apply_drafts
 from .translation.packets import apply_response, next_packet, revise_pilot_response
 
 
-BEGINNER_COMMANDS = ("doctor", "start", "init", "next", "apply", "finish", "review")
+BEGINNER_COMMANDS = ("doctor", "start", "init", "next", "apply", "apply-drafts", "finish", "review")
 EXPERT_COMMANDS = (
     "inspect",
     "prepare",
@@ -50,6 +51,7 @@ COMMAND_HELP = {
     "init": "Create an expert full-scope translation project.",
     "next": "Emit the next bounded translation packet.",
     "apply": "Validate and apply one AI translation response.",
+    "apply-drafts": "Apply prepared drafts packet by packet through the same gates.",
     "finish": "Run the strict reproducible final-book gate.",
     "review": "Write a read-only HTML review page for the project.",
     "inspect": "Inspect a source EPUB and record safe structural facts.",
@@ -155,6 +157,9 @@ def build_parser() -> argparse.ArgumentParser:
             )
             command.add_argument("--slug")
             command.add_argument("--max-blocks", type=int, default=40)
+        if name == "apply-drafts":
+            command.add_argument("project", type=Path, help="Private Book Studio project directory.")
+            command.add_argument("drafts", type=Path, help="Drafts JSON keyed by source document and block.")
         if name == "apply":
             command.add_argument(
                 "project", type=Path, help="Private Book Studio project directory."
@@ -465,6 +470,9 @@ def _dispatch(args: argparse.Namespace) -> dict[str, Any]:
                 evidence=(json.dumps(receipt["violations"], sort_keys=True),),
             )
         return {**receipt, "message": "EPUB integrity validation passed."}
+    if args.command == "apply-drafts":
+        config = load_config(args.project / "bookstudio.toml")
+        return apply_drafts(config, args.drafts, scope=lambda: _translation_scope(config))
     if args.command == "review":
         return write_review(load_config(args.project / "bookstudio.toml"))
     if args.command in {"finish", "release"}:

@@ -26,6 +26,7 @@ from ..pilot import require_full_scope
 from ..safety.xhtml import EPUB_NAMESPACE, validate_inline_xhtml
 from ..translation.cache import validated_cache_index
 from ..translation.coverage import coverage_receipt, target_index
+from .edits import apply_edits, load_edits
 from .archive import preflight_archive
 from .extract import BLOCK_TAGS
 from .inspect import DC_NS, OPF_NS, clean_text, local_name, package_context
@@ -596,6 +597,24 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _rewrite_with_edits(
+    config: ProjectConfig, path: Path, operations: list[dict[str, Any]]
+) -> None:
+    with zipfile.ZipFile(path, "r") as built:
+        members = [(info, built.read(info.filename)) for info in built.infolist()]
+    edited = apply_edits(config, members, operations)
+    rewritten = path.with_name(path.name + ".edits")
+    try:
+        with zipfile.ZipFile(rewritten, "w") as output:
+            for info, data in edited:
+                info.compress_type = zipfile.ZIP_STORED if info.filename == "mimetype" else zipfile.ZIP_DEFLATED
+                output.writestr(info, data, compresslevel=None if info.filename == "mimetype" else 9)
+        rewritten.replace(path)
+    except BaseException:
+        rewritten.unlink(missing_ok=True)
+        raise
+
+
 def build_epub(config: ProjectConfig, output_path: Path) -> dict[str, Any]:
     require_full_scope(config)
     coverage = coverage_receipt(config, require_complete=True)
@@ -618,6 +637,7 @@ def build_epub(config: ProjectConfig, output_path: Path) -> dict[str, Any]:
         rows.sort(key=lambda row: row["block_index"])
     preflight_archive(config.source)
     image_manifest = load_image_manifest(config)
+    edit_operations, edits_sha256 = load_edits(config)
     destination = output_path.expanduser().resolve()
     if destination == config.source.resolve():
         raise _fail(
@@ -734,6 +754,8 @@ def build_epub(config: ProjectConfig, output_path: Path) -> dict[str, Any]:
                         with output.open(_zip_info(name), "w", force_zip64=True) as output_member:
                             shutil.copyfileobj(source_member, output_member, length=1024 * 1024)
                 output.writestr(_zip_info(stylesheet_path), BOOKSTUDIO_STYLESHEET)
+            if edit_operations:
+                _rewrite_with_edits(config, temporary, edit_operations)
             temporary.replace(destination)
         except BaseException:
             temporary.unlink(missing_ok=True)
@@ -748,6 +770,7 @@ def build_epub(config: ProjectConfig, output_path: Path) -> dict[str, Any]:
         "source_sha256": preflight_archive(config.source)["source_sha256"],
         "output_mode": config.output_mode,
         "localized_companions": len(companions),
+        "edits": {"applied": len(edit_operations), "sha256": edits_sha256},
     }
 
 
@@ -782,6 +805,7 @@ def finish_project(config: ProjectConfig) -> dict[str, Any]:
             "output_sha256": first_receipt["output_sha256"],
             "reproducible": True,
             "integrity": integrity,
+            "edits": first_receipt["edits"],
         }
         atomic_write_json(config.paths.reports / "release.json", release)
         return {

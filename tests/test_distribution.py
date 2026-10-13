@@ -189,7 +189,8 @@ class DistributionContractTests(unittest.TestCase):
         self.assertIn("uses: actions/setup-python@v7", workflow)
         self.assertNotIn("uses: actions/checkout@v4", workflow)
         self.assertNotIn("uses: actions/setup-python@v5", workflow)
-        self.assertIn("python-version: [\"3.11\", \"3.12\", \"3.13\"]", workflow)
+        self.assertIn("python-version: [\"3.11\", \"3.12\", \"3.13\", \"3.14\"]", workflow)
+        self.assertIn("os: [ubuntu-latest, macos-latest, windows-latest]", workflow)
         self.assertIn('cp -R . "$RUNNER_TEMP/bookstudio-install"', workflow)
         self.assertIn(
             'python -m pip install "$RUNNER_TEMP/bookstudio-install"', workflow

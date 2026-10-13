@@ -8,7 +8,14 @@
   },
   "homepage": "https://github.com/wblekhoa/book-studio-core#readme",
   "repository": "https://github.com/wblekhoa/book-studio-core",
-  "keywords": ["epub", "pdf", "translation", "localization", "ebook", "bilingual"],
+  "keywords": [
+    "epub",
+    "pdf",
+    "translation",
+    "localization",
+    "ebook",
+    "bilingual"
+  ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Book Studio",
@@ -21,6 +28,13 @@
       "Help me translate this book, sample first",
       "Show my translation progress page",
       "Prepare this PDF for translation"
+    ],
+    "brandColor": "#2F6B4F",
+    "composerIcon": "./assets/logo.png",
+    "logo": "./assets/logo.png",
+    "screenshots": [
+      "./assets/screenshot-sample-review.png",
+      "./assets/screenshot-progress.png"
     ]
   }
 }

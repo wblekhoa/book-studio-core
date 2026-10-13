@@ -61,7 +61,9 @@ def main():
     args = parser.parse_args()
     files = expected_files()
     existing = {p.relative_to(DEST).as_posix() for p in DEST.rglob('*') if p.is_file()}
-    extras = existing - files.keys() - {'.codex-plugin/plugin.json'}
+    # Hand-maintained plugin files: the manifest and its PNG artwork.
+    extras = {name for name in existing - files.keys() - {'.codex-plugin/plugin.json'}
+              if not (name.startswith('assets/') and name.count('/') == 1 and name.endswith('.png'))}
     if extras:
         print('Unexpected bundle files; inspect manually: ' + ', '.join(sorted(extras)))
         return 1

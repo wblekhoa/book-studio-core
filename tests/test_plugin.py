@@ -32,6 +32,19 @@ class PluginTests(unittest.TestCase):
         self.assertTrue(all(isinstance(prompt, str) and 0 < len(prompt) <= 128 for prompt in prompts))
         self.assertTrue(manifest['keywords'])
 
+    # BSC-SKILL-015
+    def test_manifest_artwork_exists_as_png_under_assets(self):
+        manifest = json.loads((ROOT / 'plugins/book-studio/.codex-plugin/plugin.json').read_text(encoding='utf-8'))
+        interface = manifest['interface']
+        paths = [interface['logo'], interface['composerIcon'], *interface['screenshots']]
+        self.assertTrue(interface['screenshots'])
+        self.assertRegex(interface['brandColor'], r'^#[0-9A-Fa-f]{6}$')
+        for path in paths:
+            with self.subTest(path=path):
+                self.assertTrue(path.startswith('./assets/') and path.endswith('.png'))
+                data = (ROOT / 'plugins/book-studio' / path[2:]).read_bytes()
+                self.assertEqual(b'\x89PNG\r\n\x1a\n', data[:8])
+
     # BSC-SKILL-003
     def test_standalone_bundle_runs_complete_guided_flow(self):
         with tempfile.TemporaryDirectory(prefix='bookstudio plugin ') as directory:

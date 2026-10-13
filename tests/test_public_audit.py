@@ -28,6 +28,28 @@ class PublicBoundaryAuditTests(unittest.TestCase):
         receipt = audit_public_tree(self.root)
         self.assertTrue(receipt["passed"], receipt["violations"])
 
+    # BSC-SKILL-014
+    def test_only_small_real_pngs_in_plugin_artwork_folder_are_allowed(self) -> None:
+        self.minimal_tree()
+        png = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
+        cases = {
+            "plugins/book-studio/assets/logo.png": (png, None),
+            "plugins/book-studio/assets/nested/logo.png": (png, "binary_asset"),
+            "plugins/other/assets/logo.png": (png, "binary_asset"),
+            "docs/screenshot.png": (png, "binary_asset"),
+            "plugins/book-studio/assets/fake.png": (b"not a png", "binary_asset"),
+            "plugins/book-studio/assets/large.png": (png + b"\x00" * 1_000_000, "binary_asset"),
+            "plugins/book-studio/assets/cover.jpg": (b"\xff\xd8\xff", "binary_asset"),
+        }
+        for relative, (data, expected) in cases.items():
+            with self.subTest(relative=relative):
+                path = self.root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(data)
+                rows = [row for row in audit_public_tree(self.root)["violations"] if row["path"] == relative]
+                self.assertEqual([] if expected is None else [expected], [row["category"] for row in rows])
+                path.unlink()
+
     def test_plugin_packaging_does_not_hide_private_content(self) -> None:
         for relative, category in (
             ('plugins/book-studio/runtime/book.epub', 'book_binary'),

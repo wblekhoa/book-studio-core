@@ -11,6 +11,7 @@ from typing import Any, Iterator
 ALLOWED_TOP_LEVEL = frozenset(
     {
         ".gitignore",
+        ".gitattributes",
         ".github",
         "AGENTS.md",
         "LICENSE",
@@ -32,6 +33,10 @@ ALLOWED_TEXT_SUFFIXES = frozenset({".py", ".md", ".toml", ".json", ".txt", ".yml
 ALLOWED_EXTENSIONLESS_FILES = frozenset({"LICENSE"})
 BOOK_SUFFIXES = frozenset({".epub", ".pdf", ".mobi", ".azw3"})
 IMAGE_SUFFIXES = frozenset({".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"})
+# Plugin artwork is the only binary allowed: small, real PNGs directly in this folder.
+PLUGIN_ARTWORK_PARTS = ("plugins", "book-studio", "assets")
+PLUGIN_ARTWORK_MAX_BYTES = 1_000_000
+_PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 PRIVATE_DIRECTORIES = frozenset(
     {"projects", "outputs", "manifests", "reports", "ai-memory", "inputs", "cache", "working"}
 )
@@ -65,6 +70,15 @@ def _walk(root: Path) -> Iterator[Path]:
             yield path
             if path.is_dir():
                 pending.append(path)
+
+
+def _is_plugin_artwork(path: Path, relative_path: Path) -> bool:
+    if relative_path.parent.parts != PLUGIN_ARTWORK_PARTS or path.suffix != ".png":
+        return False
+    if path.stat().st_size > PLUGIN_ARTWORK_MAX_BYTES:
+        return False
+    with path.open("rb") as handle:
+        return handle.read(len(_PNG_SIGNATURE)) == _PNG_SIGNATURE
 
 
 def _row(category: str, relative: str, line: int | None = None) -> dict[str, Any]:
@@ -114,10 +128,11 @@ def audit_public_tree(root: Path) -> dict[str, Any]:
             violations.append(_row("book_binary", relative))
             continue
         if suffix in IMAGE_SUFFIXES:
-            violations.append(_row("binary_asset", relative))
+            if not _is_plugin_artwork(path, relative_path):
+                violations.append(_row("binary_asset", relative))
             continue
         if (
-            path.name != ".gitignore"
+            path.name not in {".gitignore", ".gitattributes"}
             and path.name not in ALLOWED_EXTENSIONLESS_FILES
             and suffix not in ALLOWED_TEXT_SUFFIXES
         ):

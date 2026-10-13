@@ -1,0 +1,4 @@
+# Byte-exact plugin bundle and EPUB fixtures: never convert line endings.
+* text=auto eol=lf
+*.png binary
+*.epub binary

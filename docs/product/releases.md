@@ -16,6 +16,28 @@ Source of truth for details: `CHANGELOG.md` (repo root) and `gh release list -R 
 `CONTRIBUTING.md` keeps package-index publication a separate maintainer decision. Add an entry here only when a
 release is actually published, never ahead of it.
 
+## 0.3.0 · 2026-10-13 (tag `v0.3.0`, GitHub Release)
+
+- **What changed for users**:
+  - the same plugin installs in **Claude Code** (`claude plugin marketplace add wblekhoa/book-studio-core`,
+    `claude plugin install book-studio@book-studio`) and in Codex;
+  - commands `/book-studio:translate`, `:review`, `:finish` and `:capture`;
+  - `book-translator` and `editorial-reviewer` agents;
+  - hooks that refuse direct edits to the certified EPUB, its receipt and the cache, and show project status at
+    session start;
+  - an MCP server with 11 tools plus an experimental in-chat review view;
+  - an optional `projects_dir` setting;
+  - an official eval suite.
+- **REQ-IDs shipped**: BSC-HOOK-001…004, BSC-MCP-001…003, BSC-SKILL-016…017.
+- **Evidence**:
+  - 262 tests and CI on macOS and Linux;
+  - `claude plugin validate --strict` passes for the plugin and the marketplace;
+  - clean-room installs from GitHub in Claude Code and Codex.
+  - **Not yet run**: the live Claude eval suite. The local CLI was logged out, so its results are pending in
+    `docs/behavior-evals.md`.
+- **Channel**: GitHub tag and Release.
+- **Shown in**: `github:wblekhoa/book-studio-core/releases/tag/v0.3.0`.
+
 ## 0.2.0 · 2026-10-13 (tag `v0.2.0`, GitHub Release)
 
 - **What changed for users**:

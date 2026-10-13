@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased (0.3.0)
+## Unreleased
+
+- Nothing yet.
+
+## 0.3.0 - 2026-10-13
 
 - Claude Code plugin from the same folder as the Codex plugin: repository marketplace, commands
   (`/book-studio:translate`, `:review`, `:finish`, `:capture`), `book-translator` and `editorial-reviewer` agents,

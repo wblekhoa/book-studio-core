@@ -13,8 +13,11 @@ temporary folder, and runs as
 
 ## Results
 
-| Date | Plugin | Codex CLI | 1 | 2 | 3 |
+| Date | Plugin | Host CLI | 1 | 2 | 3 |
 | ---- | ------ | --------- | - | - | - |
+| 2026-10-13 | Claude Code 0.3.0 (`claude plugin eval`, MCP path) | 2.1.287 | pending | pending | pending |
 | 2026-10-13 | 0.3.1: skill text identical to 0.2.0; engine predates the 2026-10-13 hardening, whose scenario-3 path is covered by `tests/test_edits.py` | 0.154.0 | pass | pass | pass |
 
 The prompts were written in Vietnamese, to test a non-English conversation.
+
+The Claude Code suite lives in `plugins/book-studio/evals/` (see `docs/claude-plugin.md`). The 0.3.0 row is pending because the local `claude` CLI was logged out when the release was cut.

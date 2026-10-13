@@ -49,6 +49,26 @@ version, so Codex fetches a fresh copy.
 read-only review page of the synthetic test book from `tests/fixtures.py`.
 They contain no third-party book content. `public-audit` allows small PNG files
 only directly inside `plugins/book-studio/assets/`.
+
+Logo source. Render it at 512×512 with a transparent background (for example
+`chrome --headless=new --default-background-color=00000000 --window-size=512,512 --screenshot`):
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="#2f6b4f"/>
+  <path d="M256 150 C 210 120, 150 116, 104 128 L 104 376 C 150 364, 210 368, 256 398 Z" fill="#f7f6f2"/>
+  <path d="M256 150 C 302 120, 362 116, 408 128 L 408 376 C 362 364, 302 368, 256 398 Z" fill="#e3efe8"/>
+  <path d="M256 150 L 256 398" stroke="#2f6b4f" stroke-width="10" stroke-linecap="round"/>
+  <g stroke="#9a9890" stroke-width="14" stroke-linecap="round">
+    <line x1="140" y1="186" x2="222" y2="196"/><line x1="140" y1="232" x2="222" y2="240"/><line x1="140" y1="278" x2="200" y2="284"/>
+  </g>
+  <g stroke="#2f6b4f" stroke-width="14" stroke-linecap="round">
+    <line x1="290" y1="196" x2="372" y2="186"/><line x1="290" y1="240" x2="372" y2="232"/><line x1="290" y1="284" x2="350" y2="278"/>
+  </g>
+  <circle cx="372" cy="356" r="50" fill="#f2b84b"/>
+  <path d="M350 357 l15 15 l29 -31" fill="none" stroke="#2f6b4f" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+```
 Preserve private book projects separately. Remove only the installed plugin with:
 
 ```bash

@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Review page (UX)"
 status: active
 updated: 2026-10-13
+summary: "How the static review page looks: one offline HTML snapshot per project with stage chips, progress, sample source and translation pairs, locked choices and final-book gate status; approving and revising stay CLI commands."
+tags: [area/translation, stack/python, surface/web]
 relations:
   specifies: [book-studio-core:src/bookstudio/review.py]
   dependsOn: [book-studio-core-ux-guided-pilot]

@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Declared edits (UX)"
 status: active
 updated: 2026-10-13
+summary: "How a person declares post-build corrections in edits.json, or captures them from an EPUB edited elsewhere, so finish certifies the corrected book and the review page reports the number of declared edits."
+tags: [area/book, area/build, stack/python, surface/cli]
 relations:
   specifies: [book-studio-core:src/bookstudio/epub/edits.py]
   dependsOn: [book-studio-core-ux-translation-pipeline]

@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Draft apply (logic)"
 status: active
 updated: 2026-10-13
+summary: "Rules for apply-drafts: preflight a whole-chapter drafts file before any write, apply it packet by packet with next/apply semantics, stop at the sample review gate, and stop with draft_missing at the first gap."
+tags: [area/translation, area/ai, stack/python, surface/cli]
 reqPrefix: BSC-DRAFT
 relations:
   specifiedBy: [book-studio-core-ux-draft-apply]

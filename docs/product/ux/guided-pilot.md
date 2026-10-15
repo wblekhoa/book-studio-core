@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Guided intake and pilot (UX)"
 status: active
 updated: 2026-10-11
+summary: "How a new translation starts: start asks only the missing questions and proposes one representative chapter, which the reader approves, reviews and confirms before the rest of the book is translated."
+tags: [area/translation, area/book, stack/python, surface/cli]
 relations:
   specifies:
     - book-studio-core:src/bookstudio/intake.py

@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Portable skill and Codex plugin (logic)"
 status: active
 updated: 2026-10-13
+summary: "Rules for shipping the engine and book-translation skill as a Codex plugin with a byte-identical generated bundle and as a standalone skill with an atomic installer, plus shared versioning, artwork and public-audit exceptions."
+tags: [area/release, area/build, area/ai, stack/python, surface/cli]
 reqPrefix: BSC-SKILL
 relations:
   specifiedBy: [book-studio-core-ux-portable-skill]

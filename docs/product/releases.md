@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Releases"
 status: active
 updated: 2026-10-13
+summary: "Published Book Studio Core releases, newest first: 0.3.0 Claude Code plus Codex plugin, 0.2.0 Codex plugin with hardened edits for macOS and Linux, and the unpublished 0.1.0 initial source tree."
+tags: [area/release, stack/python, surface/cli]
 relations:
   presentedBy: [github:wblekhoa/book-studio-core/releases]
 ---

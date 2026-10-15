@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Agent-host integration (UX)"
 status: active
 updated: 2026-10-13
+summary: "How Book Studio feels inside Claude Code and Codex: one plugin with the skill, four commands, two agents, guard and status hooks, an MCP server with an experimental review view, and a two-command install."
+tags: [area/ai, area/translation, stack/python, surface/cli]
 relations:
   specifies: [book-studio-core:plugins/book-studio]
   dependsOn: [book-studio-core-ux-portable-skill]

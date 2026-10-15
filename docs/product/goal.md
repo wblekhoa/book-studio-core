@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Product goal"
 status: active
 updated: 2026-10-13
+summary: "Why Book Studio Core exists: turn a source EPUB into a reviewed, structurally valid translated EPUB through bounded AI packets, never calling a model or uploading the book, plus audience, success measures and non-goals."
+tags: [area/translation, area/book, area/ai, stack/python, surface/cli]
 ---
 
 # Book Studio Core — Product goal

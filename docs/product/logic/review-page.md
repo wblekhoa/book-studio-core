@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Review page (logic)"
 status: active
 updated: 2026-10-13
+summary: "Rules for bookstudio review: write a read-only, escaped, script-free reports/review.html with stage, progress, sample source beside translation and the next command, showing Finished only while final.epub matches the release receipt."
+tags: [area/translation, area/security, stack/python, surface/cli, surface/web]
 reqPrefix: BSC-REVIEW
 relations:
   specifiedBy: [book-studio-core-ux-review-page]

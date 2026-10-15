@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Declared edits (logic)"
 status: active
 updated: 2026-10-13
+summary: "Rules for edits.json: hash-pinned replace_text, replace_member and add_member operations run inside build so finish certifies the delivered EPUB, plus edits capture and its markup, symlink and path safety checks."
+tags: [area/book, area/build, area/security, stack/python, surface/cli]
 reqPrefix: BSC-EDIT
 relations:
   specifiedBy: [book-studio-core-ux-declared-edits]

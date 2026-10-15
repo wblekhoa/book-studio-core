@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Agent-host integration (logic)"
 status: active
 updated: 2026-10-13
+summary: "Rules for the plugin hooks and MCP server: a guard denies direct writes to gate-owned files inside projects, session start lists nearby projects, and 11 MCP tools reuse the CLI dispatch with stable error codes."
+tags: [area/ai, area/security, stack/python, surface/cli]
 reqPrefix: [BSC-HOOK, BSC-MCP]
 relations:
   specifiedBy: [book-studio-core-ux-agent-host-integration]

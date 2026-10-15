@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Draft apply (UX)"
 status: active
 updated: 2026-10-13
+summary: "How an AI agent applies pre-drafted chapters with one apply-drafts command per lifecycle phase, the drafts file format, and the result statuses pilot_review_required, complete and draft_missing."
+tags: [area/translation, area/ai, stack/python, surface/cli]
 relations:
   specifies: [book-studio-core:src/bookstudio/translation/drafts.py]
   dependsOn: [book-studio-core-ux-guided-pilot]

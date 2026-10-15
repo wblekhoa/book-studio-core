@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Guided intake and pilot (logic)"
 status: active
 updated: 2026-10-13
+summary: "Rules for guided intake and the pilot gate: ask only missing decisions, never recommend a target language, lock the answers, and unlock full-book packets, build and finish only after an explicit pilot accept --confirm."
+tags: [area/translation, area/book, stack/python, surface/cli]
 reqPrefix: BSC-PILOT
 relations:
   specifiedBy: [book-studio-core-ux-guided-pilot]

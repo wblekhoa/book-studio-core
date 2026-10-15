@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Translation pipeline (UX)"
 status: active
 updated: 2026-10-11
+summary: "How a book moves from a read-only source EPUB to output/final.epub through the CLI: inspect, next packet, the reader-chosen model, apply validation, status, and finish with target-only or bilingual output."
+tags: [area/translation, area/book, stack/python, surface/cli]
 relations:
   specifies:
     - book-studio-core:src/bookstudio/cli.py

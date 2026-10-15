@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Decisions"
 status: active
 updated: 2026-10-13
+summary: "Append-only log of why Book Studio Core is built as it is: stdlib provider-neutral engine, pilot gate, fail-closed PDF gateway, personal-use licence, Codex and Claude plugin, review page, declared edits and 0.2.0 platform scope."
+tags: [area/translation, area/book, area/security, area/release, stack/python, surface/cli]
 ---
 
 # Book Studio Core — Decisions (append-only, newest first)

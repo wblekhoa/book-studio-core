@@ -5,6 +5,8 @@ product: book-studio-core
 title: "Book Studio Core — Portable skill and Codex plugin (UX)"
 status: active
 updated: 2026-10-11
+summary: "How an AI agent gets Book Studio: the Codex plugin with its bundled engine, the standalone book-translation skill installer, and the maintainer generator that keeps the plugin bundle in step with the sources."
+tags: [area/release, area/ai, stack/python, surface/cli]
 relations:
   specifies:
     - book-studio-core:skills/book-translation

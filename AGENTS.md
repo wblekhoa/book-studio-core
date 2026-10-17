@@ -1,5 +1,3 @@
-If this checkout lives under `~/JAK` (the owner's workspace), read `~/JAK/AGENTS.md` first (map + floor rules), then `~/JAK/companies/publishing/AGENTS.md`. Standalone clones can ignore this line.
-
 # AGENTS.md - Book Studio Core
 
 ## Mission

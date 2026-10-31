@@ -14,6 +14,7 @@ ALLOWED_TOP_LEVEL = frozenset(
         ".gitattributes",
         ".github",
         "AGENTS.md",
+        "CLAUDE.md",
         "LICENSE",
         "pyproject.toml",
         "README.md",

@@ -287,4 +287,4 @@ attempts timed out; its evidence is DOM/inventory, separate from the successful 
 The full Python suite passed 277 tests at this checkpoint (before rebasing onto 0.3.1). Native Mods tests remain separate from actual Codex evidence.
 The actual panel/sample/polling acceptance requested here is passed on this macOS desktop build. Existing-thread
 reload, other native host builds/OS versions and authenticated Claude evaluation remain outside this proof.
-Source remains unreleased and no commit/push/publication occurred.
+Source remained unreleased at this checkpoint; it shipped in 0.4.0 on 2026-11-02 after review fixes.

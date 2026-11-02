@@ -7,7 +7,7 @@ Code. Do not use claude.ai web chat: book files would have to be uploaded to a c
 ## Install
 
 ```bash
-claude plugin marketplace add wblekhoa/book-studio-core#v0.3.1
+claude plugin marketplace add wblekhoa/book-studio-core#v0.4.0
 claude plugin install book-studio@book-studio
 claude plugin details book-studio
 ```
@@ -55,9 +55,9 @@ claude plugin update book-studio@book-studio
 claude plugin uninstall book-studio@book-studio
 ```
 
-## Chat-first development changes
+## Chat-first progress view
 
-The unreleased checkout adds a Mods module with compact progress above the prompt. It observes Book Studio MCP
+Since 0.4.0 the plugin includes a Mods module with compact progress above the prompt. It observes Book Studio MCP
 calls, refreshes read-only project state, preserves other host drawing and never accepts a sample. Discuss sample
 changes, approval, pause and continuation in chat. The read-only `view` tool returns bounded source/target excerpts
 and saved progress without rewriting the HTML report.
@@ -71,4 +71,3 @@ claude plugin test plugins/book-studio
 
 The official test runner covers terminal and desktop render surfaces. It does not certify an actual desktop
 installation or a live model conversation, and the live Claude evals have not been run for these changes.
-Released tags do not contain these development changes yet.

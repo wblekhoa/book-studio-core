@@ -42,7 +42,7 @@ figma: []
 ## Current truth
 
 - Claude install:
-  `claude plugin marketplace add wblekhoa/book-studio-core#v0.3.1`, then
+  `claude plugin marketplace add wblekhoa/book-studio-core#v0.4.0`, then
   `claude plugin install book-studio@book-studio`. The in-session form is `/plugin marketplace add …` then
   `/plugin install …`.
 - Codex install is unchanged. Codex ignores the Claude-only files; a Codex run with the plugin installed showed no
@@ -84,7 +84,7 @@ flowchart LR
 
 - 2026-10-13: created.
 
-## Chat-first workspace (development checkout)
+## Chat-first workspace (0.4.0)
 
 See `chat-workflow.md`. The new Mods adapter shows saved progress within the conversation; MCP Apps-compatible
 hosts can show the source/sample and refresh status. Decisions remain chat messages. Native adapter tests and a

@@ -32,8 +32,8 @@ tags: [area/translation, area/book, area/security, area/release, stack/python, s
   Native test-kit and browser bridge results are distinct from actual desktop host acceptance.
 - **Review correction**: standalone EPUB edits have an independent private transform/verification route; existing
   Core projects retain `edits.json` plus `finish`/`verify`. Do not invent a translation cache or Core certification.
-- **Release boundary**: source changes stay unreleased until the owner approves a release; no public directory
-  submission or deployment.
+- **Release boundary**: released in 0.4.0 on 2026-11-02 after owner approval; no public directory submission or
+  deployment.
 - **Reversal**: record a new owner decision before changing the chat-only interaction direction.
 
 ## 2026-10-24 · Direction: an interactive workspace inside the AI host

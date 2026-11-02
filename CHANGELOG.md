@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Nothing yet.
+
+## 0.4.0 - 2026-11-02
+
 - Chat-first intake with bounded source excerpts before the agent asks unresolved questions; explicit chat sample
   review and pause/continue guidance, preserving the existing acceptance and final-book gates.
 - Read-only MCP `view` plus optional live sample/progress UI, with bounded content, coherent snapshot retries and
@@ -15,6 +19,7 @@
 - `bookstudio review` now fails with the cache or coverage error instead of rendering a page without coverage, and
   returns `REVIEW_BUSY` if the project keeps changing while it reads.
 - The MCP `review` result no longer embeds the HTML page; it returns the written report path and the `view` data.
+- Plugin manifests take their version from `pyproject.toml`; `scripts/build_plugin.py --check` fails on drift.
 - Live Claude model evals have not been run for these changes.
 
 ## 0.3.1 - 2026-11-02

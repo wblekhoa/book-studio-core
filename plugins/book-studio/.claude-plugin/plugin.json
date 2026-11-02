@@ -1,7 +1,7 @@
 {
   "name": "book-studio",
   "displayName": "Book Studio",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Translate whole EPUB books and text-layer PDFs for private reading: guided choices, a reviewed sample first, and a verified, reproducible EPUB. Bundles its own local engine.",
   "author": {
     "name": "khoa 'jak' le",

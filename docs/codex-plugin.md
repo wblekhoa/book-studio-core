@@ -3,7 +3,7 @@ id: book-studio-core-codex-plugin-guide
 type: runbook
 product: book-studio-core
 title: "Book Studio Codex plugin"
-summary: "Install and verify the bundled Codex plugin, including the unreleased in-host sample view and its approval boundaries."
+summary: "Install and verify the bundled Codex plugin, including the experimental in-host sample view and its approval boundaries."
 status: active
 owner: book-studio-core
 updated: 2026-11-02
@@ -18,7 +18,7 @@ Run commands from Terminal, not from a Python prompt.
 ## Install from GitHub
 
 ```bash
-codex plugin marketplace add wblekhoa/book-studio-core@v0.3.1
+codex plugin marketplace add wblekhoa/book-studio-core@v0.4.0
 codex plugin add book-studio@book-studio
 codex plugin list
 ```
@@ -122,9 +122,9 @@ Poppler tools. OCR, rendering, and image generation are not bundled. All use
 remains subject to the repository's current personal-use license. Structural
 tests do not replace editorial review or visual inspection of a real book.
 
-## Chat-first development changes
+## Chat-first workflow and panel
 
-The unreleased checkout also ships root `plugin.json` and `mcp.json` in the plugin folder, following the portable
+Since 0.4.0 the plugin also ships root `plugin.json` and `mcp.json` in the plugin folder, following the portable
 Agent Plugins layout. It declares local execution and starts the bundled Python server over stdio using
 `${PLUGIN_ROOT}`. Existing compatibility manifests remain for earlier hosts. No model provider is bundled.
 
@@ -140,5 +140,4 @@ translation. The `review` tool keeps the standard `_meta.ui.resourceUri` and ask
 The panel is experimental. Whether it appears depends on the Codex host and version; the developer checks behind
 it are recorded in [the visual workspace spec](product/specs/2026-10-24-visual-workspace.md), not guaranteed for
 other hosts. See [the chat workflow rules](product/logic/chat-workflow.md) for BSC-CHAT-010 and the remaining
-host-verification limits. Do not treat the existing released install commands as containing these unreleased
-changes.
+host-verification limits.

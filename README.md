@@ -20,15 +20,14 @@ original images, image annotations, and same-canvas localized companions.
 > [personal use and rights boundary](skills/book-translation/references/personal-use-and-rights.md)
 > before processing a book.
 
-## Chat-first development checkout
+## Chat-first workflow
 
-The unreleased checkout lets the agent inspect bounded source excerpts before asking for missing choices and
+Since 0.4.0 the agent can the agent inspect bounded source excerpts before asking for missing choices and
 review samples directly in chat. Optional Claude Mods/MCP Apps views show saved progress; a separate browser or
 dashboard is not required. Readers approve, request changes, pause or continue conversationally.
 
 These views are experimental: whether a host draws them depends on the host and its version, and the conversation
-works without them. Released tags below do not include these changes. In a checkout, run
-`python3 scripts/install_codex_plugin.py` for a checked local install. See
+works without them. In a checkout, `python3 scripts/install_codex_plugin.py` gives a checked local Codex install. See
 [chat workflow](docs/product/ux/chat-workflow.md) and [host research](docs/product/specs/2026-10-24-visual-workspace.md).
 
 ## Install
@@ -40,7 +39,7 @@ support. Windows is not supported yet. Register this repository as a
 marketplace, then install Book Studio:
 
 ```bash
-codex plugin marketplace add wblekhoa/book-studio-core@v0.3.1
+codex plugin marketplace add wblekhoa/book-studio-core@v0.4.0
 codex plugin add book-studio@book-studio
 ```
 
@@ -60,7 +59,7 @@ verification, and troubleshooting. The standalone CLI below remains supported.
 Python 3.11 or newer is required. Install the CLI directly from GitHub:
 
 ```bash
-pipx install git+https://github.com/wblekhoa/book-studio-core.git@v0.3.1
+pipx install git+https://github.com/wblekhoa/book-studio-core.git@v0.4.0
 bookstudio doctor --json
 ```
 
@@ -69,7 +68,7 @@ If `pipx` is unavailable, use an isolated virtual environment:
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install git+https://github.com/wblekhoa/book-studio-core.git@v0.3.1
+python -m pip install git+https://github.com/wblekhoa/book-studio-core.git@v0.4.0
 bookstudio doctor --json
 ```
 
@@ -85,7 +84,7 @@ PYTHONPATH=src python3 -m bookstudio --help
 The same plugin works in Claude Code: the CLI, the desktop app's Code tab, and VS Code.
 
 ```bash
-claude plugin marketplace add wblekhoa/book-studio-core#v0.3.1
+claude plugin marketplace add wblekhoa/book-studio-core#v0.4.0
 claude plugin install book-studio@book-studio
 ```
 

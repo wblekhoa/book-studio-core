@@ -2,7 +2,7 @@
   "schema_version": 1,
   "sha256": {
     "LICENSE": "2d170c7a5c19e55fae8fa953edfb3f2e966de5d25364dc73f926f7c1f9737a1d",
-    "runtime/bookstudio/__init__.py": "1ae4b00405fca16d6cd9ebdde9efe92212bbb3175406b42fb9fac7ccda0fc01c",
+    "runtime/bookstudio/__init__.py": "012e90f1e4458737535d6eb500ef0031ff11ab63a29443eb619e94a54a090f4d",
     "runtime/bookstudio/__main__.py": "dc25b97daf2d1bbec526a3d70cdb9af50b8fb9579ceebe6288b83effeaad743f",
     "runtime/bookstudio/chat_ui.py": "9b3a7754481475475e35bd339026eed6ed2f69a73d8493f8ca05fb9474f49dce",
     "runtime/bookstudio/cli.py": "f506ce2216be8d0d98d38c59859e288bb55348864d42ff8eab06f81225485d7e",

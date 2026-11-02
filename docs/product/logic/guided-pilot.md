@@ -4,7 +4,7 @@ type: logic
 product: book-studio-core
 title: "Book Studio Core — Guided intake and pilot (logic)"
 status: active
-updated: 2026-10-13
+updated: 2026-11-02
 summary: "Rules for guided intake and the pilot gate: ask only missing decisions, never recommend a target language, lock the answers, and unlock full-book packets, build and finish only after an explicit pilot accept --confirm."
 tags: [area/translation, area/book, stack/python, surface/cli]
 reqPrefix: BSC-PILOT
@@ -73,4 +73,5 @@ the test named in Evidence.
 
 ## Change log
 
+- 2026-11-02: re-reviewed for 0.3.1; `tests/test_cli.py` changed only the version string, rules unchanged.
 - 2026-10-11: created; REQ-IDs added as one-line `# BSC-PILOT-…` comments next to the tests in the same commit.

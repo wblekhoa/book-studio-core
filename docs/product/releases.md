@@ -4,8 +4,8 @@ type: release
 product: book-studio-core
 title: "Book Studio Core — Releases"
 status: active
-updated: 2026-10-13
-summary: "Published Book Studio Core releases, newest first: 0.3.0 Claude Code plus Codex plugin, 0.2.0 Codex plugin with hardened edits for macOS and Linux, and the unpublished 0.1.0 initial source tree."
+updated: 2026-11-02
+summary: "Published Book Studio Core releases, newest first: 0.3.1 inline-markup hints in packets, 0.3.0 Claude Code plus Codex plugin, 0.2.0 Codex plugin with hardened edits for macOS and Linux, and the unpublished 0.1.0 initial source tree."
 tags: [area/release, stack/python, surface/cli]
 relations:
   presentedBy: [github:wblekhoa/book-studio-core/releases]
@@ -17,6 +17,24 @@ Source of truth for details: `CHANGELOG.md` (repo root) and `gh release list -R 
 
 `CONTRIBUTING.md` keeps package-index publication a separate maintainer decision. Add an entry here only when a
 release is actually published, never ahead of it.
+
+## 0.3.1 · 2026-11-02 (tag `v0.3.1`, GitHub Release)
+
+- **What changed for users**:
+  - packet blocks whose source holds inline emphasis, links, superscripts, subscripts or code carry an advisory
+    `inline_markup` list, so the AI keeps that formatting in `translation_xhtml` instead of dropping it silently;
+    noterefs and anchors stay with the builder, and packet IDs, block maps and caches are unchanged;
+  - the public-boundary audit accepts the top-level `CLAUDE.md`;
+  - install instructions point to `v0.3.1`; Python 3.14 is declared.
+- **REQ-IDs shipped**: BSC-PIPE-017.
+- **Evidence**:
+  - 268 tests; CI run 41410718930 green on macOS and Linux × Python 3.11–3.14;
+  - an independent review found a noteref-duplication bug in the first draft, fixed before release with an
+    end-to-end check (one marker in the finished EPUB);
+  - prepared block maps of the private dogfood projects re-extract identically.
+  - **Not yet run**: the live Claude eval suite (`docs/behavior-evals.md`).
+- **Channel**: GitHub tag and Release.
+- **Shown in**: `github:wblekhoa/book-studio-core/releases/tag/v0.3.1`.
 
 ## 0.3.0 · 2026-10-13 (tag `v0.3.0`, GitHub Release)
 

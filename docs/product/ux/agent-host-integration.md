@@ -42,7 +42,7 @@ figma: []
 ## Current truth
 
 - Claude install:
-  `claude plugin marketplace add wblekhoa/book-studio-core#v0.3.0`, then
+  `claude plugin marketplace add wblekhoa/book-studio-core#v0.3.1`, then
   `claude plugin install book-studio@book-studio`. The in-session form is `/plugin marketplace add …` then
   `/plugin install …`.
 - Codex install is unchanged. Codex ignores the Claude-only files; a Codex run with the plugin installed showed no

@@ -36,6 +36,12 @@ may additionally contain only `translation_xhtml`, `explanation`,
 `image_annotations`, `image_companions`, and `market_contexts`, and only when
 the active policy and content justify them. Do not add prose around the JSON.
 
+When a target block carries `inline_markup`, its flattened `text` lost source
+emphasis, links, superscripts, subscripts, or code. Return a
+`translation_xhtml` that keeps each listed element, with its listed `href`,
+around the matching translated words, alongside the plain `translation`. Do
+not add noterefs or anchors that are not listed; the builder restores them.
+
 Every translation must contain visible target content. Whitespace,
 non-breaking spaces, zero-width characters, or other default-ignorable Unicode
 are not valid placeholders. If OCR debris, a print index, or another block

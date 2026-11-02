@@ -29,7 +29,7 @@ support. Windows is not supported yet. Register this repository as a
 marketplace, then install Book Studio:
 
 ```bash
-codex plugin marketplace add wblekhoa/book-studio-core@v0.2.0
+codex plugin marketplace add wblekhoa/book-studio-core@v0.3.1
 codex plugin add book-studio@book-studio
 ```
 
@@ -49,7 +49,7 @@ verification, and troubleshooting. The standalone CLI below remains supported.
 Python 3.11 or newer is required. Install the CLI directly from GitHub:
 
 ```bash
-pipx install git+https://github.com/wblekhoa/book-studio-core.git@v0.2.0
+pipx install git+https://github.com/wblekhoa/book-studio-core.git@v0.3.1
 bookstudio doctor --json
 ```
 
@@ -58,7 +58,7 @@ If `pipx` is unavailable, use an isolated virtual environment:
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install git+https://github.com/wblekhoa/book-studio-core.git@v0.2.0
+python -m pip install git+https://github.com/wblekhoa/book-studio-core.git@v0.3.1
 bookstudio doctor --json
 ```
 
@@ -74,7 +74,7 @@ PYTHONPATH=src python3 -m bookstudio --help
 The same plugin works in Claude Code: the CLI, the desktop app's Code tab, and VS Code.
 
 ```bash
-claude plugin marketplace add wblekhoa/book-studio-core
+claude plugin marketplace add wblekhoa/book-studio-core#v0.3.1
 claude plugin install book-studio@book-studio
 ```
 
@@ -391,7 +391,7 @@ substitutes for the other. Versions previously distributed under MIT retain the
 terms attached to those earlier distributions; the current license is not
 retroactive.
 
-Version 0.1.0 is an alpha-quality command-line foundation. Keep private book
+Version 0.3 is alpha-quality software. Keep private book
 data outside this repository and review generated translations before personal
 use. See
 [architecture](docs/architecture.md), [AI packets](docs/ai-packets.md),

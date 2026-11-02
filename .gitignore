@@ -22,3 +22,4 @@ previews/
 *.mobi
 *.azw3
 plugins/book-studio/evals/results/
+.pytest_cache/

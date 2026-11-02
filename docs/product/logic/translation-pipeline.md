@@ -4,7 +4,7 @@ type: logic
 product: book-studio-core
 title: "Book Studio Core — Translation pipeline (logic)"
 status: active
-updated: 2026-10-11
+updated: 2026-11-02
 summary: "Rules for moving a source EPUB to a translated EPUB: archive preflight, deterministic block maps, scoped packets, a validated append-only cache, safe inline XHTML, byte-identical builds, and a finish that never replaces final.epub on failure."
 tags: [area/translation, area/book, area/security, stack/python, surface/cli]
 reqPrefix: BSC-PIPE
@@ -55,6 +55,7 @@ the test named in Evidence (all evidence lives in `tests/`, so the generated plu
 | BSC-PIPE-014 | A target-only build keeps anchor IDs and pagebreak markers and localises document titles and EPUB 3 / NCX navigation labels; a bilingual build keeps the source titles and marks source and translation blocks.       | live   | `tests/test_epub_pipeline.py` (`test_target_only_build_preserves_nested_anchor_and_pagebreak_markers`, `…_localizes_document_titles_and_navigation_labels`, `test_bilingual_build_marks_source_and_translation_blocks`) |
 | BSC-PIPE-015 | `finish` refuses a candidate that fails independent integrity checks (for example a link to a missing fragment: `INTEGRITY_FAILED`) and leaves the previous `output/final.epub` untouched.                           | live   | `tests/test_epub_pipeline.py` (`test_broken_fragment_fails_and_finish_preserves_previous_final`)                                                                  |
 | BSC-PIPE-016 | A localized image companion must live inside the project (`IMAGE_COMPANION_OUTSIDE_PROJECT`) and match the original image's pixel canvas exactly (`IMAGE_CANVAS_MISMATCH`).                                         | live   | `tests/test_epub_pipeline.py` (`test_companion_must_be_project_owned_and_match_source_canvas`)                                                                    |
+| BSC-PIPE-017 | A packet block whose source holds inline emphasis, links, superscripts, subscripts or code carries an advisory `inline_markup` list (allowed tag name, text, relative link `href`); id-bearing elements are left to the builder, and the hint never changes the packet ID. | live   | `tests/test_packets.py` (`test_packet_blocks_name_their_source_inline_markup`, `test_inline_markup_hint_does_not_change_the_packet_id`, `InlineMarkupHintTests`) |
 
 ## States and transitions
 
@@ -81,4 +82,5 @@ the test named in Evidence (all evidence lives in `tests/`, so the generated plu
 
 ## Change log
 
+- 2026-11-02: BSC-PIPE-017 inline-markup hint in packets (0.3.1).
 - 2026-10-11: created; REQ-IDs added as one-line `# BSC-PIPE-…` comments next to the tests in the same commit.

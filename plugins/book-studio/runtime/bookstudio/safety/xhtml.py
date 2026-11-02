@@ -39,6 +39,15 @@ def _validate_href(value: str) -> None:
         raise _fail("XHTML_UNSAFE", f"Unsafe XHTML link target: {value!r}")
 
 
+def is_safe_href(value: str) -> bool:
+    """Return whether inline XHTML may keep this link target."""
+    try:
+        _validate_href(value)
+    except BookStudioError:
+        return False
+    return True
+
+
 def validate_inline_xhtml(value: str) -> dict[str, object]:
     if not isinstance(value, str) or not value.strip():
         raise _fail("XHTML_INVALID", "Inline XHTML must be a nonempty string.")

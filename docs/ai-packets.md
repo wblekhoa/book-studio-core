@@ -35,6 +35,17 @@ reference prose, or local paths in lifecycle receipts. API callers cannot mix a
 previously loaded config with a newer on-disk `bookstudio.toml`; operations fail
 with `CONFIG_STALE` and require a reload.
 
+Block `text` is flattened plain text. When the source block contains inline
+emphasis, links, superscripts, subscripts, or code, the block also carries an
+advisory `inline_markup` list such as
+`[{"tag": "em", "text": "real users"}, {"tag": "a", "text": "note", "href": "#n1"}]`.
+Carry that markup into a safe `translation_xhtml` around the matching
+translated words; plain `translation` alone drops it. Hints already name the
+allowed tag (`em` for source `i`, `strong` for source `b`) and include `href`
+only for relative link targets. Elements that carry an `id`, such as noterefs
+and anchors, are not hinted because the builder restores them itself. The hint
+is not part of the packet ID.
+
 A minimal response is:
 
 ```json

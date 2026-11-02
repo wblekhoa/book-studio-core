@@ -161,6 +161,34 @@ class PacketAndCacheTests(unittest.TestCase):
         self.assertEqual(1, len({block["source_path"] for block in packet["blocks"]}))
         self.assertEqual("OEBPS/text/chapter.xhtml", packet["source_document"])
 
+    # BSC-PIPE-017
+    def test_packet_blocks_name_their_source_inline_markup(self) -> None:
+        packet = next_packet(self.config)
+        assert packet is not None
+
+        by_tag = {block["tag"]: block for block in packet["blocks"]}
+        self.assertNotIn("inline_markup", by_tag["h1"])
+        self.assertEqual(
+            [
+                {"tag": "em", "text": "decode"},
+                {"tag": "a", "text": "One note", "href": "#note-1"},
+            ],
+            by_tag["p"]["inline_markup"],
+        )
+
+    # BSC-PIPE-017
+    def test_inline_markup_hint_does_not_change_the_packet_id(self) -> None:
+        packet = next_packet(self.config)
+        assert packet is not None
+
+        with patch(
+            "bookstudio.translation.packets.inline_markup_by_block", return_value={}
+        ):
+            plain = next_packet(self.config)
+        assert plain is not None
+        self.assertEqual(packet["packet_id"], plain["packet_id"])
+        self.assertTrue(all("inline_markup" not in block for block in plain["blocks"]))
+
     def test_next_never_crosses_active_pilot_scope(self) -> None:
         pilot_target = frozenset({("OEBPS/text/chapter.xhtml", 2)})
 
@@ -973,3 +1001,51 @@ class PacketAndCacheTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class InlineMarkupHintTests(unittest.TestCase):
+    def hint(self, body: str) -> list[dict[str, str]]:
+        from xml.etree import ElementTree as ET
+
+        from bookstudio.epub.extract import _inline_markup
+
+        return _inline_markup(
+            ET.fromstring(f'<p xmlns="http://www.w3.org/1999/xhtml">{body}</p>')
+        )
+
+    # BSC-PIPE-017
+    def test_i_and_b_are_named_by_their_allowed_equivalents(self) -> None:
+        self.assertEqual(
+            [{"tag": "em", "text": "x"}, {"tag": "strong", "text": "y"}],
+            self.hint("<i>x</i> and <b>y</b>"),
+        )
+
+    # BSC-PIPE-017
+    def test_anchored_elements_are_left_to_the_builder(self) -> None:
+        # The builder restores id-bearing source elements itself; hinting them
+        # would make a translator duplicate the noteref.
+        self.assertEqual(
+            [],
+            self.hint('Text<sup><a id="r1" href="#n1">1</a></sup> and <a id="p2"/>.'),
+        )
+
+    # BSC-PIPE-017
+    def test_only_relative_link_targets_are_hinted(self) -> None:
+        self.assertEqual(
+            [
+                {"tag": "a", "text": "site"},
+                {"tag": "a", "text": "note", "href": "notes.xhtml#n1"},
+            ],
+            self.hint('<a href="https://example.com">site</a> <a href="notes.xhtml#n1">note</a>'),
+        )
+
+    # BSC-PIPE-017
+    def test_links_inside_emphasis_and_nested_blocks_are_hinted(self) -> None:
+        self.assertEqual(
+            [
+                {"tag": "em", "text": "this note"},
+                {"tag": "a", "text": "note", "href": "#n1"},
+                {"tag": "em", "text": "inner"},
+            ],
+            self.hint('<em>this <a href="#n1">note</a></em><span><p>an <i>inner</i></p></span>'),
+        )

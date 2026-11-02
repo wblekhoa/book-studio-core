@@ -7,7 +7,7 @@ Code. Do not use claude.ai web chat: book files would have to be uploaded to a c
 ## Install
 
 ```bash
-claude plugin marketplace add wblekhoa/book-studio-core
+claude plugin marketplace add wblekhoa/book-studio-core#v0.3.1
 claude plugin install book-studio@book-studio
 claude plugin details book-studio
 ```

@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Collection
 
 from ..config import ProjectConfig
+from ..epub.extract import inline_markup_by_block
 from ..errors import BookStudioError
 from .cache import (
     load_cache,
@@ -198,6 +199,8 @@ def next_packet(
                     }
                 )
 
+    # Advisory only: the packet id binds block hashes, not these hints.
+    inline_hints = inline_markup_by_block(config.source, source_document)
     packet_blocks = [
         {
             "source_path": source_document,
@@ -207,6 +210,11 @@ def next_packet(
             "text": block["text"],
             "source_sha256": block["text_sha256"],
             "translate": True,
+            **(
+                {"inline_markup": inline_hints[block["block_index"]]}
+                if block["block_index"] in inline_hints
+                else {}
+            ),
         }
         for block in selected
     ]

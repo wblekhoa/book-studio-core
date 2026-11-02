@@ -4,6 +4,16 @@
 
 - Nothing yet.
 
+## 0.3.1 - 2026-11-02
+
+- Packet blocks whose source holds inline emphasis, links, superscripts,
+  subscripts, or code now carry an advisory `inline_markup` list, so the AI can
+  return a matching `translation_xhtml` instead of silently dropping the
+  markup. Packet IDs and existing caches are unchanged.
+- The public-boundary audit allows the top-level `CLAUDE.md`.
+- Install instructions point to `v0.3.1`; Python 3.14 is declared (CI already
+  tested it); `.pytest_cache/` is ignored.
+
 ## 0.3.0 - 2026-10-13
 
 - Claude Code plugin from the same folder as the Codex plugin: repository marketplace, commands

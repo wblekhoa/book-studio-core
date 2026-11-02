@@ -3,7 +3,7 @@ id: book-studio-core-spec-2026-10-24-visual-workspace
 type: spec
 product: book-studio-core
 title: "Book Studio Core — Visual workspace (spec)"
-status: building
+status: shipped
 approvedBy: "Project owner (chat authorization)"
 approvedAt: 2026-10-24
 updated: 2026-11-02
@@ -15,7 +15,7 @@ tags: [area/translation, area/book, area/ai, stack/python, surface/cli, surface/
 figma: []
 relations:
   changes: [book-studio-core-ux-chat-workflow, book-studio-core-logic-chat-workflow]
-  # owner gate 2 — when shipped add:  releasedTo: [book-studio-core-releases @ <release id>]
+  releasedTo: [book-studio-core-releases @ 0.4.0]
 ---
 # Book Studio Core — In-host visual workspace research
 

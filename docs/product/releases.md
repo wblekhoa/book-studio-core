@@ -5,7 +5,7 @@ product: book-studio-core
 title: "Book Studio Core — Releases"
 status: active
 updated: 2026-11-02
-summary: "Published Book Studio Core releases, newest first: 0.3.1 inline-markup hints in packets, 0.3.0 Claude Code plus Codex plugin, 0.2.0 Codex plugin with hardened edits for macOS and Linux, and the unpublished 0.1.0 initial source tree."
+summary: "Published Book Studio Core releases, newest first: 0.4.0 chat-first workflow with in-host progress views, 0.3.1 inline-markup hints in packets, 0.3.0 Claude Code plus Codex plugin, 0.2.0 Codex plugin with hardened edits for macOS and Linux, and the unpublished 0.1.0 initial source tree."
 tags: [area/release, stack/python, surface/cli]
 relations:
   presentedBy: [github:wblekhoa/book-studio-core/releases]
@@ -17,6 +17,28 @@ Source of truth for details: `CHANGELOG.md` (repo root) and `gh release list -R 
 
 `CONTRIBUTING.md` keeps package-index publication a separate maintainer decision. Add an entry here only when a
 release is actually published, never ahead of it.
+
+## 0.4.0 · 2026-11-02 (tag `v0.4.0`, GitHub Release)
+
+- **What changed for users**:
+  - chat-first intake: the agent sees bounded source excerpts before asking for missing choices; sample review,
+    pause and continue happen in chat, with the existing approval and finishing gates;
+  - experimental in-host progress: a read-only `view` tool, a Claude Code Mods progress line and a Codex MCP Apps
+    panel; no view can accept a sample;
+  - `review` fails on an invalid cache instead of showing zero progress, reports `REVIEW_BUSY` on a moving project,
+    and the MCP result uses one snapshot and no longer embeds the HTML page;
+  - portable `plugin.json`/`mcp.json`, manifest versions owned by `pyproject.toml`, a checked one-command Codex
+    install from a checkout, and refusal of book paths inside the installed plugin.
+- **REQ-IDs shipped**: BSC-CHAT-001…011, BSC-REVIEW-008, BSC-SKILL-013 (all manifests), BSC-MCP-002 (updated).
+- **Evidence**:
+  - 288 tests; CI run 41429425562 green on macOS and Linux × Python 3.11–3.14;
+  - `claude plugin validate --strict` and `claude plugin test` (5/5) pass;
+  - an independent review found doc overclaims, a broken review fallback and manifest version drift; all fixed and
+    re-reviewed before release;
+  - the Codex panel was checked on one macOS Codex desktop build (spec `specs/2026-10-24-visual-workspace.md`).
+  - **Not yet run**: the live Claude eval suite (`docs/behavior-evals.md`).
+- **Channel**: GitHub tag and Release.
+- **Shown in**: `github:wblekhoa/book-studio-core/releases/tag/v0.4.0`.
 
 ## 0.3.1 · 2026-11-02 (tag `v0.3.1`, GitHub Release)
 

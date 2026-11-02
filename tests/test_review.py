@@ -187,6 +187,53 @@ class ReviewPageTests(unittest.TestCase):
         self.assertIn("bookstudio finish", payload["next_command"])
         self.assertIn("Changed since the gate ran", page)
 
+    # BSC-REVIEW-008
+    def test_invalid_cache_fails_review_instead_of_rendering_zero_progress(self) -> None:
+        self._start_guided()
+        self._translate_pilot()
+        (self.project / "cache" / "translations.json").write_text("{not json", encoding="utf-8")
+        result = run_cli("review", str(self.project), "--json")
+        self.assertNotEqual(0, result.returncode)
+        self.assertTrue(json.loads(result.stdout)["code"])
+
+    # BSC-CHAT-002
+    def test_snapshot_reports_review_busy_when_the_project_keeps_changing(self) -> None:
+        from unittest.mock import patch
+
+        from bookstudio.config import load_config
+        from bookstudio.errors import BookStudioError
+        from bookstudio import review
+
+        self._start_guided()
+        config = load_config(self.project / "bookstudio.toml")
+        watched = config.paths.pilot
+        original = review._review_snapshot_once
+
+        def changing(current):
+            watched.write_text(watched.read_text(encoding="utf-8") + " ", encoding="utf-8")
+            return original(current)
+
+        with patch.object(review, "_review_snapshot_once", side_effect=changing):
+            with self.assertRaises(BookStudioError) as raised:
+                review.review_snapshot(config)
+        self.assertEqual("REVIEW_BUSY", raised.exception.code)
+
+    # BSC-CHAT-011
+    def test_mcp_review_reads_one_snapshot_and_omits_the_html_page(self) -> None:
+        from unittest.mock import patch
+
+        from bookstudio import mcp_server, review
+
+        self._start_guided()
+        self._translate_pilot()
+        with patch.object(review, "review_snapshot", wraps=review.review_snapshot) as snapshot:
+            result = mcp_server.call_tool("review", {"project": str(self.project)})
+        self.assertEqual(1, snapshot.call_count)
+        self.assertNotIn("review_html", result)
+        self.assertEqual("reports/review.html", result["written"])
+        self.assertEqual(result["workflow_status"], result["view"]["stage"])
+        self.assertTrue(any("Bản dịch" in pair["translation"] for pair in result["view"]["pairs"]))
+
     # BSC-REVIEW-006
     def test_missing_project_fails_with_stable_code(self) -> None:
         result = run_cli("review", str(self.root / "missing"), "--json")

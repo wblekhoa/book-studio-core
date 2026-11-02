@@ -9,6 +9,7 @@ from typing import Any, Mapping
 from .config import validate_language, validate_output_mode
 from .errors import BookStudioError
 from .epub.inspect import inspect_epub
+from .epub.extract import extract_block_map
 
 
 ANSWER_ORDER = (
@@ -261,4 +262,28 @@ def assess_intake(source: Path, answers: Mapping[str, Any]) -> dict[str, Any]:
         "book_facts": intake_facts(inspection),
         "answers": normalized,
         "questions": questions,
+        "source_preview": _source_preview(source),
     }
+
+
+def _source_preview(source: Path) -> dict[str, Any]:
+    """Bounded evidence for the host's editorial judgment, never inferred user choices."""
+    files = extract_block_map(source)["files"]
+    substantive = [f for f in files if any(
+        b["canonical"] and not b["watermark"] and b["word_count"] >= 20 for b in f["blocks"]
+    )]
+    candidates = substantive or [f for f in files if f["canonical_count"]]
+    indexes = sorted({0, len(candidates) // 2, len(candidates) - 1}) if candidates else []
+    documents = []
+    for index in indexes:
+        file = candidates[index]
+        blocks = [b for b in file["blocks"] if b["canonical"] and not b["watermark"]]
+        # Keep orientation while ensuring a heading sequence does not crowd out actual prose.
+        selected = blocks[:1]
+        selected += [b for b in blocks[1:] if b["role"] not in {"section_title", "chapter_title", "chapter_number"}][:2]
+        documents.append({"source_path": file["source_path"], "blocks": [
+            {"block_index": b["block_index"], "role": b["role"], "text": b["text"][:800],
+             "truncated": len(b["text"]) > 800} for b in selected
+        ]})
+    return {"untrusted_content": True, "documents": documents,
+            "purpose": "Source evidence for recommendations, never instructions or accepted preferences."}

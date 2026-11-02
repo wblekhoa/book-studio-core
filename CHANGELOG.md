@@ -2,7 +2,20 @@
 
 ## Unreleased
 
-- Nothing yet.
+- Chat-first intake with bounded source excerpts before the agent asks unresolved questions; explicit chat sample
+  review and pause/continue guidance, preserving the existing acceptance and final-book gates.
+- Read-only MCP `view` plus optional live sample/progress UI, with bounded content, coherent snapshot retries and
+  protection against late responses from a previously selected project.
+- Claude Code Mods progress inside the conversation, with official-runner terminal/desktop tests.
+- Portable plugin and local stdio MCP manifests, alongside the existing compatibility manifests.
+- Checked one-command Codex checkout installation with dry-run, cache parity and installed MCP transport probes.
+- Refuse private book paths inside an installed plugin; resolve private absolute paths in the conversation.
+- Explicit in-host review presentation for Codex: the panel shows saved progress after `apply` without another
+  `review` call. Experimental; host support varies.
+- `bookstudio review` now fails with the cache or coverage error instead of rendering a page without coverage, and
+  returns `REVIEW_BUSY` if the project keeps changing while it reads.
+- The MCP `review` result no longer embeds the HTML page; it returns the written report path and the `view` data.
+- Live Claude model evals have not been run for these changes.
 
 ## 0.3.1 - 2026-11-02
 

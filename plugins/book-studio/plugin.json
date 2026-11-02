@@ -1,0 +1,46 @@
+{
+  "name": "book-studio",
+  "version": "0.3.1",
+  "description": "Guided book translation with a reviewed pilot and bundled local engine.",
+  "license": "LicenseRef-Book-Studio-Personal-Use-1.0",
+  "author": {
+    "name": "khoa 'jak' le"
+  },
+  "homepage": "https://github.com/wblekhoa/book-studio-core#readme",
+  "repository": "https://github.com/wblekhoa/book-studio-core",
+  "keywords": [
+    "epub",
+    "pdf",
+    "translation",
+    "localization",
+    "ebook",
+    "bilingual"
+  ],
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "extensions": {
+    "com.openai": {
+      "requires_local_executor": true,
+      "onboardingSkill": "./skills/book-translation/SKILL.md",
+      "interface": {
+        "displayName": "Book Studio",
+        "shortDescription": "Translate whole books, sample first.",
+        "longDescription": "Translate EPUBs and supported text-layer PDFs for private reading. Includes its engine; requires Python 3.11+ on macOS or Linux. Review a sample before translating the full book.",
+        "developerName": "khoa 'jak' le",
+        "category": "Productivity",
+        "capabilities": [],
+        "defaultPrompt": [
+          "Help me translate this book, sample first",
+          "Show my translation progress page",
+          "Prepare this PDF for translation"
+        ],
+        "brandColor": "#2F6B4F",
+        "composerIcon": "./assets/logo.png",
+        "logo": "./assets/logo.png",
+        "screenshots": [
+          "./assets/screenshot-sample-review.png",
+          "./assets/screenshot-progress.png"
+        ]
+      }
+    }
+  }
+}

@@ -4,7 +4,7 @@ type: logic
 product: book-studio-core
 title: "Book Studio Core — Review page (logic)"
 status: active
-updated: 2026-10-13
+updated: 2026-11-02
 summary: "Rules for bookstudio review: write a read-only, escaped, script-free reports/review.html with stage, progress, sample source beside translation and the next command, showing Finished only while final.epub matches the release receipt."
 tags: [area/translation, area/security, stack/python, surface/cli, surface/web]
 reqPrefix: BSC-REVIEW
@@ -40,6 +40,7 @@ the test named in Evidence.
 | BSC-REVIEW-005 | An expert project with no sample gate still renders a page and points to `next`.                                                                                                                                | live   | `tests/test_review.py` (`test_expert_project_without_pilot_still_renders`)                            |
 | BSC-REVIEW-006 | A missing project fails with a stable JSON error code.                                                                                                                                                          | live   | `tests/test_review.py` (`test_missing_project_fails_with_stable_code`)                                |
 | BSC-REVIEW-007 | The page shows "Finished" only while `output/final.epub` matches the SHA-256 in `reports/release.json`. A changed output falls back to the full-book stage and points to `finish`.                         | live   | `tests/test_review.py` (`test_finished_page_reports_gate_and_detects_changed_output`)                 |
+| BSC-REVIEW-008 | An invalid translation cache fails `review` with its stable error code instead of rendering a page with zero progress. | live | `tests/test_review.py` (`test_invalid_cache_fails_review_instead_of_rendering_zero_progress`) |
 
 ## States and transitions
 
@@ -67,4 +68,5 @@ The page reflects the pilot lifecycle; it never moves it.
 
 ## Change log
 
+- 2026-11-02: BSC-REVIEW-008 (review no longer hides an invalid cache).
 - 2026-10-13: created with BSC-REVIEW-001…007.

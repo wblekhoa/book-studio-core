@@ -331,16 +331,35 @@ def project_status(config: ProjectConfig) -> dict[str, Any]:
     }
 
 
-def write_review(config: ProjectConfig) -> dict[str, Any]:
-    """Render the review page from current state; only reports/review.html is written."""
+def review_snapshot(config: ProjectConfig) -> dict[str, Any]:
+    """Read the current project for chat/host views; never writes files."""
+    watched = [config.paths.cache / "translations.json", config.paths.pilot,
+               config.paths.source_blocks / "full-block-map.json", config.paths.source_blocks / "coverage.json",
+               config.paths.reports / "release.json", config.paths.output / "final.epub"]
+    def revision():
+        result = []
+        for path in watched:
+            try:
+                stat = path.stat()
+                result.append((stat.st_ino, stat.st_mtime_ns, stat.st_size))
+            except FileNotFoundError:
+                result.append(None)
+        return result
+    for _ in range(3):
+        before = revision()
+        context = _review_snapshot_once(config)
+        if before == revision():
+            return context
+    raise BookStudioError(code="REVIEW_BUSY", message="The project changed while its progress was being read.",
+                          next_action="Wait for the current apply to finish, then request progress again.")
+
+
+def _review_snapshot_once(config: ProjectConfig) -> dict[str, Any]:
     pilot = pilot_receipt(config)
     rows = _cache_rows(load_cache(config))
     block_map = _read_optional_json(config.paths.source_blocks / "full-block-map.json")
     contract = _read_optional_json(config.paths.source_blocks / "coverage.json")
-    try:
-        coverage = coverage_receipt(config, require_complete=False) if block_map is not None else None
-    except BookStudioError:
-        coverage = None
+    coverage = coverage_receipt(config, require_complete=False) if block_map is not None else None
     intake = _read_optional_json(config.paths.intake)
     facts = intake.get("book_facts") if isinstance(intake, dict) else None
     facts = facts if isinstance(facts, dict) else {}
@@ -361,6 +380,7 @@ def write_review(config: ProjectConfig) -> dict[str, Any]:
          "output_mode": config.output_mode, **dict(config.profile)}.items()
     )
     context = {
+        "project": config.project_root.name,
         "title": title_values[0] if isinstance(title_values, list) and title_values else config.slug,
         "source_name": config.source.name,
         "source_language": config.source_language,
@@ -377,16 +397,28 @@ def write_review(config: ProjectConfig) -> dict[str, Any]:
         "choices": choices,
         "release": release,
     }
+    return context
+
+
+def write_review(config: ProjectConfig) -> dict[str, Any]:
+    """Render the review page from current state; only reports/review.html is written."""
+    return write_review_with_snapshot(config)[0]
+
+
+def write_review_with_snapshot(config: ProjectConfig) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Write the review page and return its receipt with the one snapshot it rendered."""
+    context = review_snapshot(config)
+    coverage = context["coverage"]
     atomic_write_text(config.paths.reports / "review.html", _render(context))
     return {
         "status": "pass",
         "schema_version": 1,
-        "workflow_status": stage,
+        "workflow_status": context["stage"],
         "translated": coverage.get("translated", 0) if coverage else 0,
         "eligible": coverage.get("eligible", 0) if coverage else 0,
         "remaining": coverage.get("remaining") if coverage else None,
-        "sample_blocks": len(pairs),
+        "sample_blocks": len(context["pairs"]),
         "next_command": context["next_command"],
         "written": REVIEW_RELATIVE_PATH,
-        "message": f"Review page written to {REVIEW_RELATIVE_PATH}. Open it in a browser.",
-    }
+        "message": "Review ready. Present the sample and next step in chat; the saved page is optional.",
+    }, context

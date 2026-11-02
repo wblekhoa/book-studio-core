@@ -24,7 +24,7 @@ Inside a session you can run `/plugin marketplace add wblekhoa/book-studio-core`
 | Commands | `/book-studio:translate`, `/book-studio:review`, `/book-studio:finish`, `/book-studio:capture` | Shortcuts for the main steps |
 | Agents | `book-translator`, `editorial-reviewer` | Translate one packet in an isolated context; review the sample or the final book (read-only) |
 | Hooks | guard, session start | Refuse direct writes to `output/final.epub`, `reports/release.json` and `cache/translations.json` inside a project. List nearby projects with their next command when a session starts |
-| MCP server | `book-studio` (11 tools) | `status`, `start`, `pilot`, `next_packet`, `apply_response`, `apply_drafts`, `review`, `finish`, `verify`, `capture_edits` and `doctor`. They use the same engine and gates as the CLI |
+| MCP server | `book-studio` (12 tools) | `status`, `start`, `pilot`, `next_packet`, `apply_response`, `apply_drafts`, `review`, `finish`, `verify`, `capture_edits`, `view` and `doctor`. They use the same engine and gates as the CLI |
 
 The `review` tool also declares an **experimental** MCP Apps view, which shows the review page inside the chat where
 the host supports it. Other hosts show a text summary and the page path.
@@ -54,3 +54,21 @@ claude plugin marketplace update book-studio
 claude plugin update book-studio@book-studio
 claude plugin uninstall book-studio@book-studio
 ```
+
+## Chat-first development changes
+
+The unreleased checkout adds a Mods module with compact progress above the prompt. It observes Book Studio MCP
+calls, refreshes read-only project state, preserves other host drawing and never accepts a sample. Discuss sample
+changes, approval, pause and continuation in chat. The read-only `view` tool returns bounded source/target excerpts
+and saved progress without rewriting the HTML report.
+
+Validate the module without signing in or calling a model:
+
+```bash
+claude plugin validate plugins/book-studio --strict
+claude plugin test plugins/book-studio
+```
+
+The official test runner covers terminal and desktop render surfaces. It does not certify an actual desktop
+installation or a live model conversation, and the live Claude evals have not been run for these changes.
+Released tags do not contain these development changes yet.

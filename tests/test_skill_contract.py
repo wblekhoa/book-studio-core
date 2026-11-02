@@ -20,6 +20,14 @@ def _skill_text() -> str:
 
 
 class SkillContractTests(unittest.TestCase):
+    # BSC-CHAT-003 / BSC-CHAT-004
+    def test_chat_workflow_covers_source_evidence_review_and_conversational_pause(self) -> None:
+        text = _skill_text()
+        self.assertIn("references/chat-workflow.md", (SKILL / "SKILL.md").read_text())
+        for contract in ("source_preview", "Pause requested", "Paused", "Continue does not mean pilot acceptance",
+                         "Do not require the user to open a browser"):
+            self.assertIn(contract, text)
+
     # BSC-SKILL-011
     def test_skill_documents_every_beginner_command(self) -> None:
         text = _skill_text()

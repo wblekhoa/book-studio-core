@@ -20,6 +20,17 @@ original images, image annotations, and same-canvas localized companions.
 > [personal use and rights boundary](skills/book-translation/references/personal-use-and-rights.md)
 > before processing a book.
 
+## Chat-first development checkout
+
+The unreleased checkout lets the agent inspect bounded source excerpts before asking for missing choices and
+review samples directly in chat. Optional Claude Mods/MCP Apps views show saved progress; a separate browser or
+dashboard is not required. Readers approve, request changes, pause or continue conversationally.
+
+These views are experimental: whether a host draws them depends on the host and its version, and the conversation
+works without them. Released tags below do not include these changes. In a checkout, run
+`python3 scripts/install_codex_plugin.py` for a checked local install. See
+[chat workflow](docs/product/ux/chat-workflow.md) and [host research](docs/product/specs/2026-10-24-visual-workspace.md).
+
 ## Install
 
 ### Codex plugin (bundled engine)

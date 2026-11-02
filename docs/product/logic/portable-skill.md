@@ -4,7 +4,7 @@ type: logic
 product: book-studio-core
 title: "Book Studio Core — Portable skill and Codex plugin (logic)"
 status: active
-updated: 2026-10-13
+updated: 2026-11-02
 summary: "Rules for shipping the engine and book-translation skill as a Codex plugin with a byte-identical generated bundle and as a standalone skill with an atomic installer, plus shared versioning, artwork and public-audit exceptions."
 tags: [area/release, area/build, area/ai, stack/python, surface/cli]
 reqPrefix: BSC-SKILL
@@ -46,7 +46,7 @@ the test named in Evidence.
 | BSC-SKILL-010 | The plugin manifest follows the Codex `plugin.json` spec: `skills` is a `./` path, `interface.defaultPrompt` is a list of 1-3 prompts of at most 128 characters, and `keywords` is set. | live   | `tests/test_plugin.py` (`test_manifest_follows_codex_plugin_spec`)                                 |
 | BSC-SKILL-011 | `SKILL.md` and its references name every beginner CLI command (including `apply-drafts` and `review`) and the `edits.json` contract.                              | live   | `tests/test_skill_contract.py` (`test_skill_documents_every_beginner_command`)                     |
 | BSC-SKILL-012 | The skill never recommends a per-book finalizer, a postprocessor or a project-owned script that edits the EPUB after `finish`; post-build corrections go through `edits.json`. | live   | `tests/test_skill_contract.py` (`test_skill_never_recommends_editing_after_the_gate`)              |
-| BSC-SKILL-013 | The plugin manifest and the engine share one release version (`plugin.json` `version` equals `bookstudio.__version__`), and every release raises it so Codex fetches a fresh cached copy. | live   | `tests/test_skill_contract.py` (`test_plugin_and_engine_share_one_release_version`)              |
+| BSC-SKILL-013 | All three plugin manifests (`plugin.json`, `.codex-plugin/plugin.json`, `.claude-plugin/plugin.json`) carry the `pyproject.toml` version, which equals `bookstudio.__version__`; `scripts/build_plugin.py --check` fails on drift and a build rewrites it. Every release raises it so Codex fetches a fresh cached copy. | live   | `tests/test_skill_contract.py` (`test_plugin_and_engine_share_one_release_version`); `tests/test_plugin.py` (`test_every_plugin_manifest_carries_the_package_version`, `test_check_reports_and_build_repairs_manifest_version_drift`) |
 | BSC-SKILL-014 | `public-audit` allows binary files only as small (at most 1 MB) real PNGs directly inside `plugins/book-studio/assets/`. Any other image, path, size or file signature is still `binary_asset`. | live   | `tests/test_public_audit.py` (`test_only_small_real_pngs_in_plugin_artwork_folder_are_allowed`)   |
 | BSC-SKILL-015 | The manifest declares a brand colour, a logo, a composer icon and screenshots, and every artwork path is an existing PNG under `./assets/`. | live   | `tests/test_plugin.py` (`test_manifest_artwork_exists_as_png_under_assets`)                        |
 | BSC-SKILL-016 | The same plugin folder carries a Claude Code manifest, a repository marketplace, hooks, `.mcp.json`, agents and commands. All of them call the bundled runner through `${CLAUDE_PLUGIN_ROOT}`, and the read-only reviewer has no shell access. | live   | `tests/test_plugin.py` (`test_claude_plugin_wiring_targets_the_bundled_runner`)                   |
@@ -74,4 +74,5 @@ the test named in Evidence.
 
 ## Change log
 
+- 2026-11-02: BSC-SKILL-013 covers all three manifests and is enforced by `build_plugin.py`.
 - 2026-10-11: created; REQ-IDs added as one-line `# BSC-SKILL-…` comments next to the tests in the same commit.

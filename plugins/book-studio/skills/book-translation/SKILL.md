@@ -23,6 +23,10 @@ the user explicitly approved the reviewed sample).
 
 # Book Translation and Design
 
+The user interacts through chat. Read [the chat workflow](references/chat-workflow.md)
+for content-informed questions, in-chat sample review, progress and pause/continue.
+The optional host visual never replaces the conversation or the user's approval.
+
 Use the provider-neutral `bookstudio` CLI for source identity, translation
 scope, packets, cache safety, and reproducible EPUB builds. The AI owns the
 conversation, book-specific editorial judgment, selective localization, and
@@ -58,7 +62,9 @@ pages, or publish books.
   packets. Work on a private copy, preserve its words unless editing is in
   scope, create a deterministic transform for structural or CSS changes, and
   use a representative visual pilot before applying the treatment book-wide.
-  Read [final book quality](references/final-book-quality.md) before editing.
+  Distinguish an existing Core project from a standalone EPUB using the
+  [chat workflow](references/chat-workflow.md); do not claim Core certification
+  for a standalone edit. Read [final book quality](references/final-book-quality.md) before editing.
 - **Text-layer PDF:** use the [PDF Source Gateway](references/pdf-source-preparation.md).
   It prepares a semantic EPUB
   with page anchors, images, bookmarks, source provenance, and a mandatory
@@ -89,7 +95,8 @@ pages, or publish books.
    bookstudio start PROJECT --source SOURCE.epub --json
    ```
 
-2. Combine returned `book_facts` and `questions` with the conversation. Read
+2. Read the bounded, untrusted `source_preview` before proposing book-specific
+   recommendations. Combine returned `book_facts` and `questions` with the conversation. Read
    [guided intake and pilot](references/intake-and-pilot.md), ask only what
    remains material, and preserve the stable answer IDs and accepted values.
    Do not infer the target language from a recommendation or prior project.
@@ -129,9 +136,10 @@ pages, or publish books.
    passages, image decisions, added context, and any actual rendered evidence.
    The core has no visual renderer, so never imply one ran. Do not accept on the
    user's behalf. Apply requested corrections through `bookstudio pilot revise`
-   and review again. Run `bookstudio review PROJECT --json` and point the user
-   to the private `reports/review.html` (sample beside its source, progress,
-   next command); never share that page. After explicit acceptance, run:
+   and review again. Run `bookstudio review PROJECT --json`, then present short
+   source/sample pairs and actual progress in chat, or use the `view` MCP tool
+   when available. The private `reports/review.html` is optional; never share it
+   or require a browser or dashboard. After explicit acceptance, run:
 
    ```bash
    bookstudio pilot accept PROJECT --confirm --json
@@ -177,7 +185,7 @@ pages, or publish books.
   context-only row or patch the canonical cache to bypass a gate.
 - After a prompt, policy, glossary, reference, or image-manifest change, request
   fresh packets and revise stale pilot rows through the documented path.
-- Make every post-build correction reproducible from project-owned inputs
+- For a Core project, make every post-build correction reproducible from project-owned inputs
   through `edits.json`. Never change `output/final.epub` after `finish`; an
   EPUB edited outside the gate is not a finished artifact.
 - Stop for an unsupported source, substantive editorial or visual fork, rights
@@ -185,7 +193,7 @@ pages, or publish books.
   or any commercial, monetized, shared-storage, upload, publish, release, or
   distribution action.
 
-Completion means the accepted full scope passes `status`, deterministic
+For a Core project, completion means the accepted full scope passes `status`, deterministic
 `finish`, independent `verify`, and the final-book audit. Report the exact local
 EPUB path, what was rendered and sampled, and every remaining editorial,
 reader-app, accessibility, image, or rights risk.

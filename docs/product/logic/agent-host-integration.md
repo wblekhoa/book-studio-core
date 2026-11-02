@@ -4,8 +4,8 @@ type: logic
 product: book-studio-core
 title: "Book Studio Core — Agent-host integration (logic)"
 status: active
-updated: 2026-10-13
-summary: "Rules for the plugin hooks and MCP server: a guard denies direct writes to gate-owned files inside projects, session start lists nearby projects, and 11 MCP tools reuse the CLI dispatch with stable error codes."
+updated: 2026-10-24
+summary: "Rules for the plugin hooks and MCP server: a guard denies direct writes to gate-owned files inside projects, session start lists nearby projects, and 12 MCP tools reuse the CLI dispatch with stable error codes."
 tags: [area/ai, area/security, stack/python, surface/cli]
 reqPrefix: [BSC-HOOK, BSC-MCP]
 relations:
@@ -37,7 +37,7 @@ the test named in Evidence.
 | BSC-HOOK-002 | The guard denies shell writes that resolve to those files: redirection, `cp`/`mv`/`rsync`/`install`/`ln` into them, `rm`/`zip`/`tee`/`truncate`/`dd`/`shred`, `sed -i`, inline Python writes. Reads and copies out (delivery) pass. This is a heuristic, not a sandbox. | live   | `tests/test_hooks.py` (`test_guard_blocks_shell_writes_but_allows_reads_and_copies_out`)  |
 | BSC-HOOK-003 | Hooks never break the host: malformed or empty input exits 0 with no output.                                                                                                                         | live   | `tests/test_hooks.py` (`test_hooks_never_break_the_host_on_bad_input`)                    |
 | BSC-HOOK-004 | At session start, nearby projects are listed read-only, with stage, progress and the exact next command: the current folder, its children, `projects/*`, and the optional `projects_dir` user setting. | live   | `tests/test_hooks.py` (`test_session_note_lists_nearby_projects_with_next_command`)        |
-| BSC-MCP-001  | `bookstudio mcp` speaks newline-delimited JSON-RPC: it negotiates a supported protocol version and lists 11 tools plus the experimental MCP Apps review view (`ui://book-studio/review.html`, `text/html;profile=mcp-app`). | live   | `tests/test_mcp.py` (`test_protocol_surface_lists_tools_and_the_review_app`)               |
+| BSC-MCP-001  | `bookstudio mcp` speaks newline-delimited JSON-RPC: it negotiates a supported protocol version and lists 12 tools plus the optional MCP Apps review view (`ui://book-studio/chat-review-v1.html`, `text/html;profile=mcp-app`). | live   | `tests/test_mcp.py` (`test_protocol_surface_lists_tools_and_the_review_app`)               |
 | BSC-MCP-002  | MCP tools run the CLI dispatch, so they have the same gates and files. A pilot is accepted only with `user_confirmed: true`. The review result carries the page for the view, but not in the model-visible text. | live   | `tests/test_mcp.py` (`test_guided_flow_through_tools_with_confirmation_gate`)              |
 | BSC-MCP-003  | Every failure is a tool result with `isError: true` and a stable code. stdout carries only JSON-RPC lines.                                                                                            | live   | `tests/test_mcp.py` (`test_errors_are_tool_results_with_stable_codes`)                     |
 
@@ -64,3 +64,5 @@ the test named in Evidence.
 ## Change log
 
 - 2026-10-13: created with BSC-HOOK-001…004 and BSC-MCP-001…003.
+
+- 2026-10-24: chat-first projections and read-only `view`; detailed rules and verification limits in `chat-workflow.md`.

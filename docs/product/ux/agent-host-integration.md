@@ -4,7 +4,7 @@ type: ux
 product: book-studio-core
 title: "Book Studio Core — Agent-host integration (UX)"
 status: active
-updated: 2026-10-13
+updated: 2026-10-24
 summary: "How Book Studio feels inside Claude Code and Codex: one plugin with the skill, four commands, two agents, guard and status hooks, an MCP server with an experimental review view, and a two-command install."
 tags: [area/ai, area/translation, stack/python, surface/cli]
 relations:
@@ -34,7 +34,7 @@ figma: []
   - commands `/book-studio:translate`, `:review`, `:finish` and `:capture`;
   - agents `book-translator` (one packet in an isolated context) and `editorial-reviewer` (read-only);
   - hooks (guard, session status);
-  - an MCP server with 11 tools and an experimental MCP Apps review view;
+  - an MCP server with 12 tools and an experimental MCP Apps review view;
   - the optional `projects_dir` setting;
   - an eval suite.
 - Excluded: claude.ai web chat, which would upload the book to a cloud sandbox, and Windows.
@@ -83,3 +83,9 @@ flowchart LR
 ## Change log
 
 - 2026-10-13: created.
+
+## Chat-first workspace (development checkout)
+
+See `chat-workflow.md`. The new Mods adapter shows saved progress within the conversation; MCP Apps-compatible
+hosts can show the source/sample and refresh status. Decisions remain chat messages. Native adapter tests and a
+browser bridge probe passed; actual desktop installs/renders remain unverified. No browser or dashboard is required.

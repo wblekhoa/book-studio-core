@@ -136,11 +136,16 @@ def audit_public_tree(root: Path) -> dict[str, Any]:
                 violations.append(_row("binary_asset", relative))
             continue
         eval_script = suffix == ".sh" and relative_path.parts[:3] == ("plugins", "book-studio", "evals")
+        mod_script = relative in {
+            "plugins/book-studio/hooks/chat-view.js",
+            "plugins/book-studio/evals/chat-view.test.ts",
+        }
         if (
             path.name not in {".gitignore", ".gitattributes"}
             and path.name not in ALLOWED_EXTENSIONLESS_FILES
             and suffix not in ALLOWED_TEXT_SUFFIXES
             and not eval_script
+            and not mod_script
         ):
             violations.append(_row("file_type_not_allowlisted", relative))
             continue

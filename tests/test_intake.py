@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 from bookstudio.config import load_config
@@ -25,6 +26,41 @@ class IntakeTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
+
+    # BSC-CHAT-001
+    def test_assessment_supplies_bounded_untrusted_source_context_before_asking(self) -> None:
+        source = self.workspace / "context.epub"
+        build_synthetic_epub(source)
+        before = source.read_bytes()
+        receipt = start_project(self.workspace / "not-created", source, {"target_language": "fr"})
+        preview = receipt["source_preview"]
+        self.assertTrue(preview["untrusted_content"])
+        self.assertGreater(len(preview["documents"]), 0)
+        self.assertLessEqual(len(preview["documents"]), 3)
+        for document in preview["documents"]:
+            self.assertLessEqual(len(document["blocks"]), 3)
+            for block in document["blocks"]:
+                self.assertLessEqual(len(block["text"]), 800)
+        self.assertNotIn(str(self.workspace), json.dumps(preview))
+        self.assertEqual(before, source.read_bytes())
+        self.assertFalse((self.workspace / "not-created").exists())
+        self.assertNotIn("target_language", [q["id"] for q in receipt["questions"]])
+
+    # BSC-CHAT-001
+    def test_source_context_includes_prose_after_a_heading_sequence(self) -> None:
+        source = self.workspace / "headings.epub"
+        build_synthetic_epub(source, include_image=False)
+        with zipfile.ZipFile(source) as archive:
+            entries = {n: archive.read(n) for n in archive.namelist()}
+        entries['OEBPS/text/chapter.xhtml'] = entries['OEBPS/text/chapter.xhtml'].replace(
+            b'<h1>Make', b'<h2>Scope</h2><h3>Context</h3><h1>Make').replace(
+            b'Readers should not have to', b'An example for practitioners with precise terminology and a meaningful explanation of the concept. Readers should not have to')
+        with zipfile.ZipFile(source, 'w') as archive:
+            for name, data in entries.items():
+                archive.writestr(name, data)
+        receipt = assess_intake(source, {})
+        text = ' '.join(b['text'] for d in receipt['source_preview']['documents'] for b in d['blocks'])
+        self.assertIn('Readers should not have to', text)
 
     # BSC-PILOT-002
     def test_assessment_omits_known_answers_and_image_questions_without_images(self) -> None:

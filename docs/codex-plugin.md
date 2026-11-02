@@ -1,3 +1,14 @@
+---
+id: book-studio-core-codex-plugin-guide
+type: runbook
+product: book-studio-core
+title: "Book Studio Codex plugin"
+summary: "Install and verify the bundled Codex plugin, including the unreleased in-host sample view and its approval boundaries."
+status: active
+owner: book-studio-core
+updated: 2026-11-02
+tags: [area/book, area/ai, area/build, surface/cli]
+---
 # Book Studio Codex plugin
 
 The plugin contains the canonical translation skill and its matching Python
@@ -20,11 +31,16 @@ yet.
 ```bash
 git clone https://github.com/wblekhoa/book-studio-core.git
 cd book-studio-core
-python3 plugins/book-studio/scripts/bookstudio.py doctor --json
-codex plugin marketplace add .
-codex plugin add book-studio@book-studio
-codex plugin list
+python3 scripts/install_codex_plugin.py
 ```
+
+The checkout installer checks prerequisites and bundle integrity, registers this
+checkout, installs it with the official Codex CLI, compares the cached files and
+tests the installed server. It needs no pip install or new Python dependency.
+Use `--dry-run` to check without changing Codex, or `--json` for a receipt. Run it
+again after updating the checkout. If Codex fails partway through, completed
+registration steps may remain; fix the reported problem and rerun the command.
+The installer never creates or modifies a book project.
 
 Open a new thread, select the Book Studio plugin and provide your source file.
 The AI asks about missing preferences, prepares a representative pilot and waits
@@ -38,7 +54,8 @@ explicitly to avoid ambiguity. Installing this plugin does not remove it.
 ## Update and remove
 
 Pull updates into a clean checkout, rerun doctor, and rerun the marketplace-add
-and plugin-add commands above to refresh the local snapshot. Start a new thread.
+and plugin-add commands, or rerun the checkout installer, to refresh the local
+snapshot. Start a new thread.
 For a GitHub install, run `codex plugin marketplace upgrade`, then
 `codex plugin add book-studio@book-studio`. Each release raises the plugin
 version, so Codex fetches a fresh copy.
@@ -104,3 +121,24 @@ PDF preparation is limited to supported text-layer documents and needs local
 Poppler tools. OCR, rendering, and image generation are not bundled. All use
 remains subject to the repository's current personal-use license. Structural
 tests do not replace editorial review or visual inspection of a real book.
+
+## Chat-first development changes
+
+The unreleased checkout also ships root `plugin.json` and `mcp.json` in the plugin folder, following the portable
+Agent Plugins layout. It declares local execution and starts the bundled Python server over stdio using
+`${PLUGIN_ROOT}`. Existing compatibility manifests remain for earlier hosts. No model provider is bundled.
+
+Readers interact in chat. Source evidence informs intake questions; the agent shows the sample, approval choices
+and saved progress without requiring JSON, engine commands or an external browser. The optional MCP Apps view
+refreshes through the read-only `view` tool. If the host cannot draw the view, the conversation still works.
+
+The server rejects book paths inside its installation; the agent resolves private absolute paths. Sample
+review keeps both explicit-approval guards: the panel and the `view` tool never accept a sample or unlock full
+translation. The `review` tool keeps the standard `_meta.ui.resourceUri` and asks Codex for a fullscreen display
+(`_meta['openai/ui'].preferredModelDisplayMode`); polling `view` is data-only.
+
+The panel is experimental. Whether it appears depends on the Codex host and version; the developer checks behind
+it are recorded in [the visual workspace spec](product/specs/2026-10-24-visual-workspace.md), not guaranteed for
+other hosts. See [the chat workflow rules](product/logic/chat-workflow.md) for BSC-CHAT-010 and the remaining
+host-verification limits. Do not treat the existing released install commands as containing these unreleased
+changes.

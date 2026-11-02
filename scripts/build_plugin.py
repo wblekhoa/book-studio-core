@@ -7,6 +7,7 @@ import re
 import json
 from pathlib import Path
 import sys
+import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / 'plugins/book-studio'
@@ -45,11 +46,28 @@ the user explicitly approved the reviewed sample).
 HAND_MAINTAINED = (
     r'\.codex-plugin/plugin\.json', r'\.claude-plugin/plugin\.json', r'\.mcp\.json', r'hooks/hooks\.json',
     r'assets/[^/]+\.png', r'agents/[^/]+\.md', r'commands/[^/]+\.md', r'evals/.+\.(md|yaml|sh|py)',
+    r'hooks/chat-view\.js', r'evals/chat-view\.test\.ts', r'plugin\.json', r'mcp\.json',
 )
 
 
 def _hand_maintained(name):
     return any(re.fullmatch(pattern, name) for pattern in HAND_MAINTAINED)
+
+
+# Hand-maintained manifests whose "version" pyproject.toml owns (BSC-SKILL-013).
+VERSIONED_MANIFESTS = ('plugin.json', '.codex-plugin/plugin.json', '.claude-plugin/plugin.json')
+VERSION_FIELD = re.compile(r'("version"\s*:\s*")([^"]*)(")')
+
+
+def manifest_version_drift():
+    """Return {manifest: text with the package version} for manifests that disagree."""
+    version = tomllib.loads((ROOT / 'pyproject.toml').read_text())['project']['version']
+    drift = {}
+    for name in VERSIONED_MANIFESTS:
+        text = (DEST / name).read_text()
+        if json.loads(text).get('version') != version:
+            drift[name] = VERSION_FIELD.sub(lambda match: match[1] + version + match[3], text, count=1)
+    return drift
 
 
 def expected_files():
@@ -82,6 +100,10 @@ def main():
         print('Unexpected bundle files; inspect manually: ' + ', '.join(sorted(extras)))
         return 1
     drift = [name for name, data in files.items() if not (DEST / name).is_file() or (DEST / name).read_bytes() != data]
+    manifests = manifest_version_drift()
+    for name, text in manifests.items():
+        files[name] = text.encode()
+        drift.append(name)
     if args.check:
         print('Bundle matches canonical sources.' if not drift else 'Bundle drift: ' + ', '.join(drift))
         return int(bool(drift))

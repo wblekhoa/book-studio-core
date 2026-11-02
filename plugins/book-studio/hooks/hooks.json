@@ -1,5 +1,6 @@
 {
   "description": "Book Studio: block direct writes to gate-owned files (final EPUB, release receipt, translation cache) and show nearby project status at session start.",
+  "modules": ["./chat-view.js"],
   "hooks": {
     "PreToolUse": [
       {

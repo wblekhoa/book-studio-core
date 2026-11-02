@@ -12,8 +12,10 @@ bookstudio start PROJECT --source SOURCE.epub --json
 
 When input is incomplete, exit code 2 and `status: needs_input` are expected;
 the project directory is not created. The response supplies privacy-safe
-`book_facts`, normalized existing `answers`, and only the remaining
-`questions`.
+`book_facts`, normalized existing `answers`, bounded untrusted `source_preview`
+excerpts, and only the remaining `questions`. Use the source evidence before
+asking; distinguish recommendations from accepted choices. Follow the
+[chat workflow](chat-workflow.md) for review and pause/continue interaction.
 
 Always start guided work with `start`. `bookstudio init` creates an expert
 full-scope project with no intake and no sample gate; use it only when the user

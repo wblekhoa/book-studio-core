@@ -4,12 +4,62 @@ type: decision
 product: book-studio-core
 title: "Book Studio Core — Decisions"
 status: active
-updated: 2026-10-13
-summary: "Append-only log of why Book Studio Core is built as it is: stdlib provider-neutral engine, pilot gate, fail-closed PDF gateway, personal-use licence, Codex and Claude plugin, review page, declared edits and 0.2.0 platform scope."
+updated: 2026-11-02
+summary: "Product decisions covering the provider-neutral engine, pilot and finishing gates, distribution, host integrations, and the approved direction toward an interactive in-host workspace."
 tags: [area/translation, area/book, area/security, area/release, stack/python, surface/cli]
 ---
 
 # Book Studio Core — Decisions (append-only, newest first)
+
+## 2026-10-24 · Install and exercise the Codex preview locally
+
+- **Owner instruction** (paraphrased): keep going autonomously, install the preview into Codex, test the real chat
+  flow, and finish it so other people can install and use it easily.
+- **Decision**: refresh the local installed Book Studio snapshot and test a synthetic book through actual chat
+  MCP tools. Add a checked one-command checkout installer; keep book data outside installed plugin folders.
+- **Evidence**: the Codex installation/chat checkpoint in `specs/2026-10-24-visual-workspace.md`.
+- **Limits**: this authorization covers local plugin installation and tests. It does not publish source, approve
+  a book sample, or turn unobserved custom desktop rendering into a passed check. Updating in an active turn
+  may close its tool connection; use a fresh session, preserving durable private project state.
+
+## 2026-10-24 · Autonomous implementation of the chat-first direction
+
+- **Owner instruction** (paraphrased): implement the proposal autonomously.
+- **Decision**: implement the proposed chat-first workflow, source-informed intake, optional in-host progress
+  adapters and portable local MCP packaging. Reuse the existing restrained visual style and retain macOS/Linux
+  as implementation defaults. No new provider, dependency or Windows support is introduced.
+- **Evidence**: the implementation and local verification receipt in `specs/2026-10-24-visual-workspace.md`.
+  Native test-kit and browser bridge results are distinct from actual desktop host acceptance.
+- **Review correction**: standalone EPUB edits have an independent private transform/verification route; existing
+  Core projects retain `edits.json` plus `finish`/`verify`. Do not invent a translation cache or Core certification.
+- **Release boundary**: source changes stay unreleased until the owner approves a release; no public directory
+  submission or deployment.
+- **Reversal**: record a new owner decision before changing the chat-only interaction direction.
+
+## 2026-10-24 · Direction: an interactive workspace inside the AI host
+
+- **Context**: the reader wants other people to install and use Book Studio easily, get content-informed translation
+  or editorial advice, and see and interact with the book's progress. A static review snapshot does not meet this goal.
+- **Owner choices** (paraphrased):
+  - A Codex/Claude plugin with a local UI; users already have the corresponding AI application.
+  - Only a panel inside Codex/Claude; the owner acknowledged dependence on each host's display capabilities.
+  - Chat with the AI plus actions on the UI; AI advises, and the UI supports sample approval, feedback, and
+    requests to pause or continue.
+  - Research both hosts, including Claude Code Mods, before deciding the implementation.
+  - Later clarification: interact through chat only, to keep it simple for users. This supersedes requiring
+    controls on the visual surface: requests, approvals, revisions and pause/continue instructions go through chat.
+- **Decision**: preserve the local plugin direction and in-host-only experience. These are product requirements,
+  with chat as the interaction surface and optional in-host visuals for sample/progress visibility. They are not
+  a claim that the current review page implements them. The host-specific visual route
+  remains proposed until a live capability probe establishes rendering, progress updates, and restart behaviour.
+- **Not selected for this iteration**: a standalone application, an externally hosted website, and an external
+  browser fallback. No long-term platform exclusion is implied.
+- **Consequence**: use the draft `specs/2026-10-24-visual-workspace.md` for the research and open choices. Keep the
+  existing engine, source and cache safeguards, and finishing path. Do not require a separate dashboard or UI
+  buttons to complete the workflow. Initial OS coverage remains open; no new
+  dependency, provider integration, host configuration change, release, or publication was approved by these choices.
+- **Evidence**: owner direction and interaction choices; official host documentation cited in the draft spec.
+- **Reversal**: a new owner decision, recorded here; do not silently replace the in-host requirement with a browser.
 
 Entries before 2026-10-11 are reconstructed from commits, `CHANGELOG.md`, `AGENTS.md` and `docs/` in this repo; each
 cites its source.

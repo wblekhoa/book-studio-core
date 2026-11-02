@@ -16,9 +16,10 @@ from typing import Any, Callable, TextIO
 
 from . import __version__
 from .errors import BookStudioError, error_payload
+from .chat_ui import REVIEW_APP
 
 SUPPORTED_PROTOCOLS = ("2025-06-18", "2025-03-26", "2024-11-05")
-REVIEW_UI = "ui://book-studio/review.html"
+REVIEW_UI = "ui://book-studio/chat-review-v1.html"
 APP_MIME = "text/html;profile=mcp-app"
 
 _PROJECT = {"project": {"type": "string", "description": "Private Book Studio project directory."}}
@@ -36,6 +37,9 @@ def _tool(name: str, description: str, properties: dict[str, Any], required: lis
 TOOLS = [
     _tool("doctor", "Check that the bundled engine can run here and which optional PDF tools exist.", {}, []),
     _tool("status", "Read-only stage, progress and exact next command for a project.", _PROJECT, ["project"]),
+    _tool("view", "Read-only live progress and bounded sample for the in-chat view. Never changes project state.",
+          _PROJECT, ["project"], annotations={"readOnlyHint": True},
+          _meta={"ui": {"visibility": ["app", "model"]}}),
     _tool(
         "start",
         "Assess a source EPUB and, once every required choice is answered, create a guided project. "
@@ -57,44 +61,28 @@ TOOLS = [
         "Write the private read-only review page (sample beside source, progress, next command).",
         _PROJECT,
         ["project"],
-        _meta={"ui": {"resourceUri": REVIEW_UI}},
+        _meta={"ui": {"resourceUri": REVIEW_UI},
+               "openai/ui": {"preferredModelDisplayMode": "fullscreen"}},
     ),
     _tool("finish", "Run the strict reproducible final gate (applies edits.json).", _PROJECT, ["project"]),
     _tool("verify", "Independently validate the final EPUB.", _PROJECT, ["project"]),
     _tool("capture_edits", "Write edits.json from an EPUB edited elsewhere (never overwrites).", {**_PROJECT, "edited_epub": {"type": "string"}}, ["project", "edited_epub"]),
 ]
 
-REVIEW_APP = """<!doctype html>
-<html lang="en"><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
-<title>Book Studio review</title>
-<style>html,body{margin:0;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-#note{padding:12px;color:#6b6a64}</style></head>
-<body><p id="note">Waiting for the review page from Book Studio…</p>
-<script>
-(function () {
-  var nextId = 1;
-  function send(message) { window.parent.postMessage(Object.assign({ jsonrpc: "2.0" }, message), "*"); }
-  window.addEventListener("message", function (event) {
-    var data = event.data || {};
-    if (data.id === 1 && data.result) { send({ method: "ui/notifications/initialized", params: {} }); return; }
-    if (data.method === "ui/notifications/tool-result") {
-      var content = (data.params && data.params.structuredContent) || {};
-      if (typeof content.review_html === "string") {
-        // The page is server-escaped and script-free; DOMParser output never executes scripts.
-        var page = new DOMParser().parseFromString(content.review_html, "text/html");
-        page.querySelectorAll("style").forEach(function (style) { document.head.appendChild(document.importNode(style, true)); });
-        document.body.replaceWith(document.importNode(page.body, true));
-        send({ method: "ui/notifications/size-changed", params: { width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight } });
-      } else {
-        document.getElementById("note").textContent = content.message || "No review page in this result.";
-      }
-    }
-  });
-  send({ id: nextId++, method: "ui/initialize", params: { protocolVersion: "2026-01-26", appInfo: { name: "book-studio-review", version: "%VERSION%" }, appCapabilities: {} } });
-})();
-</script></body></html>
-"""
+def _plugin_root() -> Path | None:
+    for key in ("PLUGIN_ROOT", "CLAUDE_PLUGIN_ROOT"):
+        value = os.environ.get(key, "")
+        if value and "${" not in value:
+            return Path(value).expanduser().resolve()
+    return None
+
+
+def _private_path_required() -> BookStudioError:
+    return BookStudioError(
+        code="MCP_PRIVATE_PATH_REQUIRED",
+        message="Book files and projects need a private workspace outside the installed plugin.",
+        next_action="Resolve an absolute private workspace path from the conversation, then retry. The plugin's working directory is not the reader's book folder.",
+    )
 
 
 def _base_dir() -> Path:
@@ -103,14 +91,22 @@ def _base_dir() -> Path:
         value = os.environ.get(key, "")
         if value and "${" not in value:
             return Path(value).expanduser()
-    return Path.cwd()
+    cwd = Path.cwd()
+    root = _plugin_root()
+    if root is not None and cwd.resolve().is_relative_to(root):
+        raise _private_path_required()
+    return cwd
 
 
 def _path(value: Any) -> str:
     if not isinstance(value, str) or not value:
         raise BookStudioError(code="MCP_ARGUMENT_INVALID", message="A path argument is missing.", next_action="Pass the project or file path.")
     path = Path(value).expanduser()
-    return str(path if path.is_absolute() else _base_dir() / path)
+    resolved = path if path.is_absolute() else _base_dir() / path
+    root = _plugin_root()
+    if root is not None and resolved.resolve().is_relative_to(root):
+        raise _private_path_required()
+    return str(resolved)
 
 
 def _dispatch(argv: list[str]) -> dict[str, Any]:
@@ -121,6 +117,26 @@ def _dispatch(argv: list[str]) -> dict[str, Any]:
     return payload
 
 
+def _chat_view(project: Path) -> dict[str, Any]:
+    from .config import load_config
+    from .review import review_snapshot
+
+    return _bounded_view(review_snapshot(load_config(project / "bookstudio.toml")))
+
+
+def _bounded_view(view: dict[str, Any]) -> dict[str, Any]:
+    view = dict(view)
+    pairs = view["pairs"]
+    view["sample_excerpt"] = len(pairs) > 12 or any(
+        len(p["source"]) > 800 or len(p["translation"]) > 1000 for p in pairs[:12]
+    )
+    view["pairs"] = [{**p, "source": p["source"][:800], "translation": p["translation"][:1000]}
+                     for p in pairs[:12]]
+    view["documents_total"] = len(view["documents"])
+    view["documents"] = view["documents"][:20]
+    return view
+
+
 def call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
     if name == "doctor":
         return _dispatch(["doctor"])
@@ -129,6 +145,10 @@ def call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         from .review import project_status
 
         return project_status(load_config(Path(_path(arguments.get("project"))) / "bookstudio.toml"))
+    if name == "view":
+        view = _chat_view(Path(_path(arguments.get("project"))))
+        return {"status": "pass", "schema_version": 1, "view": view,
+                "message": f"{view['project']}: {view['stage']}. Continue the conversation to approve or request changes."}
     if name == "start":
         from .project import start_project
 
@@ -151,10 +171,13 @@ def call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
     if name == "apply_drafts":
         return _dispatch(["apply-drafts", _path(arguments.get("project")), _path(arguments.get("drafts_path"))])
     if name == "review":
+        from .config import load_config
+        from .review import write_review_with_snapshot
+
+        # One snapshot feeds both the saved page and the view, so they cannot disagree.
         project = Path(_path(arguments.get("project")))
-        payload = _dispatch(["review", str(project)])
-        page = project / payload["written"]
-        return {**payload, "review_html": page.read_text(encoding="utf-8")}
+        payload, snapshot = write_review_with_snapshot(load_config(project / "bookstudio.toml"))
+        return {**payload, "view": _bounded_view(snapshot)}
     if name in {"finish", "verify"}:
         return _dispatch([name, _path(arguments.get("project"))])
     if name == "capture_edits":
@@ -171,7 +194,7 @@ def _tool_result(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         payload, is_error = error_payload(error), True
     except SystemExit:
         payload, is_error = {"status": "error", "code": "MCP_ARGUMENT_INVALID", "message": "Invalid arguments."}, True
-    visible = {key: value for key, value in payload.items() if key != "review_html"}
+    visible = {key: value for key, value in payload.items() if key != "view"}
     return {
         "content": [{"type": "text", "text": json.dumps(visible, ensure_ascii=False, indent=2)}],
         "structuredContent": payload,

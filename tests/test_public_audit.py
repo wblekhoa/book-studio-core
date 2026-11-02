@@ -28,6 +28,24 @@ class PublicBoundaryAuditTests(unittest.TestCase):
         receipt = audit_public_tree(self.root)
         self.assertTrue(receipt["passed"], receipt["violations"])
 
+    # BSC-CHAT-007
+    def test_only_owned_mod_source_and_its_test_have_script_exceptions(self) -> None:
+        self.minimal_tree()
+        for relative, allowed in [
+            ("plugins/book-studio/hooks/chat-view.js", True),
+            ("plugins/book-studio/evals/chat-view.test.ts", True),
+            ("plugins/book-studio/hooks/other.js", False),
+            ("plugins/other/hooks/chat-view.js", False),
+            ("plugins/book-studio/evals/other.test.ts", False),
+        ]:
+            with self.subTest(relative=relative):
+                file = self.root / relative
+                file.parent.mkdir(parents=True, exist_ok=True)
+                file.write_text("export const synthetic = true;\n")
+                violations = [v for v in audit_public_tree(self.root)["violations"] if v["path"] == relative]
+                self.assertEqual([] if allowed else ["file_type_not_allowlisted"], [v["category"] for v in violations])
+                file.unlink()
+
     # BSC-SKILL-017
     def test_claude_marketplace_and_eval_scripts_have_narrow_exceptions(self) -> None:
         self.minimal_tree()

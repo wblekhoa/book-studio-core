@@ -4,7 +4,7 @@ type: ux
 product: book-studio-core
 title: "Book Studio Core — Draft apply (UX)"
 status: active
-updated: 2026-10-13
+updated: 2026-11-10
 summary: "How an AI agent applies pre-drafted chapters with one apply-drafts command per lifecycle phase, the drafts file format, and the result statuses pilot_review_required, complete and draft_missing."
 tags: [area/translation, area/ai, stack/python, surface/cli]
 relations:
@@ -46,9 +46,9 @@ figma: []
 
 ## Screens and states
 
-| Surface            | States                                              | Entry                        | Exit / next                         |
-| ------------------ | --------------------------------------------------- | ---------------------------- | ----------------------------------- |
-| CLI `apply-drafts` | pilot_review_required · complete · draft_missing · error code | after `pilot approve` or `accept` | `review`, `pilot accept`, `finish` |
+| Surface            | State ID | States                                              | Entry                        | Exit / next                         |
+| ------------------ |---| --------------------------------------------------- | ---------------------------- | ----------------------------------- |
+| CLI `apply-drafts` | state:drafts/pilot-review-required · state:drafts/complete · state:drafts/draft-missing · state:drafts/error | pilot_review_required · complete · draft_missing · error code | after `pilot approve` or `accept` | `review`, `pilot accept`, `finish` |
 
 ## Flow
 
@@ -72,3 +72,4 @@ flowchart LR
 ## Change log
 
 - 2026-10-13: created.
+- 2026-11-10: "State ID" column cites the state registry.

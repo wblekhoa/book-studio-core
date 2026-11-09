@@ -4,7 +4,7 @@ type: ux
 product: book-studio-core
 title: "Book Studio Core — Declared edits (UX)"
 status: active
-updated: 2026-10-13
+updated: 2026-11-10
 summary: "How a person declares post-build corrections in edits.json, or captures them from an EPUB edited elsewhere, so finish certifies the corrected book and the review page reports the number of declared edits."
 tags: [area/book, area/build, stack/python, surface/cli]
 relations:
@@ -52,10 +52,10 @@ figma: []
 
 ## Screens and states
 
-| Surface       | States                                        | Entry                 | Exit / next                       |
-| ------------- | --------------------------------------------- | --------------------- | --------------------------------- |
-| CLI `finish`  | pass with `edits.applied` · stable error code | `bookstudio finish`   | `verify`, `review`                |
-| Review page   | Final book: "Declared edits: N"               | `bookstudio review`   | rerun after any change            |
+| Surface       | State ID | States                                        | Entry                 | Exit / next                       |
+| ------------- |---| --------------------------------------------- | --------------------- | --------------------------------- |
+| CLI `finish`  | state:finish/edits-applied · state:finish/error | pass with `edits.applied` · stable error code | `bookstudio finish`   | `verify`, `review`                |
+| Review page   | state:review/declared-edits | Final book: "Declared edits: N"               | `bookstudio review`   | rerun after any change            |
 
 ## Flow
 
@@ -78,3 +78,4 @@ flowchart LR
 ## Change log
 
 - 2026-10-13: created.
+- 2026-11-10: "State ID" column cites the state registry.

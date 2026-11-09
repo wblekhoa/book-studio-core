@@ -4,7 +4,7 @@ type: ux
 product: book-studio-core
 title: "Book Studio Core — Translation pipeline (UX)"
 status: active
-updated: 2026-10-11
+updated: 2026-11-10
 summary: "How a book moves from a read-only source EPUB to output/final.epub through the CLI: inspect, next packet, the reader-chosen model, apply validation, status, and finish with target-only or bilingual output."
 tags: [area/translation, area/book, stack/python, surface/cli]
 relations:
@@ -54,13 +54,13 @@ relations:
 
 ## Screens and states
 
-| Screen (CLI step)  | States                                   | Entry                         | Exit / next                         |
-| ------------------ | ---------------------------------------- | ----------------------------- | ----------------------------------- |
-| `inspect`/`prepare` | ok · unsafe archive · broken EPUB        | source EPUB path              | block map + coverage in the project |
-| `next`             | packet (exit 0) · no work (exit 3) · blocked by pilot (exit 2) | prepared project | agent translates the packet         |
-| `apply`            | applied · rejected with code             | response JSON file            | `next` again                        |
-| `status`           | incomplete (exit 2) · complete (exit 0)  | any time                      | `finish` when complete              |
-| `finish`           | final written · integrity failed         | complete coverage             | `output/final.epub`                 |
+| Screen (CLI step)  | State ID | States                                   | Entry                         | Exit / next                         |
+| ------------------ |---| ---------------------------------------- | ----------------------------- | ----------------------------------- |
+| `inspect`/`prepare` | state:inspect/ok · state:inspect/unsafe-archive · state:inspect/broken-epub | ok · unsafe archive · broken EPUB        | source EPUB path              | block map + coverage in the project |
+| `next`             | state:next/packet · state:next/no-work · state:next/blocked | packet (exit 0) · no work (exit 3) · blocked by pilot (exit 2) | prepared project | agent translates the packet         |
+| `apply`            | state:apply/applied · state:apply/rejected | applied · rejected with code             | response JSON file            | `next` again                        |
+| `status`           | state:status/incomplete · state:status/complete | incomplete (exit 2) · complete (exit 0)  | any time                      | `finish` when complete              |
+| `finish`           | state:finish/final-written · state:finish/integrity-failed | final written · integrity failed         | complete coverage             | `output/final.epub`                 |
 
 ## Flow
 
@@ -91,3 +91,4 @@ flowchart LR
 ## Change log
 
 - 2026-10-11: created.
+- 2026-11-10: "State ID" column cites the state registry.

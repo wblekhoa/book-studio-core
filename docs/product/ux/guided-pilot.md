@@ -4,7 +4,7 @@ type: ux
 product: book-studio-core
 title: "Book Studio Core — Guided intake and pilot (UX)"
 status: active
-updated: 2026-10-11
+updated: 2026-11-10
 summary: "How a new translation starts: start asks only the missing questions and proposes one representative chapter, which the reader approves, reviews and confirms before the rest of the book is translated."
 tags: [area/translation, area/book, stack/python, surface/cli]
 relations:
@@ -53,13 +53,13 @@ relations:
 
 ## Screens and states
 
-| Screen (CLI step)        | States                                              | Entry                         | Exit / next                         |
-| ------------------------ | --------------------------------------------------- | ----------------------------- | ----------------------------------- |
-| `start`                  | needs input (exit 2) · ready · not owned            | source EPUB, optional answers | `pilot status`                      |
-| `pilot status`           | `pilot_proposed` · `pilot_active` · `pilot_review_required` · `full_active` | project | the "Next action" it prints |
-| `pilot approve`          | `pilot_active`                                      | `pilot_proposed`              | `next` / `apply` for pilot targets  |
-| `pilot revise`           | revised · locked after acceptance                   | `pilot_review_required`       | review again                        |
-| `pilot accept --confirm` | `full_active` · confirmation required · incomplete  | `pilot_review_required`       | `next` for the rest of the book     |
+| Screen (CLI step)        | State ID | States                                              | Entry                         | Exit / next                         |
+| ------------------------ |---| --------------------------------------------------- | ----------------------------- | ----------------------------------- |
+| `start`                  | state:start/needs-input · state:start/ready · state:start/not-owned | needs input (exit 2) · ready · not owned            | source EPUB, optional answers | `pilot status`                      |
+| `pilot status`           | state:pilot/proposed · state:pilot/active · state:pilot/review-required · state:pilot/full-active | `pilot_proposed` · `pilot_active` · `pilot_review_required` · `full_active` | project | the "Next action" it prints |
+| `pilot approve`          | state:pilot/active | `pilot_active`                                      | `pilot_proposed`              | `next` / `apply` for pilot targets  |
+| `pilot revise`           | state:pilot/revised · state:pilot/locked | revised · locked after acceptance                   | `pilot_review_required`       | review again                        |
+| `pilot accept --confirm` | state:pilot/full-active · state:pilot/confirmation-required · state:pilot/incomplete | `full_active` · confirmation required · incomplete  | `pilot_review_required`       | `next` for the rest of the book     |
 
 ## Flow
 
@@ -88,3 +88,4 @@ flowchart LR
 ## Change log
 
 - 2026-10-11: created.
+- 2026-11-10: "State ID" column cites the state registry.

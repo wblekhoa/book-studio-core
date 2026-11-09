@@ -4,10 +4,10 @@
     {"screen": "install", "label": {"vi": "Cài đặt", "en": "Install"}, "next": ["start"]},
     {"screen": "start", "label": {"vi": "Bắt đầu", "en": "start"}, "next": ["pilot"]},
     {"screen": "inspect", "label": {"vi": "Kiểm tra EPUB", "en": "inspect / prepare"}, "next": ["next"]},
-    {"screen": "pilot", "label": {"vi": "Bản thử", "en": "pilot"}, "next": ["next"]},
+    {"screen": "pilot", "label": {"vi": "Bản thử", "en": "pilot"}, "next": ["next", "drafts"]},
     {"screen": "next", "label": {"vi": "Gói dịch tiếp", "en": "next"}, "next": ["apply"]},
     {"screen": "apply", "label": {"vi": "Nhận bản dịch", "en": "apply"}, "next": ["next", "status"]},
-    {"screen": "drafts", "label": {"vi": "Áp bản nháp", "en": "apply-drafts"}, "next": ["finish", "review"]},
+    {"screen": "drafts", "label": {"vi": "Áp bản nháp", "en": "apply-drafts"}, "next": ["finish", "review", "pilot"]},
     {"screen": "status", "label": {"vi": "Tiến độ", "en": "status"}, "next": ["finish"]},
     {"screen": "finish", "label": {"vi": "Xuất sách", "en": "finish"}, "next": ["review"]},
     {"screen": "review", "label": {"vi": "Trang xem lại", "en": "Review page"}, "next": []}

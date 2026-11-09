@@ -23,15 +23,16 @@ relations:
 | `states[].id` | `<screen>/<state>`; never reused |
 | `states[].label` | display name, Vietnamese and English |
 
-A UX table cites a state in its "State ID" column. Format: doc-engine `docs/product/contracts/state-registry.md`.
+A UX table cites a state in its "State ID" column. The ID format is set by the docs tooling's state registry contract.
 
-This product is a command-line tool, so a `screen` here is a CLI step and a state is one of its outcomes. The review page and chat workflow have no states table, so they are not listed. The JSON sits beside this contract so the Python package does not ship it.
+This product is a command-line tool, so a `screen` here is a CLI step and a state is one of its outcomes. The chat workflow has no states table, so it is not listed. `drafts/pilot-review-required` is the `apply-drafts` outcome for the same status that `pilot/review-required` reports. The JSON sits beside this contract so the Python package does not ship it.
 
 ## Consumers
 | Consumer | Uses | Breaks if |
 |---|---|---|
 | The doc index | `flow`, `states[].id`, `label` | `id` changes form |
-| The JAK Hub flow page | `flow`, `states` | a field is renamed |
+| The internal flow page | `flow`, `states` | a field is renamed |
 
 ## Change log
-- 2026-11-10: created. The list comes from the existing UX tables; AI default, the owner has not confirmed it.
+- 2026-11-10: created. The list comes from the existing UX tables and has not been confirmed yet.
+- 2026-11-10: reviewer fixes: drafts and pilot arrows added, listing note corrected.

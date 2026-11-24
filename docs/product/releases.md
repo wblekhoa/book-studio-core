@@ -5,7 +5,7 @@ product: book-studio-core
 title: "Book Studio Core — Releases"
 status: active
 updated: 2026-11-25
-summary: "Published Book Studio Core releases, newest first: 0.5.0 other AI hosts, Windows and a skill-only install, 0.4.0 chat-first workflow with in-host progress views, 0.3.1 inline-markup hints in packets, 0.3.0 Claude Code plus Codex plugin, 0.2.0 Codex plugin with hardened edits for macOS and Linux, and the unpublished 0.1.0 initial source tree."
+summary: "Published Book Studio Core releases, newest first: 0.5.1 the skill asks before installing Python and before the full run, 0.5.0 other AI hosts, Windows and a skill-only install, 0.4.0 chat-first workflow with in-host progress views, 0.3.1 inline-markup hints in packets, 0.3.0 Claude Code plus Codex plugin, 0.2.0 Codex plugin with hardened edits for macOS and Linux, and the unpublished 0.1.0 initial source tree."
 tags: [area/release, stack/python, surface/cli]
 relations:
   presentedBy: [github:wblekhoa/book-studio-core/releases]
@@ -17,6 +17,13 @@ Source of truth for details: `CHANGELOG.md` (repo root) and `gh release list -R 
 
 `CONTRIBUTING.md` keeps package-index publication a separate maintainer decision. Add an entry here only when a
 release is actually published, never ahead of it.
+
+## 0.5.1 · 2026-11-25 (tag `v0.5.1`, GitHub Release)
+
+- **What changed for users**: the skill checks for Python 3.11+ (also newer versions already installed) and asks
+  before installing one; the old-Python error names the next step; after the sample, the agent states the remaining
+  passages and asks a pace; intake asks the reading purpose and the names or terms to keep.
+- **REQ-IDs shipped**: none new (skill guidance only; decision 2026-11-25 "The skill asks before installing Python").
 
 ## 0.5.0 · 2026-11-25 (tag `v0.5.0`, GitHub Release)
 

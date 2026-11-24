@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.1 - 2026-11-25
 
 - Skill: a Python check before the first command finds an installed 3.11+ (macOS often ships 3.9), otherwise
   proposes one install route per system and runs it only after the user agrees.

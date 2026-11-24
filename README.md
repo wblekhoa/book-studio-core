@@ -39,7 +39,7 @@ support. Windows is not supported yet. Register this repository as a
 marketplace, then install Book Studio:
 
 ```bash
-codex plugin marketplace add wblekhoa/book-studio-core@v0.5.0
+codex plugin marketplace add wblekhoa/book-studio-core@v0.5.1
 codex plugin add book-studio@book-studio
 ```
 
@@ -59,7 +59,7 @@ verification, and troubleshooting. The standalone CLI below remains supported.
 Python 3.11 or newer is required. Install the CLI directly from GitHub:
 
 ```bash
-pipx install git+https://github.com/wblekhoa/book-studio-core.git@v0.5.0
+pipx install git+https://github.com/wblekhoa/book-studio-core.git@v0.5.1
 bookstudio doctor --json
 ```
 
@@ -68,7 +68,7 @@ If `pipx` is unavailable, use an isolated virtual environment:
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install git+https://github.com/wblekhoa/book-studio-core.git@v0.5.0
+python -m pip install git+https://github.com/wblekhoa/book-studio-core.git@v0.5.1
 bookstudio doctor --json
 ```
 
@@ -84,7 +84,7 @@ PYTHONPATH=src python3 -m bookstudio --help
 The same plugin works in Claude Code: the CLI, the desktop app's Code tab, and VS Code.
 
 ```bash
-claude plugin marketplace add wblekhoa/book-studio-core#v0.5.0
+claude plugin marketplace add wblekhoa/book-studio-core#v0.5.1
 claude plugin install book-studio@book-studio
 ```
 

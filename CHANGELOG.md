@@ -8,6 +8,8 @@
   folders it did not create.
 - Windows: MCP stdio is UTF-8 with LF whatever the code page; CLI output is UTF-8; a production brief saved with
   CRLF binds the same packet identity; CI matrix includes `windows-latest` (result pending).
+- `install` recognises its own MCP entry on Windows (the ownership check compared against JSON-escaped text), so
+  a reinstall or upgrade replaces it instead of refusing it (BSC-HOST-002).
 - Archive preflight checks each entry's raw name, so a backslash path is rejected on Windows too, where
   `zipfile` turns it into `/` (BSC-PIPE-001).
 - Tests: Windows-safe ZIP fixtures and TOML path rewrites; install tests use the checkout bundle so they pass

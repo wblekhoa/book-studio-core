@@ -21,7 +21,7 @@
     "runtime/bookstudio/hooks.py": "b7d97d17b9f0d9298f64b7d4569477cbadf857b7ef09f18b456c42a2f5dc211d",
     "runtime/bookstudio/images/__init__.py": "538e1f99190db3e309b70d27b75fe3a09f447602032dd07e19e328e71d0ec1b1",
     "runtime/bookstudio/images/manifest.py": "7b724c108bbc9438f6d3175e083bae6f15487178d39939527f4ce761dc14ab03",
-    "runtime/bookstudio/install.py": "ba37af25a938b5cc55c653a9578bb8ced72d17311010d2e78d4bf26fb0c53d34",
+    "runtime/bookstudio/install.py": "d20d8f171ada87bb2e8dc161b5dcb67bc663bf236fa3cc00cde2ad76046b2178",
     "runtime/bookstudio/intake.py": "1414e8d5ddb338ca1a9e82a811ccb89548759fdd9adb908c2cc8cad3c23280ad",
     "runtime/bookstudio/mcp_server.py": "eb42175d4b7b687f82de10620b4e06fcd37b9b54cb45df69eca6f99c5f2cb47f",
     "runtime/bookstudio/pdf/__init__.py": "61932ffaf973ef344a777cfe25003a2d3906b15757659bd229a8f4b0816c131e",

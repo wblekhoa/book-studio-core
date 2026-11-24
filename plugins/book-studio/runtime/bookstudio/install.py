@@ -116,8 +116,14 @@ def _servers(config: dict[str, Any], style: str, path: Path) -> dict[str, Any]:
 
 def _owned(entry: Any, engine_root: Path) -> bool:
     """True when an existing entry points at a Book Studio engine installed by this command."""
-    text = json.dumps(entry)
-    return "bookstudio.py" in text and str(engine_root) in text
+    # Compare the entry's own strings: JSON text would escape Windows backslashes and never match (BSC-HOST-002).
+    def strings(value: Any) -> list[str]:
+        if isinstance(value, str):
+            return [value]
+        items = value.values() if isinstance(value, dict) else value if isinstance(value, list) else []
+        return [text for item in items for text in strings(item)]
+    found = strings(entry)
+    return any("bookstudio.py" in text for text in found) and any(str(engine_root) in text for text in found)
 
 
 def merge_decision(existing: Any, wanted: dict[str, Any], owned: bool) -> str:

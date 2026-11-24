@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from bookstudio.errors import BookStudioError
-from bookstudio.install import HOSTS, MARKER, SKILL, engine_home, install, uninstall
+from bookstudio.install import HOSTS, MARKER, SKILL, _owned, engine_home, install, uninstall
 
 T1 = datetime(2026, 11, 24, 9, 0, tzinfo=timezone.utc)
 T2 = datetime(2026, 11, 24, 9, 5, tzinfo=timezone.utc)
@@ -101,6 +101,14 @@ class InstallTests(unittest.TestCase):
         self.assertEqual("replace", moved["mcp"]["action"])
         entry = json.loads(self._config("kimi").read_text(encoding="utf-8"))["mcpServers"]["book-studio"]
         self.assertEqual("/usr/bin/python3.12", entry["command"])
+
+    # BSC-HOST-002
+    def test_our_entry_is_recognised_with_windows_paths(self) -> None:
+        engine = Path("C:\\Users\\a\\AppData\\Local\\BookStudio\\engine")
+        runner = "C:\\Users\\a\\AppData\\Local\\BookStudio\\engine\\0.4.0\\scripts\\bookstudio.py"
+        self.assertTrue(_owned({"command": "C:\\Python313\\python.exe", "args": [runner, "mcp"]}, engine))
+        self.assertTrue(_owned({"type": "local", "command": ["py", runner, "mcp"]}, engine))
+        self.assertFalse(_owned({"command": "npx", "args": ["bookstudio.py"]}, engine))
 
     # BSC-HOST-003
     def test_uninstall_restores_the_config_and_removes_only_our_skill(self) -> None:

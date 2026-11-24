@@ -104,8 +104,8 @@ class InstallTests(unittest.TestCase):
 
     # BSC-HOST-002
     def test_our_entry_is_recognised_with_windows_paths(self) -> None:
-        engine = Path("C:\\Users\\a\\AppData\\Local\\BookStudio\\engine")
-        runner = "C:\\Users\\a\\AppData\\Local\\BookStudio\\engine\\0.4.0\\scripts\\bookstudio.py"
+        engine = Path("D:\\Apps\\BookStudio\\engine")
+        runner = "D:\\Apps\\BookStudio\\engine\\0.4.0\\scripts\\bookstudio.py"
         self.assertTrue(_owned({"command": "C:\\Python313\\python.exe", "args": [runner, "mcp"]}, engine))
         self.assertTrue(_owned({"type": "local", "command": ["py", runner, "mcp"]}, engine))
         self.assertFalse(_owned({"command": "npx", "args": ["bookstudio.py"]}, engine))

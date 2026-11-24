@@ -11,11 +11,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from bookstudio.errors import BookStudioError
-from bookstudio.install import HOSTS, MARKER, SKILL, bundle_root, engine_home, install, uninstall
+from bookstudio.install import HOSTS, MARKER, SKILL, engine_home, install, uninstall
 
 T1 = datetime(2026, 11, 24, 9, 0, tzinfo=timezone.utc)
 T2 = datetime(2026, 11, 24, 9, 5, tzinfo=timezone.utc)
 OTHER = {"command": "npx", "args": ["-y", "other-mcp"]}
+# CI imports an installed copy of bookstudio, which has no bundle beside it: install from the checkout's bundle.
+BUNDLE = Path(__file__).resolve().parents[1] / "plugins" / "book-studio"
 
 
 def _tree(root: Path) -> dict[str, str]:
@@ -26,13 +28,13 @@ def _tree(root: Path) -> dict[str, str]:
 class InstallTests(unittest.TestCase):
     def setUp(self) -> None:
         self._directory = tempfile.TemporaryDirectory()
-        self.home = Path(self._directory.name)
+        self.home = Path(self._directory.name).resolve()
 
     def tearDown(self) -> None:
         self._directory.cleanup()
 
     def _install(self, host: str, **kwargs):
-        return install(host, home=self.home, env={}, platform="darwin", python="/opt/py/bin/python3", now=T1, **kwargs)
+        return install(host, home=self.home, env={}, platform="darwin", python="/opt/py/bin/python3", now=T1, source=BUNDLE, **kwargs)
 
     def _config(self, host: str) -> Path:
         return self.home.joinpath(*HOSTS[host].config)
@@ -86,7 +88,7 @@ class InstallTests(unittest.TestCase):
         self._seed("cursor")
         self._install("cursor")
         before = _tree(self.home)
-        again = install("cursor", home=self.home, env={}, platform="darwin", python="/opt/py/bin/python3", now=T2)
+        again = install("cursor", home=self.home, env={}, platform="darwin", python="/opt/py/bin/python3", now=T2, source=BUNDLE)
         self.assertEqual(("unchanged",) * 3,
                          (again["engine"]["action"], again["skill"]["action"], again["mcp"]["action"]))
         self.assertIsNone(again["mcp"]["backup"])
@@ -95,7 +97,7 @@ class InstallTests(unittest.TestCase):
     # BSC-HOST-002
     def test_new_python_or_version_replaces_our_own_entry(self) -> None:
         self._install("kimi")
-        moved = install("kimi", home=self.home, env={}, platform="darwin", python="/usr/bin/python3.12", now=T2)
+        moved = install("kimi", home=self.home, env={}, platform="darwin", python="/usr/bin/python3.12", now=T2, source=BUNDLE)
         self.assertEqual("replace", moved["mcp"]["action"])
         entry = json.loads(self._config("kimi").read_text(encoding="utf-8"))["mcpServers"]["book-studio"]
         self.assertEqual("/usr/bin/python3.12", entry["command"])
@@ -130,7 +132,7 @@ class InstallTests(unittest.TestCase):
         for label, (host, arrange) in cases.items():
             with self.subTest(case=label):
                 with tempfile.TemporaryDirectory() as directory:
-                    self.home = Path(directory)
+                    self.home = Path(directory).resolve()
                     self._config(host).parent.mkdir(parents=True, exist_ok=True)
                     arrange()
                     before = _tree(self.home)
@@ -156,7 +158,10 @@ class InstallTests(unittest.TestCase):
         real.write_text(json.dumps({"mcpServers": {"other": OTHER}}), encoding="utf-8")
         link = self._config("antigravity")
         link.parent.mkdir(parents=True)
-        link.symlink_to(real)
+        try:
+            link.symlink_to(real)
+        except OSError:  # Windows without symlink rights
+            self.skipTest("symlinks are not available here")
         self._install("antigravity")
         self.assertTrue(link.is_symlink())
         self.assertIn("book-studio", json.loads(real.read_text(encoding="utf-8"))["mcpServers"])
@@ -184,7 +189,7 @@ class InstallTests(unittest.TestCase):
     # BSC-HOST-006
     def test_the_installed_entry_starts_a_working_server_that_guards_its_folder(self) -> None:
         result = install("cursor", home=self.home, env={}, platform=sys.platform if sys.platform != "win32" else "darwin",
-                         python=sys.executable, now=T1)
+                         python=sys.executable, now=T1, source=BUNDLE)
         entry = result["mcp"]["entry"]
         engine = Path(result["engine"]["path"])
         lines = [{"jsonrpc": "2.0", "id": 1, "method": "tools/list"},
@@ -202,8 +207,16 @@ class InstallTests(unittest.TestCase):
         self.assertEqual("MCP_PRIVATE_PATH_REQUIRED", replies[2]["result"]["structuredContent"]["code"])
         self.assertFalse(any(p.name == "__pycache__" for p in engine.rglob("*")))
 
-    def test_bundle_root_is_found_from_the_checkout(self) -> None:
-        self.assertTrue((bundle_root() / "bundle.json").is_file())
+    # BSC-HOST-005
+    def test_the_bundled_runner_installs_from_its_own_bundle(self) -> None:
+        env = {k: v for k, v in os.environ.items() if k not in {"PYTHONPATH", "HOME", "USERPROFILE", "LOCALAPPDATA"}}
+        env.update(HOME=str(self.home), USERPROFILE=str(self.home), LOCALAPPDATA=str(self.home / "Local"),
+                   PYTHONDONTWRITEBYTECODE="1")
+        done = subprocess.run([sys.executable, str(BUNDLE / "scripts" / "bookstudio.py"), "install", "--host", "cursor",
+                               "--dry-run", "--json"], capture_output=True, text=True, encoding="utf-8", env=env)
+        self.assertEqual(0, done.returncode, done.stderr)
+        self.assertEqual("dry_run", json.loads(done.stdout)["status"])
+        self.assertEqual([], [p for p in self.home.rglob("*")])
 
 
 if __name__ == "__main__":

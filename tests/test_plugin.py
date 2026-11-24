@@ -132,6 +132,7 @@ class PluginTests(unittest.TestCase):
             self.assertEqual('raise SystemExit(9)\n', runner.read_text())
 
 
+@unittest.skipIf(sys.platform == 'win32', 'scripts/install_codex_plugin.py supports macOS and Linux only (docs/codex-plugin.md)')
 class CodexInstallTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='book studio install ')

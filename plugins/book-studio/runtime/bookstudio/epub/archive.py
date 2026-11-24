@@ -73,6 +73,8 @@ def preflight_archive(
             seen: set[str] = set()
             total_uncompressed = 0
             for member in members:
+                # BSC-PIPE-001: on Windows zipfile turns '\\' into '/' in .filename; the raw name is in .orig_filename.
+                _validate_member_name(member.orig_filename)
                 _validate_member_name(member.filename)
                 if member.filename in seen:
                     raise _fail(

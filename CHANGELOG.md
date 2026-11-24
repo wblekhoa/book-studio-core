@@ -8,7 +8,10 @@
   folders it did not create.
 - Windows: MCP stdio is UTF-8 with LF whatever the code page; CLI output is UTF-8; a production brief saved with
   CRLF binds the same packet identity; CI matrix includes `windows-latest` (result pending).
-- Tests: Windows-safe ZIP fixtures and TOML path rewrites.
+- Archive preflight checks each entry's raw name, so a backslash path is rejected on Windows too, where
+  `zipfile` turns it into `/` (BSC-PIPE-001).
+- Tests: Windows-safe ZIP fixtures and TOML path rewrites; install tests use the checkout bundle so they pass
+  against an installed package; the macOS/Linux-only Codex checkout installer tests skip on Windows.
 - MCP: `pilot` gains `revise` (with `response_path`), and new `pdf_inspect` / `pdf_prepare` tools, so a host with
   only MCP can revise a sample and prepare a PDF.
 - Claude Code: `/book-studio:start` asks which job (translate, bilingual, restyle, PDF to EPUB, fix formatting,

@@ -73,7 +73,7 @@ class McpServerTests(unittest.TestCase):
                 request = {'jsonrpc': '2.0', 'id': 1, 'method': 'tools/call', 'params': {'name': 'start',
                            'arguments': {'project': project, 'source': str(self.root / 'book.epub'), 'answers': ANSWERS}}}
                 result = subprocess.run([sys.executable, '-m', 'bookstudio', 'mcp'], input=json.dumps(request)+'\n',
-                                        capture_output=True, text=True, env=env, cwd=installation)
+                                        capture_output=True, text=True, encoding='utf-8', env=env, cwd=installation)
                 self.assertEqual(0, result.returncode, result.stderr)
                 payload = json.loads(result.stdout)['result']
                 self.assertTrue(payload['isError'], payload)
@@ -142,7 +142,7 @@ class McpServerTests(unittest.TestCase):
                   for n, (name, args) in enumerate(calls, start=1)]
         env = dict(os.environ, PYTHONPATH=str(ROOT / "src"), PYTHONDONTWRITEBYTECODE="1", BOOKSTUDIO_PROJECTS_DIR=str(self.root))
         result = subprocess.run([sys.executable, "-m", "bookstudio", "mcp"], input="\n".join(map(json.dumps, lines)) + "\n",
-                                capture_output=True, text=True, env=env, cwd=self.root)
+                                capture_output=True, text=True, encoding="utf-8", env=env, cwd=self.root)
         responses = [json.loads(line) for line in result.stdout.splitlines()]  # every stdout line is JSON-RPC
         self.assertEqual(len(calls) + 1, len(responses), result.stderr)
         return [response["result"] for response in responses[1:]]

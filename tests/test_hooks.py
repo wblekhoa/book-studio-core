@@ -49,13 +49,15 @@ class HookTests(unittest.TestCase):
 
     # BSC-HOOK-002
     def test_guard_blocks_shell_writes_but_allows_reads_and_copies_out(self) -> None:
-        final = self.project / "output/final.epub"
+        # Commands are bash: an unquoted backslash is an escape there, so Windows paths are written with '/'.
+        project, root = self.project.as_posix(), self.root.as_posix()
+        final = f"{project}/output/final.epub"
         blocked = [
             f"cp other.epub {final}",
-            f"echo x > {self.project}/reports/release.json",
-            f"rm {self.project}/cache/translations.json",
+            f"echo x > {project}/reports/release.json",
+            f"rm {project}/cache/translations.json",
             f"python3 -c \"open('{final}','wb').write(b'')\"",
-            f"sed -i '' s/a/b/ {self.project}/reports/release.json",
+            f"sed -i '' s/a/b/ {project}/reports/release.json",
             "cp x.epub output/final.epub",
         ]
         for command in blocked:
@@ -65,7 +67,7 @@ class HookTests(unittest.TestCase):
             f"cp {final} ~/Books/demo.epub",
             f"unzip -l {final}",
             f"shasum -a 256 {final}",
-            f"rm {self.root}/other/reports/release.json",
+            f"rm {root}/other/reports/release.json",
             "bookstudio finish demo --json",
         ]
         for command in allowed:

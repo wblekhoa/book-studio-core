@@ -4,7 +4,7 @@ type: ux
 product: book-studio-core
 title: "Book Studio Core — Agent-host integration (UX)"
 status: active
-updated: 2026-11-24
+updated: 2026-11-25
 summary: "How Book Studio feels inside Claude Code and Codex: one plugin with the skill, four commands, two agents, guard and status hooks, an MCP server with an experimental review view, and a two-command install."
 tags: [area/ai, area/translation, stack/python, surface/cli]
 relations:
@@ -56,7 +56,8 @@ figma: []
 
 1. Install Python 3.11+ (Windows: from python.org, tick "Add to PATH"; `py` works too).
 2. Download and unpack the release, then run one command (Windows uses `py`, macOS/Linux `python3`):
-   `py plugins\book-studio\scripts\bookstudio.py install --host cursor` (or `antigravity`, `kimi`, `opencode`).
+   `py plugins\book-studio\scripts\bookstudio.py install --host cursor` (or `antigravity`, `kimi`, `opencode`;
+   `claude-code` or `codex` for the skill alone, without a plugin or MCP entry).
    `--dry-run --json` shows the plan first; `uninstall --host …` undoes it.
 3. Restart the tool and ask it to translate a book. The agent reads the skill and calls the `book-studio` tools.
 
@@ -66,6 +67,8 @@ figma: []
 | Antigravity | `~/.gemini/antigravity/skills/`   | `~/.gemini/antigravity/mcp_config.json` |
 | Kimi Code   | `~/.kimi-code/skills/`            | `~/.kimi-code/mcp.json`                 |
 | OpenCode    | `~/.config/opencode/skills/`      | `~/.config/opencode/opencode.json`      |
+| Claude Code | `~/.claude/skills/` (`CLAUDE_CONFIG_DIR`) | none (skill only)               |
+| Codex       | `~/.codex/skills/` (`CODEX_HOME`) | none (skill only)                       |
 
 The person sees one line per part (engine, skill, MCP: installed / updated / unchanged) and the backup path.
 Refusals name the file and leave it untouched.

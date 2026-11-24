@@ -117,7 +117,27 @@ explains meaningful choices, proposes a representative text and visual pilot,
 drives the bounded packet loop, and audits the final EPUB for editorial,
 navigation, image, and rendering gaps that structural coverage cannot prove.
 
-From inside Codex, the shortest first-time setup is to ask:
+### Skill only, one command (no plugin)
+
+For Claude Code or Codex without installing a plugin, on macOS, Linux or Windows:
+
+```bash
+git clone https://github.com/wblekhoa/book-studio-core.git
+cd book-studio-core
+python3 plugins/book-studio/scripts/bookstudio.py install --host claude-code
+```
+
+On Windows type `py` instead of `python3`; use `--host codex` for Codex. This
+copies the matching engine to a per-user folder and the skill, with absolute run
+commands, into `~/.claude/skills` (or `$CLAUDE_CONFIG_DIR`) / `~/.codex/skills`
+(or `$CODEX_HOME`). Nothing else is installed and no host settings change; no
+separate CLI is needed. `--dry-run --json` shows the plan first and
+`uninstall --host …` removes the skill. Restart the app and ask it to translate
+a book.
+
+### Other ways
+
+From inside Codex, you can also ask:
 
 ```text
 Use $skill-installer to install https://github.com/wblekhoa/book-studio-core/tree/main/skills/book-translation

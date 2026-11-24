@@ -23,9 +23,13 @@ codex plugin add book-studio@book-studio
 codex plugin list
 ```
 
-Supported on macOS and Linux with Python 3.11-3.14. The Codex plugin manifest starts `python3`, which a
-Windows machine may not have; on Windows, Book Studio is supported through `bookstudio install` for other
-hosts (see the README) and is not yet verified inside Codex.
+Python 3.11-3.14 on macOS, Linux or Windows. The plugin manifest starts `python3`. On Windows that command
+comes with the python.org Python install manager; the classic installer gives only `py` and `python`. The
+Windows plugin route is unblocked but not yet run on a real Windows machine.
+
+Skill only, without the plugin (any OS, no `python3` needed): from a checkout or the unpacked release run
+`py plugins\book-studio\scripts\bookstudio.py install --host codex` (`python3 plugins/book-studio/scripts/bookstudio.py …`
+on macOS/Linux). It copies the engine and the skill, with absolute run commands, into `$CODEX_HOME/skills`.
 
 ## Install from a checkout
 

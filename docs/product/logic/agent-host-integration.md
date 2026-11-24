@@ -49,6 +49,9 @@ the test named in Evidence.
 | BSC-HOST-004 | Install refuses, writing nothing, on malformed JSON, a non-object config or server map, a skill folder it did not create, someone else's `book-studio` entry, or an OpenCode `opencode.jsonc`. A UTF-8 BOM or empty file is read; a symlinked config is written through to its target. | live   | `tests/test_install.py` (`test_unsafe_configs_and_folders_are_refused_untouched`, `test_bom_and_empty_configs_are_read_and_symlinks_survive`) |
 | BSC-HOST-005 | `--dry-run` reports the same plan and writes nothing. | live   | `tests/test_install.py` (`test_dry_run_writes_nothing`, `test_the_bundled_runner_installs_from_its_own_bundle`) |
 | BSC-HOST-006 | The written entry starts a working MCP server that lists its tools and refuses project paths inside the engine folder. | live   | `tests/test_install.py` (`test_the_installed_entry_starts_a_working_server_that_guards_its_folder`) |
+| BSC-HOST-007 | `install --host claude-code\|codex` copies the engine and the skill (into `~/.claude/skills` or `$CLAUDE_CONFIG_DIR/skills`, `~/.codex/skills` or `$CODEX_HOME/skills`) and edits no host config; an unmarked `book-translation` folder (the older skill installer's) is refused untouched. | live   | `tests/test_install.py` (`test_claude_code_and_codex_get_the_skill_only`, `test_skill_only_hosts_honour_their_home_variable`, `test_a_skill_folder_from_the_older_installer_is_left_untouched`) |
+| BSC-HOST-008 | The installed skill's run command uses forward slashes and quoted absolute paths, and running it gives a passing `doctor`. | live   | `tests/test_install.py` (`test_the_installed_skill_command_runs_doctor`) |
+| BSC-HOST-009 | The Claude Code and Codex plugins on Windows: `scripts/install_codex_plugin.py` no longer refuses win32 and runs the manifest's `python3` through doctor; commands and the skill tell the agent to use `py -3` when `python3` does not run. | not built | Unverified: no Windows run of the marketplace plugin, its MCP server or hooks yet (owner machine run). |
 | BSC-WIN-001  | MCP stdio is UTF-8 with LF line endings whatever the console code page; CLI output is reconfigured to UTF-8. | live   | `tests/test_mcp.py` (`test_stdio_frames_are_utf8_and_lf_whatever_the_locale`) |
 | BSC-WIN-002  | On Windows the engine lives under `%LOCALAPPDATA%` (fallback `~\\AppData\\Local`). | live   | `tests/test_install.py` (`test_windows_engine_lives_in_local_app_data`) |
 | BSC-WIN-003  | A production brief saved with CRLF binds the same packet identity as LF. | live   | `tests/test_packets.py` (`test_crlf_production_brief_binds_the_same_packet_as_lf`) |
@@ -76,6 +79,7 @@ the test named in Evidence.
 
 ## Change log
 
+- 2026-11-25: BSC-HOST-007…009 (skill-only install for Claude Code and Codex; Windows plugin route unblocked, unverified).
 - 2026-11-25: BSC-MCP-004…005 (revise and PDF tools over MCP); `/book-studio:start` job menu.
 - 2026-11-24: BSC-HOST-001…006 and BSC-WIN-001…003 (other AI hosts, Windows I/O). Windows CI result pending a pushed branch.
 - 2026-11-02: BSC-MCP-002 updated for 0.4.0 (review returns a bounded view, no HTML page).

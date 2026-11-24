@@ -18,6 +18,8 @@ T2 = datetime(2026, 11, 24, 9, 5, tzinfo=timezone.utc)
 OTHER = {"command": "npx", "args": ["-y", "other-mcp"]}
 # CI imports an installed copy of bookstudio, which has no bundle beside it: install from the checkout's bundle.
 BUNDLE = Path(__file__).resolve().parents[1] / "plugins" / "book-studio"
+MCP_HOSTS = [name for name, host in HOSTS.items() if host.config is not None]
+SKILL_HOSTS = [name for name, host in HOSTS.items() if host.config is None]
 
 
 def _tree(root: Path) -> dict[str, str]:
@@ -49,7 +51,7 @@ class InstallTests(unittest.TestCase):
 
     # BSC-HOST-001
     def test_each_host_gets_engine_skill_and_one_mcp_entry_and_keeps_the_rest(self) -> None:
-        for host in HOSTS:
+        for host in MCP_HOSTS:
             with self.subTest(host=host):
                 original = self._seed(host)
                 result = self._install(host)
@@ -77,7 +79,7 @@ class InstallTests(unittest.TestCase):
                 text = (skill / "SKILL.md").read_text(encoding="utf-8")
                 self.assertIn("# Book Translation and Design", text)
                 self.assertIn("## Establish the boundary", text)
-                self.assertIn(f'"/opt/py/bin/python3" "{runner}"', text)
+                self.assertIn(f'"/opt/py/bin/python3" "{Path(runner).as_posix()}"', text)
                 for stale in ("<plugin-root>", 'python3 "', "${CLAUDE_PLUGIN_ROOT}"):
                     self.assertNotIn(stale, text)
                 self.assertTrue((skill / MARKER).is_file())
@@ -112,7 +114,7 @@ class InstallTests(unittest.TestCase):
 
     # BSC-HOST-003
     def test_uninstall_restores_the_config_and_removes_only_our_skill(self) -> None:
-        for host in HOSTS:
+        for host in MCP_HOSTS:
             with self.subTest(host=host):
                 original = self._seed(host)
                 self._install(host)
@@ -176,7 +178,7 @@ class InstallTests(unittest.TestCase):
 
     # BSC-HOST-005
     def test_dry_run_writes_nothing(self) -> None:
-        for host in HOSTS:
+        for host in MCP_HOSTS:
             with self.subTest(host=host):
                 self._seed(host)
                 before = _tree(self.home)
@@ -214,6 +216,61 @@ class InstallTests(unittest.TestCase):
         self.assertFalse(replies[1]["result"]["isError"], replies[1])
         self.assertEqual("MCP_PRIVATE_PATH_REQUIRED", replies[2]["result"]["structuredContent"]["code"])
         self.assertFalse(any(p.name == "__pycache__" for p in engine.rglob("*")))
+
+    # BSC-HOST-007
+    def test_claude_code_and_codex_get_the_skill_only(self) -> None:
+        self.assertEqual(["claude-code", "codex"], SKILL_HOSTS)
+        for host in SKILL_HOSTS:
+            with self.subTest(host=host):
+                result = self._install(host)
+                skill = self.home.joinpath(*HOSTS[host].skills) / SKILL
+                self.assertEqual({"path": None, "action": "none"}, result["mcp"])
+                self.assertEqual(str(skill), result["skill"]["path"])
+                self.assertTrue((skill / MARKER).is_file())
+                text = (skill / "SKILL.md").read_text(encoding="utf-8")
+                self.assertIn('"/opt/py/bin/python3" "', text)
+                self.assertNotIn("${CLAUDE_PLUGIN_ROOT}", text)
+                top = HOSTS[host].skills[0]
+                self.assertEqual({"skills"}, {p.name for p in (self.home / top).iterdir()})
+                removed = uninstall(host, home=self.home, env={}, now=T2)
+                self.assertEqual("removed", removed["skill"]["action"])
+                self.assertFalse(skill.exists())
+
+    # BSC-HOST-007
+    def test_skill_only_hosts_honour_their_home_variable(self) -> None:
+        for host, var in (("claude-code", "CLAUDE_CONFIG_DIR"), ("codex", "CODEX_HOME")):
+            with self.subTest(host=host):
+                custom = self.home / f"custom-{host}"
+                result = install(host, home=self.home, env={var: str(custom)}, platform="darwin",
+                                 python="/opt/py/bin/python3", now=T1, source=BUNDLE)
+                self.assertEqual(str(custom / "skills" / SKILL), result["skill"]["path"])
+                self.assertTrue((custom / "skills" / SKILL / "SKILL.md").is_file())
+
+    # BSC-HOST-004
+    def test_a_skill_folder_from_the_older_installer_is_left_untouched(self) -> None:
+        old = self.home / ".codex" / "skills" / SKILL
+        old.mkdir(parents=True)
+        (old / "SKILL.md").write_text("older copy", encoding="utf-8")
+        with self.assertRaises(BookStudioError) as caught:
+            self._install("codex")
+        self.assertEqual("INSTALL_SKILL_CONFLICT", caught.exception.code)
+        self.assertEqual("older copy", (old / "SKILL.md").read_text(encoding="utf-8"))
+
+    # BSC-HOST-008
+    def test_the_installed_skill_command_runs_doctor(self) -> None:
+        env = {k: v for k, v in os.environ.items() if k not in {"PYTHONPATH"}}
+        result = install("claude-code", home=self.home, env={"LOCALAPPDATA": str(self.home / "Local")},
+                         python=sys.executable, now=T1, source=BUNDLE)
+        text = (Path(result["skill"]["path"]) / "SKILL.md").read_text(encoding="utf-8")
+        line = next(l for l in text.splitlines() if "doctor --json" in l and l.strip().startswith("`"))
+        command = line.split("`")[1]
+        self.assertNotIn("\\", command)
+        parts = [part for part in command.split('"') if part.strip()]
+        self.assertEqual(["doctor --json"], [p.strip() for p in parts[2:]])
+        done = subprocess.run([parts[0], parts[1], "doctor", "--json"], capture_output=True, text=True,
+                              encoding="utf-8", env=dict(env, PYTHONDONTWRITEBYTECODE="1"))
+        self.assertEqual(0, done.returncode, done.stderr)
+        self.assertEqual("pass", json.loads(done.stdout)["status"])
 
     # BSC-HOST-005
     def test_the_bundled_runner_installs_from_its_own_bundle(self) -> None:

@@ -20,7 +20,7 @@ class InstallError(Exception):
 
 
 def run(command, *, data=None, env=None, cwd=ROOT):
-    result = subprocess.run(command, cwd=cwd, input=data, capture_output=True, text=True, timeout=60, env=env)
+    result = subprocess.run(command, cwd=cwd, input=data, capture_output=True, text=True, encoding='utf-8', timeout=60, env=env)
     if result.returncode:
         raise InstallError('CODEX_INSTALL_COMMAND_FAILED', (result.stderr or result.stdout).strip() or 'Command failed.')
     return result.stdout
@@ -39,7 +39,8 @@ def transport(plugin):
         raise InstallError('PLUGIN_TRANSPORT_INVALID', 'The plugin has no valid local command.')
     command = shutil.which(server['command'])
     if not command:
-        raise InstallError('PLUGIN_COMMAND_NOT_FOUND', 'Install Python 3.11+ and make ' + server['command'] + ' available in Terminal and Codex.')
+        raise InstallError('PLUGIN_COMMAND_NOT_FOUND', 'Install Python 3.11+ and make ' + server['command'] + ' available in Terminal and Codex.'
+                           + (' On Windows use the python.org Python install manager, which provides python3; or skip the plugin: py plugins\\book-studio\\scripts\\bookstudio.py install --host codex' if sys.platform == 'win32' else ''))
     args = server['args']
     if not isinstance(args, list) or not all(isinstance(arg, str) for arg in args):
         raise InstallError('PLUGIN_TRANSPORT_INVALID', 'The plugin has invalid command arguments.')
@@ -51,8 +52,6 @@ def install(dry_run=False):
     try:
         if sys.version_info < (3, 11):
             raise InstallError('PYTHON_TOO_OLD', 'Install Python 3.11 or newer, then retry.')
-        if sys.platform == 'win32':
-            raise InstallError('PLATFORM_UNSUPPORTED', 'This build supports macOS and Linux.')
         codex = shutil.which('codex')
         if not codex:
             raise InstallError('CODEX_NOT_FOUND', 'Install Codex with plugin support and make its codex command available in Terminal.')

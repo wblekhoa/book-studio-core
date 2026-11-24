@@ -4,3 +4,5 @@ argument-hint: "[project-folder]"
 ---
 
 For the Book Studio project at $ARGUMENTS, use the `book-translation` skill's completion steps: run `status`, `finish` and `verify` separately with `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/bookstudio.py" … --json`, then the bundled final-EPUB audit. Corrections after the build go into `edits.json`, never into `output/final.epub`. Report the final path, whether its SHA-256 matches `reports/release.json`, the number of declared edits, and any open review findings.
+
+On Windows, if `python3` does not run or opens the Microsoft Store, use `py -3` with the same arguments.

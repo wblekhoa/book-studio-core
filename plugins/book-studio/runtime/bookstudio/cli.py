@@ -232,7 +232,7 @@ def build_parser() -> argparse.ArgumentParser:
     hook.add_argument("event", choices=("guard", "session-start"))
     from .install import HOSTS
 
-    for name, text in (("install", "Install the skill and MCP server into an AI host (Cursor, Antigravity, Kimi, OpenCode)."),
+    for name, text in (("install", "Install the skill (and, for Cursor, Antigravity, Kimi and OpenCode, the MCP server) into an AI host; claude-code and codex get the skill only."),
                        ("uninstall", "Remove the Book Studio skill and MCP entry from an AI host.")):
         host_command = subparsers.add_parser(name, help=text, description=text)
         host_command.add_argument("--host", required=True, choices=sorted(HOSTS))

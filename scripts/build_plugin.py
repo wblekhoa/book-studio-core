@@ -32,6 +32,8 @@ to the plugin root (two parent directories above this skill folder). For every
 quoted path and Python 3.11 or newer. Do not use a separately installed global
 CLI or pip-install another engine. Run the bundled `doctor --json` first.
 If Python is missing, explain the requirement and help the user install it.
+On Windows, if `python3` does not run or opens the Microsoft Store, run the same
+command with `py -3` (or `python`) instead.
 Optional PDF tools are reported by doctor and are needed only for PDF input.
 Keep all private project files outside the plugin installation directory.
 In Claude Code the plugin root is `${CLAUDE_PLUGIN_ROOT}`. When the `book-studio`

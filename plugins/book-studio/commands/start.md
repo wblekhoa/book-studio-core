@@ -24,3 +24,5 @@ Then ask only the questions that job needs, in one message, with a recommended d
 - Edit a finished book: what to change; declare it in `edits.json` and run `finish` and `verify`.
 
 Keep my book files outside the plugin folder, and stop for my explicit approval at every sample or review step.
+
+On Windows, if `python3` does not run or opens the Microsoft Store, use `py -3` with the same arguments.

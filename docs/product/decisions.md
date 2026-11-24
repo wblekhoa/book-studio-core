@@ -4,12 +4,26 @@ type: decision
 product: book-studio-core
 title: "Book Studio Core — Decisions"
 status: active
-updated: 2026-11-24
+updated: 2026-11-25
 summary: "Product decisions covering the provider-neutral engine, pilot and finishing gates, distribution, host integrations, and the approved direction toward an interactive in-host workspace."
 tags: [area/translation, area/book, area/security, area/release, stack/python, surface/cli]
 ---
 
 # Book Studio Core — Decisions (append-only, newest first)
+
+## 2026-11-25 · Claude Code and Codex on Windows; a skill-only install
+
+- **Owner request** (paraphrased): do not block Windows in Claude Code and Codex, make it easy to install there,
+  and optimise for people who want the skill without a full plugin.
+- **Decision**:
+  - Supersedes the 2026-11-24 line that Windows inside Claude and Codex is not claimed.
+  - `bookstudio install --host claude-code|codex` installs the engine and the skill only, with absolute,
+    forward-slash run commands, so it works on every OS without `python3` and without a plugin (BSC-HOST-007/008).
+  - The Codex plugin installer no longer refuses Windows; plugin manifests and hooks keep `python3` (present with
+    the python.org install manager) and the agent is told to fall back to `py -3` (BSC-HOST-009, not built until
+    a real Windows run).
+- **Evidence**: `tests/test_install.py`; Windows CI on the pushed branch.
+- **Reversal**: if the plugin route fails on Windows, document the skill-only install as the Windows path.
 
 ## 2026-11-24 · Other AI hosts and Windows through one install command
 

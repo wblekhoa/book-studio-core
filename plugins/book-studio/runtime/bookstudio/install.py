@@ -1,8 +1,9 @@
 """Install the Book Studio skill and MCP server into other AI hosts.
 
-One command per host (Cursor, Antigravity, Kimi Code, OpenCode): copy the engine to a stable per-user folder,
-copy the skill into the host's skills folder with absolute run commands, and merge one ``book-studio`` MCP entry
-into the host's config. Configs are backed up before any change; other entries are never touched.
+One command per host: copy the engine to a stable per-user folder, copy the skill into the host's skills folder
+with absolute run commands, and (Cursor, Antigravity, Kimi Code, OpenCode) merge one ``book-studio`` MCP entry into
+the host's config. Claude Code and Codex get the skill only, with no plugin and no config edit (BSC-HOST-007).
+Configs are backed up before any change; other entries are never touched.
 """
 
 from __future__ import annotations
@@ -32,9 +33,10 @@ class Host:
     name: str
     label: str
     skills: tuple[str, ...]
-    config: tuple[str, ...]
-    style: str  # "mcpServers" or "opencode"
+    config: tuple[str, ...] | None  # None: skill only, no MCP entry (BSC-HOST-007)
+    style: str  # "mcpServers", "opencode" or "" for skill only
     refuse_if: tuple[str, ...] = ()
+    home_env: str = ""  # env var that replaces the first skills folder, e.g. CODEX_HOME for ~/.codex
 
 
 HOSTS: dict[str, Host] = {
@@ -45,7 +47,16 @@ HOSTS: dict[str, Host] = {
     "opencode": Host("opencode", "OpenCode", (".config", "opencode", "skills"),
                      (".config", "opencode", "opencode.json"), "opencode",
                      refuse_if=(".config", "opencode", "opencode.jsonc")),
+    "claude-code": Host("claude-code", "Claude Code", (".claude", "skills"), None, "", home_env="CLAUDE_CONFIG_DIR"),
+    "codex": Host("codex", "Codex", (".codex", "skills"), None, "", home_env="CODEX_HOME"),
 }
+
+
+def skills_home(host: Host, home: Path, env: Mapping[str, str]) -> Path:
+    configured = env.get(host.home_env, "").strip() if host.home_env else ""
+    if configured:
+        return Path(configured).expanduser().joinpath(*host.skills[1:])
+    return home.joinpath(*host.skills)
 
 
 def _error(code: str, message: str, next_action: str) -> BookStudioError:
@@ -160,10 +171,11 @@ def rewrite_runtime(skill_text: str, python: str, runner: Path, engine: Path) ->
                      "Rebuild the plugin bundle (scripts/build_plugin.py), then install again.")
     start = starts[0]
     end = next((i for i in range(start + 1, len(lines)) if lines[i].startswith("#")), len(lines))
-    command = f'"{python}" "{runner}"'
+    # Forward slashes work in Git Bash, PowerShell and cmd alike (BSC-HOST-008).
+    command = f'"{Path(python).as_posix()}" "{runner.as_posix()}"'
     section = f"""{RUNTIME_HEADING}
 
-`bookstudio install` placed this skill's matching Python engine in `{engine}`.
+`bookstudio install` placed this skill's matching Python engine in `{engine.as_posix()}`.
 For every `bookstudio ...` command in this skill and its references, run
 `{command} ...` instead (in PowerShell, put `& ` before it). Do not use a
 separately installed global CLI or pip-install another engine. Run
@@ -191,12 +203,11 @@ def install(host_name: str, *, home: Path | None = None, env: Mapping[str, str] 
     source = source or bundle_root()
     engine = engine_home(home, env, platform)
     runner = engine / "scripts" / "bookstudio.py"
-    config_path = home.joinpath(*host.config)
-    skill_dir = home.joinpath(*host.skills) / SKILL
+    skill_dir = skills_home(host, home, env) / SKILL
 
     if host.refuse_if and home.joinpath(*host.refuse_if).exists():
         raise _error("INSTALL_CONFIG_UNSUPPORTED", f"{home.joinpath(*host.refuse_if)} exists; Book Studio only edits "
-                     f"{config_path.name}.", f'Add the "{SERVER}" entry shown by --dry-run --json to that file by hand.')
+                     f"{host.config[-1]}.", f'Add the "{SERVER}" entry shown by --dry-run --json to that file by hand.')
     if skill_dir.exists() and not (skill_dir / MARKER).is_file():
         raise _error("INSTALL_SKILL_CONFLICT", f"{skill_dir} exists and was not installed by Book Studio; it was left untouched.",
                      "Move or rename that folder, then run install again.")
@@ -230,12 +241,16 @@ def install(host_name: str, *, home: Path | None = None, env: Mapping[str, str] 
     skill_action = ("unchanged" if all(p.is_file() and p.read_bytes() == d for p, d in skill_files.items())
                     else "updated" if skill_dir.exists() else "installed")
 
-    # MCP entry.
-    real_config = config_path.resolve() if config_path.is_symlink() else config_path
-    config = read_config(real_config)
-    servers = _servers(config, host.style, real_config)
-    wanted = wanted_entry(host.style, python, runner, engine)
-    decision = merge_decision(servers.get(SERVER), wanted, _owned(servers.get(SERVER), engine.parent))
+    # MCP entry (skill-only hosts have none).
+    real_config = config = servers = wanted = None
+    decision = "none"
+    if host.config is not None:
+        config_path = home.joinpath(*host.config)
+        real_config = config_path.resolve() if config_path.is_symlink() else config_path
+        config = read_config(real_config)
+        servers = _servers(config, host.style, real_config)
+        wanted = wanted_entry(host.style, python, runner, engine)
+        decision = merge_decision(servers.get(SERVER), wanted, _owned(servers.get(SERVER), engine.parent))
 
     backup = None
     if not dry_run:
@@ -247,7 +262,7 @@ def install(host_name: str, *, home: Path | None = None, env: Mapping[str, str] 
             for target, data in skill_files.items():
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(data)
-        if decision != "unchanged":
+        if decision not in ("unchanged", "none"):
             if real_config.exists():
                 backup = _backup(real_config, now)
             servers[SERVER] = wanted
@@ -260,24 +275,25 @@ def install(host_name: str, *, home: Path | None = None, env: Mapping[str, str] 
         "python": python,
         "engine": {"path": str(engine), "action": engine_action},
         "skill": {"path": str(skill_dir), "action": skill_action},
-        "mcp": {"path": str(real_config), "action": decision, "backup": str(backup) if backup else None,
-                "entry": wanted},
+        "mcp": ({"path": str(real_config), "action": decision, "backup": str(backup) if backup else None,
+                 "entry": wanted} if host.config is not None else {"path": None, "action": "none"}),
     }
 
 
-def uninstall(host_name: str, *, home: Path | None = None, dry_run: bool = False,
-              now: datetime | None = None) -> dict[str, Any]:
+def uninstall(host_name: str, *, home: Path | None = None, env: Mapping[str, str] | None = None,
+              dry_run: bool = False, now: datetime | None = None) -> dict[str, Any]:
     host = HOSTS[host_name]
     home = home or Path.home()
     now = now or datetime.now(timezone.utc)
-    config_path = home.joinpath(*host.config)
-    real_config = config_path.resolve() if config_path.is_symlink() else config_path
-    skill_dir = home.joinpath(*host.skills) / SKILL
-
-    config = read_config(real_config)
-    key = "mcp" if host.style == "opencode" else "mcpServers"
-    servers = config.get(key)
-    has_entry = isinstance(servers, dict) and SERVER in servers
+    skill_dir = skills_home(host, home, os.environ if env is None else env) / SKILL
+    real_config = config = servers = None
+    has_entry = False
+    if host.config is not None:
+        config_path = home.joinpath(*host.config)
+        real_config = config_path.resolve() if config_path.is_symlink() else config_path
+        config = read_config(real_config)
+        servers = config.get("mcp" if host.style == "opencode" else "mcpServers")
+        has_entry = isinstance(servers, dict) and SERVER in servers
     owned_skill = (skill_dir / MARKER).is_file()
     backup = None
     if not dry_run:
@@ -292,6 +308,7 @@ def uninstall(host_name: str, *, home: Path | None = None, dry_run: bool = False
         "message": f"{'Would remove' if dry_run else 'Removed'} Book Studio from {host.label}. The engine folder is kept.",
         "host": host.name,
         "skill": {"path": str(skill_dir), "action": "removed" if owned_skill else "absent"},
-        "mcp": {"path": str(real_config), "action": "removed" if has_entry else "absent",
-                "backup": str(backup) if backup else None},
+        "mcp": ({"path": str(real_config), "action": "removed" if has_entry else "absent",
+                 "backup": str(backup) if backup else None} if host.config is not None
+                else {"path": None, "action": "none"}),
     }

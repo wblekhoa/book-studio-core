@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- `bookstudio install --host claude-code|codex`: the skill and engine only, no plugin and no config edit; honours
+  `CLAUDE_CONFIG_DIR` / `CODEX_HOME`. Installed run commands use forward slashes so they work in Git Bash,
+  PowerShell and cmd.
+- The Codex plugin installer no longer refuses Windows; plugin commands and the skill fall back to `py -3` when
+  `python3` does not run.
+
 - `bookstudio install --host cursor|antigravity|kimi|opencode` (and `uninstall`, `--dry-run`, `--json`): copies the
   hash-checked engine to a per-user folder, adds the skill with absolute run commands and one `book-studio` MCP
   entry, backs up the host config, keeps other entries, and refuses malformed configs, foreign entries and

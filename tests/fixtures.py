@@ -24,7 +24,11 @@ def make_zip(path: Path, entries: dict[str, bytes], *, compressed: bool = False)
     compression = zipfile.ZIP_DEFLATED if compressed else zipfile.ZIP_STORED
     with zipfile.ZipFile(path, "w", compression=compression) as archive:
         for name, data in entries.items():
-            archive.writestr(name, data)
+            # ZipInfo() turns os.sep into '/' on Windows; set the raw name so unsafe names stay unsafe.
+            info = zipfile.ZipInfo("placeholder")
+            info.filename = name
+            info.compress_type = compression
+            archive.writestr(info, data)
 
 
 def make_duplicate_name_zip(path: Path, name: str) -> None:

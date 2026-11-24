@@ -23,8 +23,9 @@ codex plugin add book-studio@book-studio
 codex plugin list
 ```
 
-Supported on macOS and Linux with Python 3.11-3.14. Windows is not supported
-yet.
+Supported on macOS and Linux with Python 3.11-3.14. The Codex plugin manifest starts `python3`, which a
+Windows machine may not have; on Windows, Book Studio is supported through `bookstudio install` for other
+hosts (see the README) and is not yet verified inside Codex.
 
 ## Install from a checkout
 

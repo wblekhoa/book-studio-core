@@ -64,8 +64,12 @@ pages, or publish books.
 
    ```bash
    bookstudio pdf inspect SOURCE.pdf --json
-   bookstudio pdf prepare SOURCE.pdf --output PREPARED.epub --source-language en --json
+   bookstudio pdf prepare SOURCE.pdf --output PREPARED.epub --json
    ```
+
+   Add `--source-language TAG` only when the user or the document states the
+   language; never guess it. The MCP tools `pdf_inspect` and `pdf_prepare` run
+   the same gateway.
 
    A successful preparation intentionally returns exit code 2 with
    `status: source_review_required`. Compare the PDF and prepared EPUB as
@@ -113,12 +117,17 @@ pages, or publish books.
    manifest before acceptance because changing them invalidates older packet
    context. For each packet, reconstruct the connected idea, rewrite it for the
    target language, then perform a target-only read before emitting final JSON.
+   In Claude Code, hand each packet to the `book-translator` agent (one packet,
+   isolated context) and keep applying and gate decisions in the main
+   conversation.
 
 6. At `PILOT_REVIEW_REQUIRED`, present the voice, terminology, difficult
    passages, image decisions, added context, and any actual rendered evidence.
    The core has no visual renderer, so never imply one ran. Do not accept on the
-   user's behalf. Apply requested corrections through `bookstudio pilot revise`
-   and review again. Run `bookstudio review PROJECT --json`, then present short
+   user's behalf. In Claude Code, run the read-only `editorial-reviewer` agent
+   on the sample first and fold its findings into what you present. Apply
+   requested corrections through `bookstudio pilot revise` (MCP: `pilot` with
+   `action: revise` and `response_path`) and review again. Run `bookstudio review PROJECT --json`, then present short
    source/sample pairs and actual progress in chat, or use the `view` MCP tool
    when available. The private `reports/review.html` is optional; never share it
    or require a browser or dashboard. After explicit acceptance, run:
@@ -135,7 +144,8 @@ pages, or publish books.
    gates. Declare every post-build correction (wording, contents page, CSS,
    an approved cover mark) in `PROJECT/edits.json` so `finish` certifies the
    edited book. Before declaring completion, run
-   the candidate-bound editorial-evidence gate plus independent structural,
+   the candidate-bound editorial-evidence gate (in Claude Code, with the
+   `editorial-reviewer` agent on the final book) plus independent structural,
    navigation, image, and rendered gates in [final book
    quality](references/final-book-quality.md). Create
    `reports/editorial-review.json`, then run the bundled

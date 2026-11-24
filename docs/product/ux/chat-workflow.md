@@ -59,4 +59,4 @@ after the explicit presentation fix. DOM and viewport screenshots show all four 
 counts, chapter counts and pending approval. The same panel changed 0/8 to 4/8 after apply through five-second
 polling, without another `review`. A fresh chat after updating also recovered saved state and the approval gate.
 Existing-thread reload, other desktop builds and native UI on Linux have not been established by these probes.
-The current scope retains macOS/Linux; Windows support has not been added.
+These checks ran on macOS. Windows support (2026-11-24) is through `bookstudio install`; see `agent-host-integration.md`.

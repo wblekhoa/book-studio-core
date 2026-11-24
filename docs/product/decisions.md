@@ -4,12 +4,35 @@ type: decision
 product: book-studio-core
 title: "Book Studio Core — Decisions"
 status: active
-updated: 2026-11-02
+updated: 2026-11-24
 summary: "Product decisions covering the provider-neutral engine, pilot and finishing gates, distribution, host integrations, and the approved direction toward an interactive in-host workspace."
 tags: [area/translation, area/book, area/security, area/release, stack/python, surface/cli]
 ---
 
 # Book Studio Core — Decisions (append-only, newest first)
+
+## 2026-11-24 · Other AI hosts and Windows through one install command
+
+- **Owner request** (paraphrased): make the plugin usable on Windows and in any AI tool a reader already has
+  (Codex, Claude, Antigravity, Kimi, OpenCode, Cursor, …). The owner approved: skill plus local stdio MCP per host
+  through one `bookstudio install --host <name>` command; users install Python 3.11+ themselves (no uv, no
+  executable); first hosts Cursor, Antigravity, Kimi Code and OpenCode; Windows checked by a `windows-latest` CI
+  leg plus one owner run on a real Windows machine. Then: continue the remaining phases.
+- **Decision**:
+  - Supersedes the Windows exclusion of 2026-10-13: Windows is back in the CI matrix and in scope.
+  - The installer writes absolute paths (`sys.executable`, the engine runner) so `python3`/`py`/`python` naming
+    stops mattering, and sets `PLUGIN_ROOT` so the installation-folder guard applies.
+  - Someone else's `book-studio` entry is refused, never overwritten (`INSTALL_ENTRY_CONFLICT`).
+  - Claude and Codex keep their plugin manifests (`python3`) this round; Windows inside those two hosts is not
+    claimed.
+- **Evidence**: `tests/test_install.py`, `tests/test_mcp.py` (BSC-WIN-001), `tests/test_packets.py` (BSC-WIN-003);
+  the four earlier Windows CI failures (cp1252 console, CRLF brief identity, backslash ZIP fixture, TOML path
+  rewrite in a test) are each addressed. Installed on one macOS machine into all four hosts; each config's entry
+  started the server and listed 12 tools, and OpenCode reported it connected.
+- **Not yet verified**: Windows CI (needs a pushed branch), a real Windows machine, and the Cursor, Antigravity and
+  Kimi desktop apps loading the entry.
+- **Reversal**: drop `windows-latest` from CI and restore the exclusion text; `bookstudio uninstall` removes the
+  host wiring.
 
 ## 2026-10-24 · Install and exercise the Codex preview locally
 

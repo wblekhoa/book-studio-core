@@ -47,7 +47,8 @@ def read_production_brief(config: ProjectConfig) -> str | None:
             ),
         )
     try:
-        text = payload.decode("utf-8")
+        # BSC-WIN-003: a brief saved with CRLF (Windows editors) must bind the same identity as LF.
+        text = payload.decode("utf-8").replace("\r\n", "\n")
     except UnicodeDecodeError as exc:
         raise BookStudioError(
             code="PRODUCTION_BRIEF_INVALID",

@@ -16,8 +16,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Windows is not supported yet: see docs/product/decisions.md (2026-10-13).
-        os: [ubuntu-latest, macos-latest]
+        # Windows joined 2026-11-24 (multi-host plan): runs under Git Bash via `shell: bash`.
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ["3.11", "3.12", "3.13", "3.14"]
 
     steps:

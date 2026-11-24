@@ -230,6 +230,14 @@ def build_parser() -> argparse.ArgumentParser:
         description="Agent-host hook: read one JSON event on stdin.",
     )
     hook.add_argument("event", choices=("guard", "session-start"))
+    from .install import HOSTS
+
+    for name, text in (("install", "Install the skill and MCP server into an AI host (Cursor, Antigravity, Kimi, OpenCode)."),
+                       ("uninstall", "Remove the Book Studio skill and MCP entry from an AI host.")):
+        host_command = subparsers.add_parser(name, help=text, description=text)
+        host_command.add_argument("--host", required=True, choices=sorted(HOSTS))
+        host_command.add_argument("--dry-run", action="store_true", help="Report what would change; write nothing.")
+        _add_json_flag(host_command)
     subparsers.add_parser(
         "mcp",
         help="Serve the Book Studio tools over MCP (stdio).",
@@ -498,6 +506,14 @@ def _dispatch(args: argparse.Namespace) -> dict[str, Any]:
                 evidence=(json.dumps(receipt["violations"], sort_keys=True),),
             )
         return {**receipt, "message": "EPUB integrity validation passed."}
+    if args.command == "install":
+        from .install import install
+
+        return install(args.host, dry_run=args.dry_run)
+    if args.command == "uninstall":
+        from .install import uninstall
+
+        return uninstall(args.host, dry_run=args.dry_run)
     if args.command == "edits":
         return capture_edits(load_config(args.project / "bookstudio.toml"), args.edited)
     if args.command == "apply-drafts":
@@ -527,6 +543,15 @@ def _dispatch(args: argparse.Namespace) -> dict[str, Any]:
     )
 
 
+def _utf8_console() -> None:
+    # Windows consoles default to a legacy code page; print Vietnamese, Japanese or any target language as UTF-8
+    # instead of raising UnicodeEncodeError. Streams without reconfigure (test captures) are left alone.
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None and (getattr(stream, "encoding", "") or "").lower().replace("-", "") != "utf8":
+            reconfigure(encoding="utf-8")
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -535,9 +560,10 @@ def main(argv: list[str] | None = None) -> int:
 
         return run_hook(args.event)
     if args.command == "mcp":
-        from .mcp_server import serve
+        from .mcp_server import serve, utf8_stdio
 
-        return serve()
+        return serve(*utf8_stdio())
+    _utf8_console()
     try:
         payload = _dispatch(args)
         exit_code = int(payload.pop("_exit_code", 0))

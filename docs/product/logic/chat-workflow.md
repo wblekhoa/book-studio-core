@@ -51,8 +51,8 @@ that preference, Codex desktop runtime 0.164.0-alpha.11.1 exposed the real MCP A
 showed source/translation pairs and the same tab polling 0/8 to 4/8 after an atomic apply. The PATH CLI used
 for installation was 0.154.0; it is not the desktop runtime version. Existing-thread reload and live Claude agent
 evals remain unverified.
-macOS/Linux are the existing supported platform scope. Do not report Windows or public directory availability
-from these local checks.
+These chat checks ran on macOS/Linux. Windows is in scope since 2026-11-24 through `bookstudio install`
+(`agent-host-integration.md`); do not report Windows or public directory availability from these local checks.
 
 ## Change log
 

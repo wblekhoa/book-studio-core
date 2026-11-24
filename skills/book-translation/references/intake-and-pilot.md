@@ -124,15 +124,20 @@ For the first reply, group missing choices into at most five reader-facing
 questions instead of exposing every machine field separately:
 
 1. What language and output form should the reader receive: target-only or
-   bilingual?
+   bilingual? Ask which language the book is written in only when its metadata
+   and excerpts leave `source_language` unclear.
 2. Who will read the book, and what voice or reference edition should guide the
-   editing?
+   editing? When the target language encodes the relationship in pronouns or
+   honorifics (for example Vietnamese, Japanese, Korean), ask how the author
+   should address the reader and record the answer in the production brief.
 3. Should the result stay close to the source or be adapted for natural reading,
    and are labeled local examples allowed?
 4. Should important image text be localized, annotated, preserved only, or
    reviewed case by case? Is any cover treatment in scope?
-5. Which reader apps or screen classes must the pilot prove, and is the result
-   private-only or intended for later distribution review?
+5. Should the page layout stay as published (`layout_policy: preserve`) or be
+   adapted for comfortable reading (`adaptive`), and which reader apps or
+   screen classes must the pilot prove? The result stays private for the
+   reader's own use; do not offer distribution as an option.
 
 Omit questions already answered. Offer a recommended default with a short
 tradeoff only when the source assessment supports it. After project creation,

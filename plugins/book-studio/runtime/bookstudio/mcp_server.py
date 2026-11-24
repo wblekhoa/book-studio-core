@@ -8,6 +8,7 @@ The review tool also declares an experimental MCP Apps view (`ui://`).
 from __future__ import annotations
 
 import contextlib
+import io
 import json
 import os
 import sys
@@ -49,8 +50,11 @@ TOOLS = [
     ),
     _tool(
         "pilot",
-        "Show, approve, or accept the sample (pilot). Accept only after the user explicitly approved the reviewed sample.",
-        {**_PROJECT, "action": {"type": "string", "enum": ["status", "approve", "accept"]}, "user_confirmed": {"type": "boolean"}},
+        "Show, approve, revise, or accept the sample (pilot). Revise applies a corrected response JSON (response_path) "
+        "after the user asked for changes. Accept only after the user explicitly approved the reviewed sample.",
+        {**_PROJECT, "action": {"type": "string", "enum": ["status", "approve", "revise", "accept"]},
+         "response_path": {"type": "string", "description": "Corrected response JSON; required for revise."},
+         "user_confirmed": {"type": "boolean"}},
         ["project", "action"],
     ),
     _tool("next_packet", "Emit the next bounded translation packet.", _PROJECT, ["project"]),
@@ -66,6 +70,16 @@ TOOLS = [
     ),
     _tool("finish", "Run the strict reproducible final gate (applies edits.json).", _PROJECT, ["project"]),
     _tool("verify", "Independently validate the final EPUB.", _PROJECT, ["project"]),
+    _tool("pdf_inspect", "Classify a PDF's text layer (read-only, no prose returned) before preparing it.",
+          {"source": {"type": "string"}}, ["source"], annotations={"readOnlyHint": True}),
+    _tool(
+        "pdf_prepare",
+        "Create a semantic EPUB from a text-layer PDF. The result needs a source-fidelity review before translation "
+        "or delivery. Pass source_language only when the user or the document states it; never guess.",
+        {"source": {"type": "string"}, "output": {"type": "string", "description": "New EPUB path (must not exist)."},
+         "source_language": {"type": "string"}, "title": {"type": "string"}},
+        ["source", "output"],
+    ),
     _tool("capture_edits", "Write edits.json from an EPUB edited elsewhere (never overwrites).", {**_PROJECT, "edited_epub": {"type": "string"}}, ["project", "edited_epub"]),
 ]
 
@@ -161,6 +175,8 @@ def call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
     if name == "pilot":
         action = arguments.get("action")
         argv = ["pilot", str(action), _path(arguments.get("project"))]
+        if action == "revise":
+            argv.append(_path(arguments.get("response_path")))
         if action == "accept" and arguments.get("user_confirmed") is True:
             argv.append("--confirm")
         return _dispatch(argv)
@@ -180,6 +196,15 @@ def call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         return {**payload, "view": _bounded_view(snapshot)}
     if name in {"finish", "verify"}:
         return _dispatch([name, _path(arguments.get("project"))])
+    if name == "pdf_inspect":
+        return _dispatch(["pdf", "inspect", _path(arguments.get("source"))])
+    if name == "pdf_prepare":
+        argv = ["pdf", "prepare", _path(arguments.get("source")), "--output", _path(arguments.get("output"))]
+        for key, flag in (("source_language", "--source-language"), ("title", "--title")):
+            value = arguments.get(key)
+            if isinstance(value, str) and value:
+                argv += [flag, value]
+        return _dispatch(argv)
     if name == "capture_edits":
         return _dispatch(["edits", "capture", _path(arguments.get("project")), "--from", _path(arguments.get("edited_epub"))])
     raise BookStudioError(code="MCP_TOOL_UNKNOWN", message=f"Unknown tool: {name}", next_action="Call tools/list.")
@@ -240,6 +265,22 @@ def handle(message: dict[str, Any]) -> dict[str, Any] | None:
     else:
         return {"jsonrpc": "2.0", "id": request_id, "error": {"code": -32601, "message": f"Method not found: {method}"}}
     return {"jsonrpc": "2.0", "id": request_id, "result": result}
+
+
+def utf8_stdio(stdin_buffer: Any = None, stdout_buffer: Any = None) -> tuple[TextIO, TextIO]:
+    """UTF-8, LF-only text streams over the process's binary stdio.
+
+    MCP frames are UTF-8 JSON lines. Python's default text stdio follows the locale (cp1252 on most Windows
+    machines) and writes CRLF there, so non-ASCII titles or glossary terms would be garbled or crash the server.
+    """
+    stdin = io.TextIOWrapper(stdin_buffer if stdin_buffer is not None else sys.stdin.buffer, encoding="utf-8")
+    stdout = io.TextIOWrapper(
+        stdout_buffer if stdout_buffer is not None else sys.stdout.buffer,
+        encoding="utf-8",
+        newline="\n",
+        write_through=True,
+    )
+    return stdin, stdout
 
 
 def serve(stdin: TextIO = sys.stdin, stdout: TextIO = sys.stdout, log: Callable[[str], None] | None = None) -> int:

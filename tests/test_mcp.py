@@ -34,6 +34,22 @@ class McpServerTests(unittest.TestCase):
     def tearDown(self) -> None:
         self._directory.cleanup()
 
+    # BSC-WIN-001
+    def test_stdio_frames_are_utf8_and_lf_whatever_the_locale(self) -> None:
+        import io
+
+        from bookstudio.mcp_server import serve, utf8_stdio
+
+        request = json.dumps({"jsonrpc": "2.0", "id": "dịch-本-1", "method": "ping"}, ensure_ascii=False)
+        raw_in = io.BytesIO((request + "\r\n").encode("utf-8"))
+        raw_out = io.BytesIO()
+        stdin, stdout = utf8_stdio(raw_in, raw_out)
+        self.assertEqual(serve(stdin, stdout), 0)
+        frame = raw_out.getvalue()
+        self.assertTrue(frame.endswith(b"}\n"))
+        self.assertNotIn(b"\r", frame)
+        self.assertEqual(json.loads(frame.decode("utf-8"))["id"], "dịch-本-1")
+
     # BSC-CHAT-010
     def test_review_declares_explicit_host_presentation_for_the_local_app(self) -> None:
         tools = handle({'id': 1, 'method': 'tools/list'})['result']['tools']
@@ -181,6 +197,46 @@ class McpServerTests(unittest.TestCase):
                             for pair in review["structuredContent"]["view"]["pairs"]))
         results = self._session([("pilot", {"project": "demo", "action": "accept", "user_confirmed": True})])
         self.assertFalse(results[0]["isError"], results[0])
+
+    # BSC-MCP-004
+    def test_sample_can_be_revised_through_mcp_alone(self) -> None:
+        results = self._session([
+            ("start", {"project": "demo", "source": "book.epub", "answers": ANSWERS}),
+            ("pilot", {"project": "demo", "action": "approve"}),
+            ("next_packet", {"project": "demo"}),
+        ])
+        packet = results[2]["structuredContent"]
+        def response(text: str) -> dict:
+            return {"schema_version": 1, "packet_id": packet["packet_id"], "source_document": packet["source_document"],
+                    "translations": [{"block_index": b["block_index"], "source_sha256": b["source_sha256"], "translation": text}
+                                     for b in packet["blocks"] if b.get("translate", True)]}
+        for name, text in (("first.json", "Bản nháp"), ("fixed.json", "Bản đã sửa")):
+            (self.root / name).write_text(json.dumps(response(text), ensure_ascii=False), encoding="utf-8")
+        results = self._session([
+            ("apply_response", {"project": "demo", "response_path": "first.json"}),
+            ("pilot", {"project": "demo", "action": "revise"}),
+            ("pilot", {"project": "demo", "action": "revise", "response_path": "fixed.json"}),
+            ("view", {"project": "demo"}),
+        ])
+        self.assertFalse(results[0]["isError"], results[0])
+        self.assertEqual("MCP_ARGUMENT_INVALID", results[1]["structuredContent"]["code"])
+        self.assertFalse(results[2]["isError"], results[2])
+        translations = [pair["translation"] for pair in results[3]["structuredContent"]["view"]["pairs"]]
+        self.assertTrue(any("Bản đã sửa" in t for t in translations))
+        self.assertFalse(any("Bản nháp" in t for t in translations))
+
+    # BSC-MCP-005
+    def test_pdf_tools_are_listed_and_return_stable_errors(self) -> None:
+        tools = {tool["name"]: tool for tool in handle({"id": 1, "method": "tools/list"})["result"]["tools"]}
+        self.assertTrue({"pdf_inspect", "pdf_prepare"} <= set(tools))
+        self.assertNotIn("source_language", tools["pdf_prepare"]["inputSchema"]["required"])
+        (self.root / "not.pdf").write_bytes(b"plain text, not a PDF")
+        results = self._session([("pdf_inspect", {"source": "not.pdf"}),
+                                 ("pdf_prepare", {"source": "not.pdf", "output": "out.epub"})])
+        for result in results:
+            self.assertTrue(result["isError"], result)
+            self.assertTrue(result["structuredContent"]["code"])
+        self.assertFalse((self.root / "out.epub").exists())
 
     # BSC-MCP-003
     def test_errors_are_tool_results_with_stable_codes(self) -> None:

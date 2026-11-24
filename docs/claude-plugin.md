@@ -21,10 +21,10 @@ Inside a session you can run `/plugin marketplace add wblekhoa/book-studio-core`
 | Component | Name | What it does |
 | --- | --- | --- |
 | Skill | `book-translation` | The guided, sample-first workflow (loaded when you ask to translate a book) |
-| Commands | `/book-studio:translate`, `/book-studio:review`, `/book-studio:finish`, `/book-studio:capture` | Shortcuts for the main steps |
+| Commands | `/book-studio:start` (pick a job: translate, bilingual, restyle, PDF to EPUB, fix formatting, edit), `/book-studio:translate`, `/book-studio:review`, `/book-studio:finish`, `/book-studio:capture` | Shortcuts for the main steps |
 | Agents | `book-translator`, `editorial-reviewer` | Translate one packet in an isolated context; review the sample or the final book (read-only) |
 | Hooks | guard, session start | Refuse direct writes to `output/final.epub`, `reports/release.json` and `cache/translations.json` inside a project. List nearby projects with their next command when a session starts |
-| MCP server | `book-studio` (12 tools) | `status`, `start`, `pilot`, `next_packet`, `apply_response`, `apply_drafts`, `review`, `finish`, `verify`, `capture_edits`, `view` and `doctor`. They use the same engine and gates as the CLI |
+| MCP server | `book-studio` (14 tools) | `status`, `start`, `pilot` (status, approve, revise, accept), `next_packet`, `apply_response`, `apply_drafts`, `review`, `finish`, `verify`, `capture_edits`, `pdf_inspect`, `pdf_prepare`, `view` and `doctor`. They use the same engine and gates as the CLI |
 
 The `review` tool also declares an **experimental** MCP Apps view, which shows the review page inside the chat where
 the host supports it. Other hosts show a text summary and the page path.

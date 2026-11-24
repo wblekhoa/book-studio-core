@@ -189,7 +189,7 @@ else:
         code, result = self.run_install()
         self.assertEqual(0, code, result)
         self.assertEqual('pass', result['status'])
-        self.assertEqual(12, result['tools'])
+        self.assertEqual(14, result['tools'])
         self.assertGreater(result['verified_files'], 80)
         calls = [json.loads(line) for line in (self.root / 'commands.jsonl').read_text().splitlines()]
         self.assertEqual([['plugin', 'marketplace', 'add', str(self.checkout.resolve()), '--json'],

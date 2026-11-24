@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import re
 import os
 import subprocess
 import sys
@@ -434,9 +435,8 @@ class PacketAndCacheTests(unittest.TestCase):
         renamed_source.write_bytes(self.source.read_bytes())
         config_path = self.project / "bookstudio.toml"
         config_path.write_text(
-            config_path.read_text(encoding="utf-8").replace(
-                str(self.source), str(renamed_source)
-            ),
+            re.sub(r"(?m)^source = .*$", lambda _: "source = " + json.dumps(str(renamed_source)),
+                   config_path.read_text(encoding="utf-8"), count=1),
             encoding="utf-8",
         )
         renamed_map = extract_block_map(renamed_source)
@@ -545,6 +545,18 @@ class PacketAndCacheTests(unittest.TestCase):
         with self.assertRaisesRegex(BookStudioError, "RESPONSE_PACKET_STALE"):
             apply_response(self.config, old_response)
         self.assertFalse((self.project / "cache/translations.json").exists())
+
+    # BSC-WIN-003
+    def test_crlf_production_brief_binds_the_same_packet_as_lf(self) -> None:
+        brief = "# Production brief\n\n- Voice: calm\n"
+        path = self.project / "production-brief.md"
+        path.write_bytes(brief.encode("utf-8"))
+        lf = next_packet(self.config)
+        path.write_bytes(brief.replace("\n", "\r\n").encode("utf-8"))
+        crlf = next_packet(self.config)
+        assert lf is not None and crlf is not None
+        self.assertEqual(brief, crlf["production_brief"])
+        self.assertEqual(lf["packet_id"], crlf["packet_id"])
 
     def test_production_brief_must_be_nonempty_bounded_utf8(self) -> None:
         path = self.project / "production-brief.md"

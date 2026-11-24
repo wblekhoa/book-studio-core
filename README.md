@@ -88,10 +88,26 @@ claude plugin marketplace add wblekhoa/book-studio-core#v0.4.0
 claude plugin install book-studio@book-studio
 ```
 
-It adds the commands `/book-studio:translate`, `:review`, `:finish` and `:capture`, a packet translator and an
+It adds the commands `/book-studio:start` (a menu of jobs), `:translate`, `:review`, `:finish` and `:capture`, a packet translator and an
 editorial reviewer agent, hooks that refuse direct edits to the certified EPUB, and an MCP server with the same tools
 as the CLI. See [Book Studio in Claude Code](docs/claude-plugin.md). Do not use claude.ai web chat, which would
 require uploading your book.
+
+### Cursor, Antigravity, Kimi Code, OpenCode (macOS, Linux, Windows)
+
+Not yet released: available from a checkout until 0.5.0. Install Python 3.11+ (on Windows from python.org, with
+"Add python.exe to PATH" ticked), unpack the repository, then run from its folder:
+
+```bash
+python3 plugins/book-studio/scripts/bookstudio.py install --host cursor --dry-run --json
+python3 plugins/book-studio/scripts/bookstudio.py install --host cursor
+```
+
+On Windows use `py plugins\book-studio\scripts\bookstudio.py install --host cursor`. Other hosts: `antigravity`,
+`kimi`, `opencode`. The command copies the engine to a per-user folder, adds the `book-translation` skill and one
+`book-studio` MCP server to that tool, backs up the tool's config first and keeps your other servers. Restart the
+tool, then ask it to translate a book. `uninstall --host <name>` removes both again. These tools get the skill and
+the MCP tools; Claude's commands, agents, hooks and progress view are Claude-only.
 
 ## Add the AI skill
 

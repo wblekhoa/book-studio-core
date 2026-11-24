@@ -4,8 +4,8 @@ type: release
 product: book-studio-core
 title: "Book Studio Core — Releases"
 status: active
-updated: 2026-11-02
-summary: "Published Book Studio Core releases, newest first: 0.4.0 chat-first workflow with in-host progress views, 0.3.1 inline-markup hints in packets, 0.3.0 Claude Code plus Codex plugin, 0.2.0 Codex plugin with hardened edits for macOS and Linux, and the unpublished 0.1.0 initial source tree."
+updated: 2026-11-25
+summary: "Published Book Studio Core releases, newest first: 0.5.0 other AI hosts, Windows and a skill-only install, 0.4.0 chat-first workflow with in-host progress views, 0.3.1 inline-markup hints in packets, 0.3.0 Claude Code plus Codex plugin, 0.2.0 Codex plugin with hardened edits for macOS and Linux, and the unpublished 0.1.0 initial source tree."
 tags: [area/release, stack/python, surface/cli]
 relations:
   presentedBy: [github:wblekhoa/book-studio-core/releases]
@@ -17,6 +17,21 @@ Source of truth for details: `CHANGELOG.md` (repo root) and `gh release list -R 
 
 `CONTRIBUTING.md` keeps package-index publication a separate maintainer decision. Add an entry here only when a
 release is actually published, never ahead of it.
+
+## 0.5.0 · 2026-11-25 (tag `v0.5.0`, GitHub Release)
+
+- **What changed for users**:
+  - one command installs Book Studio into Cursor, Antigravity, Kimi Code or OpenCode (skill plus local MCP), and
+    into Claude Code or Codex as a skill only, without a plugin;
+  - Windows is supported: UTF-8 MCP stdio, CRLF-safe briefs, Windows paths in install and archive checks; the
+    Codex plugin installer no longer refuses Windows;
+  - over MCP: revise a sample and prepare a PDF; Claude Code `/book-studio:start` asks which job first.
+- **REQ-IDs shipped**: BSC-HOST-001…008, BSC-WIN-001…003, BSC-MCP-004…005. BSC-HOST-009 (Claude/Codex plugins on
+  a real Windows machine) is not built: unverified.
+- **Evidence**: 307 tests; CI on the branch green on Ubuntu, macOS and Windows × Python 3.11–3.14 (run #41) and on
+  `main` before tagging. Installed on one macOS machine into the four MCP hosts.
+  - **Not yet run**: any host on a real Windows machine; Cursor, Antigravity and Kimi in their apps beyond the config.
+- **Channel**: GitHub tag and Release.
 
 ## 0.4.0 · 2026-11-02 (tag `v0.4.0`, GitHub Release)
 

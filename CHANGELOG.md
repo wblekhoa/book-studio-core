@@ -1,25 +1,24 @@
 # Changelog
 
-## Unreleased
+## 0.5.0 - 2026-11-25
 
 - `bookstudio install --host claude-code|codex`: the skill and engine only, no plugin and no config edit; honours
   `CLAUDE_CONFIG_DIR` / `CODEX_HOME`. Installed run commands use forward slashes so they work in Git Bash,
   PowerShell and cmd.
 - The Codex plugin installer no longer refuses Windows; plugin commands and the skill fall back to `py -3` when
   `python3` does not run.
-
 - `bookstudio install --host cursor|antigravity|kimi|opencode` (and `uninstall`, `--dry-run`, `--json`): copies the
   hash-checked engine to a per-user folder, adds the skill with absolute run commands and one `book-studio` MCP
   entry, backs up the host config, keeps other entries, and refuses malformed configs, foreign entries and
   folders it did not create.
 - Windows: MCP stdio is UTF-8 with LF whatever the code page; CLI output is UTF-8; a production brief saved with
-  CRLF binds the same packet identity; CI matrix includes `windows-latest` (result pending).
+  CRLF binds the same packet identity; CI matrix includes `windows-latest` (green).
 - `install` recognises its own MCP entry on Windows (the ownership check compared against JSON-escaped text), so
   a reinstall or upgrade replaces it instead of refusing it (BSC-HOST-002).
 - Archive preflight checks each entry's raw name, so a backslash path is rejected on Windows too, where
   `zipfile` turns it into `/` (BSC-PIPE-001).
 - Tests: Windows-safe ZIP fixtures and TOML path rewrites; install tests use the checkout bundle so they pass
-  against an installed package; the macOS/Linux-only Codex checkout installer tests skip on Windows.
+  against an installed package; the Codex checkout installer tests use POSIX stubs and skip on Windows.
 - MCP: `pilot` gains `revise` (with `response_path`), and new `pdf_inspect` / `pdf_prepare` tools, so a host with
   only MCP can revise a sample and prepare a PDF.
 - Claude Code: `/book-studio:start` asks which job (translate, bilingual, restyle, PDF to EPUB, fix formatting,

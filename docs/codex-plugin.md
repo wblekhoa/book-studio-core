@@ -18,7 +18,7 @@ Run commands from Terminal, not from a Python prompt.
 ## Install from GitHub
 
 ```bash
-codex plugin marketplace add wblekhoa/book-studio-core@v0.4.0
+codex plugin marketplace add wblekhoa/book-studio-core@v0.5.0
 codex plugin add book-studio@book-studio
 codex plugin list
 ```

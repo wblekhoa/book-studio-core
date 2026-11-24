@@ -4,7 +4,7 @@ type: logic
 product: book-studio-core
 title: "Book Studio Core — Chat workflow rules"
 status: active
-updated: 2026-11-02
+updated: 2026-11-25
 summary: "Source-grounded intake, consistent read-only chat snapshots, conversational approval and pause semantics, optional host adapters, and narrow public-source exceptions for the owned Mods code."
 tags: [area/book, area/translation, area/ai, area/security, stack/python, surface/cli, surface/web]
 reqPrefix: BSC-CHAT

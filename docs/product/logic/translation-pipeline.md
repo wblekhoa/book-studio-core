@@ -4,7 +4,7 @@ type: logic
 product: book-studio-core
 title: "Book Studio Core — Translation pipeline (logic)"
 status: active
-updated: 2026-11-02
+updated: 2026-11-25
 summary: "Rules for moving a source EPUB to a translated EPUB: archive preflight, deterministic block maps, scoped packets, a validated append-only cache, safe inline XHTML, byte-identical builds, and a finish that never replaces final.epub on failure."
 tags: [area/translation, area/book, area/security, stack/python, surface/cli]
 reqPrefix: BSC-PIPE

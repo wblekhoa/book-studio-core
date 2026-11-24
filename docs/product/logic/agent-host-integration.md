@@ -4,7 +4,7 @@ type: logic
 product: book-studio-core
 title: "Book Studio Core — Agent-host integration (logic)"
 status: active
-updated: 2026-11-24
+updated: 2026-11-25
 summary: "Rules for the plugin hooks and MCP server: a guard denies direct writes to gate-owned files inside projects, session start lists nearby projects, 14 MCP tools reuse the CLI dispatch with stable error codes, `bookstudio install` wires other AI hosts, and Windows I/O is UTF-8 with LF."
 tags: [area/ai, area/security, stack/python, surface/cli]
 reqPrefix: [BSC-HOOK, BSC-MCP, BSC-HOST, BSC-WIN]

@@ -11,6 +11,19 @@ tags: [area/translation, area/book, area/security, area/release, stack/python, s
 
 # Book Studio Core — Decisions (append-only, newest first)
 
+## 2026-11-25 · The skill asks before installing Python and before the full run
+
+- **Owner request** (paraphrased): review whether the tool proactively confirms a Python install and asks for enough
+  context; then fix all four gaps found.
+- **Decision**: the skill checks for Python 3.11+ (including newer versions already installed) and proposes one
+  install route per system, run only after the user agrees; the engine's old-Python error names the next step. After
+  the sample is accepted, the agent states the remaining passages and asks for a pace. Intake asks the reading purpose
+  and the names or terms to keep (recorded in `glossary.md`). The finished book still covers the whole source:
+  `finish` needs complete coverage, so "scope" is offered as pace, not as skipping chapters.
+- **Evidence**: `python3 scripts/build_plugin.py --check`; the bundled runner on Python 3.9.6 prints the new message;
+  full test suite.
+- **Reversal**: revert the guidance in `scripts/build_plugin.py` and `skills/book-translation/`, rebuild the bundle.
+
 ## 2026-11-25 · Claude Code and Codex on Windows; a skill-only install
 
 - **Owner request** (paraphrased): do not block Windows in Claude Code and Codex, make it easy to install there,

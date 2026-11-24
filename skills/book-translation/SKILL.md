@@ -136,7 +136,15 @@ pages, or publish books.
    bookstudio pilot accept PROJECT --confirm --json
    ```
 
-7. Continue the remaining scope with the accepted decisions. Read [packet loop
+7. Before translating past the pilot, confirm the size of the run: read
+   `bookstudio status PROJECT --json`, tell the user how many passages remain
+   (eligible minus translated) and across how many chapters, that the run uses
+   their AI app's usage and may take several sessions, and offer a pace: the
+   whole book in one go, or chapter by chapter with a short report after each.
+   The finished book always covers the whole source. Start only after the user
+   agrees, and keep to the chosen pace.
+
+8. Continue the remaining scope with the accepted decisions. Read [packet loop
    and verification](references/packet-loop-and-verification.md) for the exact
    response contract and recovery behavior. When whole chapters are drafted
    ahead, use `bookstudio apply-drafts PROJECT DRAFTS.json --json`; it

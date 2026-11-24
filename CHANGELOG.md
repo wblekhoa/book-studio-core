@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Skill: a Python check before the first command finds an installed 3.11+ (macOS often ships 3.9), otherwise
+  proposes one install route per system and runs it only after the user agrees.
+- The engine's old-Python error names the running version and the next step.
+- Skill: before translating past the accepted sample, the agent states how many passages remain and asks for a
+  pace (whole book or chapter by chapter). Intake also asks the reading purpose and the names or terms to keep.
+
 ## 0.5.0 - 2026-11-25
 
 - `bookstudio install --host claude-code|codex`: the skill and engine only, no plugin and no config edit; honours

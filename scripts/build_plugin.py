@@ -15,7 +15,11 @@ RUNNER = '''"""Run the engine shipped with this plugin, without pip or a global 
 import sys
 from pathlib import Path
 if sys.version_info < (3, 11):
-    raise SystemExit("Book Studio requires Python 3.11 or newer.")
+    raise SystemExit(
+        "Book Studio requires Python 3.11 or newer; this is Python %d.%d. "
+        "Run the same command with a newer Python (python3.13, python3.12, or py -3 on Windows), "
+        "or install one from https://www.python.org/downloads/ first." % sys.version_info[:2]
+    )
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "runtime"))
 from bookstudio.cli import main
@@ -31,9 +35,22 @@ to the plugin root (two parent directories above this skill folder). For every
 `python3 "<plugin-root>/scripts/bookstudio.py" ...` instead. Use an absolute,
 quoted path and Python 3.11 or newer. Do not use a separately installed global
 CLI or pip-install another engine. Run the bundled `doctor --json` first.
-If Python is missing, explain the requirement and help the user install it.
-On Windows, if `python3` does not run or opens the Microsoft Store, run the same
-command with `py -3` (or `python`) instead.
+
+Python check, before the first command: run `python3 --version` (Windows:
+`py -3 --version`; if `python3` opens the Microsoft Store, use `py -3` or
+`python` with the same arguments from then on).
+- 3.11 or newer: use it.
+- Missing or older (macOS often ships 3.9): look for a newer one already on the
+  machine (`python3.13`, `python3.12`, `python3.11`, `/opt/homebrew/bin/python3`,
+  `py -3.13`, `py -3.12`) and use its absolute path when found.
+- None found: tell the user, in their language, that Book Studio needs Python
+  3.11 or newer and propose one install route for their system: macOS
+  `brew install python@3.13` when Homebrew exists, otherwise the installer from
+  python.org/downloads; Windows `winget install Python.Python.3.13` or the
+  python.org installer; Linux the distribution's package manager when it offers
+  3.11 or newer. Ask before installing anything. Run the command only after the
+  user agrees; hand commands that need sudo, an admin prompt or a password to
+  the user. Then rerun `doctor --json`.
 Optional PDF tools are reported by doctor and are needed only for PDF input.
 Keep all private project files outside the plugin installation directory.
 In Claude Code the plugin root is `${CLAUDE_PLUGIN_ROOT}`. When the `book-studio`

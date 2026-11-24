@@ -126,12 +126,17 @@ questions instead of exposing every machine field separately:
 1. What language and output form should the reader receive: target-only or
    bilingual? Ask which language the book is written in only when its metadata
    and excerpts leave `source_language` unclear.
-2. Who will read the book, and what voice or reference edition should guide the
-   editing? When the target language encodes the relationship in pronouns or
+2. Who will read the book, why, and what voice or reference edition should
+   guide the editing? Name the likely purposes so the reader can pick one:
+   relaxed reading, study or work reference, or learning the source language.
+   Purpose drives the recommendation: learning the language suggests bilingual
+   and faithful; relaxed reading suggests target-only and adaptive. When the target language encodes the relationship in pronouns or
    honorifics (for example Vietnamese, Japanese, Korean), ask how the author
    should address the reader and record the answer in the production brief.
 3. Should the result stay close to the source or be adapted for natural reading,
-   and are labeled local examples allowed?
+   and are labeled local examples allowed? Are there names or terms the reader
+   wants kept in the source language or spelled a certain way? Record them in
+   `PROJECT/glossary.md` once the project exists, before the pilot.
 4. Should important image text be localized, annotated, preserved only, or
    reviewed case by case? Is any cover treatment in scope?
 5. Should the page layout stay as published (`layout_policy: preserve`) or be

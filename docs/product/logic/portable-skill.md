@@ -4,7 +4,7 @@ type: logic
 product: book-studio-core
 title: "Book Studio Core — Portable skill and Codex plugin (logic)"
 status: active
-updated: 2026-11-25
+updated: 2026-11-28
 summary: "Rules for shipping the engine and book-translation skill as a Codex plugin with a byte-identical generated bundle and as a standalone skill with an atomic installer, plus shared versioning, artwork and public-audit exceptions."
 tags: [area/release, area/build, area/ai, stack/python, surface/cli]
 reqPrefix: BSC-SKILL
@@ -73,6 +73,8 @@ the test named in Evidence.
 - None recorded.
 
 ## Change log
+
+- 2026-11-28: Re-reviewed `tests/test_public_audit.py`: the repository-tree test now audits a temporary copy of git-tracked files, and a separate regression test confirms untracked cache files still fail the audit. BSC-SKILL-014 and BSC-SKILL-017 remain unchanged.
 
 - 2026-11-02: BSC-SKILL-013 covers all three manifests and is enforced by `build_plugin.py`.
 - 2026-10-11: created; REQ-IDs added as one-line `# BSC-SKILL-…` comments next to the tests in the same commit.

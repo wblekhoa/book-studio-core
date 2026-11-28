@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -231,25 +232,66 @@ class PublicBoundaryAuditTests(unittest.TestCase):
                 self.assertIn("personal_path", receipt["category_counts"])
                 path.unlink()
 
+    def _copy_git_tracked_tree(self, actual: Path, target_dir: Path) -> None:
+        try:
+            completed = subprocess.run(
+                ["git", "ls-files", "-z"],
+                cwd=actual,
+                check=True,
+                capture_output=True,
+            )
+        except (FileNotFoundError, subprocess.CalledProcessError) as error:
+            self.skipTest(f"git unavailable or tree is not a git checkout: {error}")
+        entries = [entry for entry in completed.stdout.split(b"\0") if entry]
+        if not entries:
+            self.skipTest("git ls-files returned no files (not a git checkout)")
+        for raw_path in entries:
+            relative = raw_path.decode("utf-8", errors="replace")
+            source = actual / relative
+            if source.is_file():
+                target = target_dir / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(source.read_bytes())
+
     def test_actual_public_core_tree_passes_with_required_docs(self) -> None:
         actual = Path(__file__).resolve().parents[1]
-        receipt = audit_public_tree(actual)
-        required = (
-            "LICENSE",
-            "pyproject.toml",
-            "README.md",
-            "CONTRIBUTING.md",
-            "SECURITY.md",
-            "CHANGELOG.md",
-            ".github/workflows/ci.yml",
-            "skills/book-translation/SKILL.md",
-            "skills/book-translation/agents/openai.yaml",
-            "docs/architecture.md",
-            "docs/ai-packets.md",
-            "docs/safety.md",
-        )
-        self.assertTrue(all((actual / relative).is_file() for relative in required))
-        self.assertTrue(receipt["passed"], receipt["violations"])
+        with tempfile.TemporaryDirectory() as temp_dir:
+            copy = Path(temp_dir)
+            self._copy_git_tracked_tree(actual, copy)
+            required = (
+                "LICENSE",
+                "pyproject.toml",
+                "README.md",
+                "CONTRIBUTING.md",
+                "SECURITY.md",
+                "CHANGELOG.md",
+                ".github/workflows/ci.yml",
+                "skills/book-translation/SKILL.md",
+                "skills/book-translation/agents/openai.yaml",
+                "docs/architecture.md",
+                "docs/ai-packets.md",
+                "docs/safety.md",
+            )
+            self.assertTrue(all((copy / relative).is_file() for relative in required))
+            receipt = audit_public_tree(copy)
+            self.assertTrue(receipt["passed"], receipt["violations"])
+
+    def test_actual_public_core_tree_audit_fails_on_untracked_junk(self) -> None:
+        actual = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            copy = Path(temp_dir)
+            self._copy_git_tracked_tree(actual, copy)
+            clean_receipt = audit_public_tree(copy)
+            self.assertTrue(clean_receipt["passed"], clean_receipt["violations"])
+
+            junk = copy / ".pytest_cache" / "README.md"
+            junk.parent.mkdir(parents=True, exist_ok=True)
+            junk.write_text("local junk cache\n", encoding="utf-8")
+
+            junk_receipt = audit_public_tree(copy)
+            self.assertFalse(junk_receipt["passed"])
+            violated_paths = [v["path"] for v in junk_receipt["violations"]]
+            self.assertIn(".pytest_cache/README.md", violated_paths)
 
 
 if __name__ == "__main__":

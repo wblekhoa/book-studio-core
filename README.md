@@ -22,7 +22,7 @@ original images, image annotations, and same-canvas localized companions.
 
 ## Chat-first workflow
 
-Since 0.4.0 the agent can the agent inspect bounded source excerpts before asking for missing choices and
+Since 0.4.0 the agent can inspect bounded source excerpts before asking for missing choices and
 review samples directly in chat. Optional Claude Mods/MCP Apps views show saved progress; a separate browser or
 dashboard is not required. Readers approve, request changes, pause or continue conversationally.
 
@@ -34,8 +34,10 @@ works without them. In a checkout, `python3 scripts/install_codex_plugin.py` giv
 
 ### Codex plugin (bundled engine)
 
-Requires Python 3.11+ on macOS or Linux and a Codex version with `codex plugin`
-support. Windows is not supported yet. Register this repository as a
+Requires Python 3.11+ and a Codex version with `codex plugin` support; on Windows
+the plugin starts `python3` (python.org install manager) and has not yet been
+run on a real Windows machine, so Windows users can use the skill-only install
+below. Register this repository as a
 marketplace, then install Book Studio:
 
 ```bash
@@ -95,7 +97,7 @@ require uploading your book.
 
 ### Cursor, Antigravity, Kimi Code, OpenCode (macOS, Linux, Windows)
 
-Not yet released: available from a checkout until 0.5.0. Install Python 3.11+ (on Windows from python.org, with
+Install Python 3.11+ (on Windows from python.org, with
 "Add python.exe to PATH" ticked), unpack the repository, then run from its folder:
 
 ```bash

@@ -20,7 +20,7 @@
   "interface": {
     "displayName": "Book Studio",
     "shortDescription": "Translate whole books, sample first.",
-    "longDescription": "Translate EPUBs and supported text-layer PDFs for private reading. Includes its engine; requires Python 3.11+ on macOS or Linux. Review a sample before translating the full book.",
+    "longDescription": "Translate EPUBs and supported text-layer PDFs for private reading. Includes its engine; requires Python 3.11+. Review a sample before translating the full book.",
     "developerName": "khoa 'jak' le",
     "category": "Productivity",
     "capabilities": [],

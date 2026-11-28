@@ -4,7 +4,7 @@ type: goal
 product: book-studio-core
 title: "Book Studio Core — Product goal"
 status: active
-updated: 2026-10-13
+updated: 2026-11-28
 summary: "Why Book Studio Core exists: turn a source EPUB into a reviewed, structurally valid translated EPUB through bounded AI packets, never calling a model or uploading the book, plus audience, success measures and non-goals."
 tags: [area/translation, area/book, area/ai, stack/python, surface/cli]
 ---
@@ -38,10 +38,10 @@ tags: [area/translation, area/book, area/ai, stack/python, surface/cli]
 
 | Measure                         | Today (observed 2026-10-11)                                                                                       | Target   | How it is measured (command, dashboard, store data)                                          |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------- |
-| Unit test suite                 | 262 of 262 pass locally (2026-10-13)                                                                              | all pass | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m unittest discover -s tests -v`          |
+| Unit test suite                 | 308 of 308 pass locally (observed 2026-11-28)                                                                     | all pass | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m unittest discover -s tests -v`          |
 | CI on `main` (Python 3.11-3.13) | last 3 runs green (latest on commit `e027d96`)                                                                    | green    | `gh run list -R wblekhoa/book-studio-core`                                                   |
 | Public-boundary audit           | passes in a clean checkout and in CI (before install and after tests)                                             | passes   | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m bookstudio public-audit . --json`       |
-| Public releases                 | 0 (no GitHub release, no git tag)                                                                                 | not set  | `gh release list -R wblekhoa/book-studio-core`                                               |
+| Public releases                 | 6 (observed 2026-11-28)                                                                                           | not set  | `gh release list -R wblekhoa/book-studio-core`                                               |
 | GitHub stars / forks            | 0 / 0 (GitHub API, 2026-10-11)                                                                                    | not set  | `gh api repos/wblekhoa/book-studio-core --jq '{stars:.stargazers_count,forks:.forks_count}'` |
 | Books translated end to end     | not measured                                                                                                      | not set  | no method: the engine keeps no usage record and book projects live outside the repo by design |
 

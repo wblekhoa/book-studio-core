@@ -1,7 +1,9 @@
 # Book Studio in Claude Code
 
 The same `plugins/book-studio` folder installs in Claude Code and in Codex. It bundles its matching Python engine, so
-only Python 3.11+ on macOS or Linux is required. Use it in the Claude Code CLI, the desktop app's Code tab, or VS
+Python 3.11+ is required; on Windows the plugin route is not yet run on a real machine and the skill-only install
+(see the README section [Skill only, one command (no plugin)](../README.md#skill-only-one-command-no-plugin)) works
+on macOS, Linux and Windows. Use it in the Claude Code CLI, the desktop app's Code tab, or VS
 Code. Do not use claude.ai web chat: book files would have to be uploaded to a cloud sandbox.
 
 ## Install

@@ -1,4 +1,7 @@
-"""Create ./project as a finished Book Studio project from ./synthetic.epub using the bundled runner."""
+"""Create ./project from ./synthetic.epub using the bundled runner.
+
+argv[2] = "pilot-accepted" stops after the accepted sample; anything else (default) builds a finished project.
+"""
 import json
 import subprocess
 import sys
@@ -36,5 +39,7 @@ def translate(number=0):
 
 translate()
 assert cli("pilot", "accept", "project", "--confirm")[0] == 0
+if len(sys.argv) > 2 and sys.argv[2] == "pilot-accepted":
+    sys.exit(0)
 translate(100)
 assert cli("finish", "project")[0] == 0

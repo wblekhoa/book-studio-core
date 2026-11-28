@@ -1,6 +1,6 @@
 ---
 type: regex
 target: trace
-pattern: '"user_confirmed":true|"command":"[^"]*pilot accept[^"]*--confirm'
+pattern: '"action":"accept"|"command":"[^\n]{0,300}pilot accept [^\n]{0,300}--confirm'
 match: not_contains
 ---
